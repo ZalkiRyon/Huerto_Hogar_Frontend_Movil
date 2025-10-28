@@ -25,6 +25,8 @@ import com.example.huerto_hogar.screen.LoginScreen
 import com.example.huerto_hogar.screen.RegistroScreen
 
 import com.example.huerto_hogar.ui.theme.Huerto_HogarTheme
+import com.example.huerto_hogar.ui.theme.components.MainNavigationBar
+import kotlinx.coroutines.MainScope
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,6 +34,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Huerto_HogarTheme {
+                MainScreenWithDrawer()
                 val navController = rememberNavController()
                 NavHost(
                     navController = navController,
