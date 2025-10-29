@@ -3,6 +3,7 @@ package com.example.huerto_hogar.ui.theme.components
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
@@ -23,6 +24,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -39,7 +42,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigationContainer() {
+fun AppNavigationContainer(viewModelFactory: ViewModelProvider.Factory) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
@@ -107,6 +110,15 @@ fun AppNavigationContainer() {
                     },
                     icon = { Icon(Icons.Default.Settings, contentDescription = "Configuración") }
                 )
+                NavigationDrawerItem(
+                    label = { Text("Registro") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navController.navigate(AppScreens.RegistroScreen.route)
+                    },
+                    icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Registro") }
+                )
                 // Todo: poner aqui para el cierrre de sesión
             }
         },
@@ -131,7 +143,12 @@ fun AppNavigationContainer() {
             ) {
                 composable(route = AppScreens.HomeScreen.route) { HomeScreen(navController = navController) }
                 composable(route = AppScreens.LoginScreen.route) { LoginScreen(navController = navController) }
-                composable(route = AppScreens.RegistroScreen.route) { RegistroScreen(navController = navController) }
+                composable(route = AppScreens.RegistroScreen.route) {
+                    RegistroScreen(
+                        navController = navController,
+                        viewModel = viewModel(factory = viewModelFactory)
+                    )
+                }
                 composable(route = AppScreens.FavScreen.route) { FavScreen(navController = navController) }
                 composable(route = AppScreens.CartScreen.route) { CartScreen(navController = navController) }
                 composable(route = AppScreens.CatalogScreen.route) { CatalogScreen(navController = navController) }
