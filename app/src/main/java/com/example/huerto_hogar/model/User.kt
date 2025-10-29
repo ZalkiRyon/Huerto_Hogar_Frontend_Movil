@@ -1,5 +1,6 @@
 package com.example.huerto_hogar.model
 
+import com.example.huerto_hogar.repository.RegistrationResult
 import java.time.LocalDateTime
 
 // Roles in the system
@@ -19,6 +20,8 @@ data class RegisterUser(
     val phone: String = "",
     val address: String = "",
     val registrationSuccess: Boolean = false,
+    val registerError: String? = null,
+    val registrationResultEvent: RegistrationResult? = null,
     val errors: RegisterUserErrors = RegisterUserErrors()
 )
 
@@ -29,7 +32,8 @@ data class RegisterUserErrors(
     val confirmPasswordError: String? = null,
     val nameError: String? = null,
     val lastnameError: String? = null,
-    val addressError: String? = null
+    val addressError: String? = null,
+    val phoneError: String? = null,
 )
 
 // THIS IS THE FINAL CLASS FOR USER
@@ -37,7 +41,6 @@ data class User(
     // THIS WILL ASSIGN AUTOMATICALLY
     val id: Int,
     val role: Role,
-    val registerDate: LocalDateTime,
     val comment: String?,
 
     // THIS THE USER HAVE TO FILL
