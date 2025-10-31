@@ -21,6 +21,6 @@ enum class BottomNavViews(
     HOME(AppScreens.HomeScreen.route, Icons.Default.Home,"Home", "Home"),
     FAVORITOS(AppScreens.FavScreen.route, Icons.Default.Favorite, "Favoritos", "Favoritos"),
     CARRITO(AppScreens.CartScreen.route, Icons.Default.ShoppingCart, "Carrito", "Carrito"),
-    CATALOGO(AppScreens.CatalogScreen.route, Icons.Default.Search, "Catálogo", "Catálogo"),
+    CATALOGO(null, Icons.Default.Search, "Catálogo", "Catálogo"),
     MENU(null, Icons.Default.Menu, "Menú", "Menú")
 }

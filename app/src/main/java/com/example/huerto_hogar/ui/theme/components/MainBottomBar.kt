@@ -15,7 +15,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 @Composable
 fun MainBottomBar(
     navController: NavHostController,
-    onMenuClick: () -> Unit
+    onMenuClick: () -> Unit,
+    onCatalogoClick: () -> Unit
 ) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -32,7 +33,17 @@ fun MainBottomBar(
                     val isSelected = currentRoute == destination.route
                     NavigationBarItem(
                         selected = isSelected,
-                        onClick = { destination.route?.let { route -> navController.navigate(route) } },
+                        onClick = {
+                            if (destination.route == null) {
+                                when (destination) {
+                                    BottomNavViews.MENU -> onMenuClick()
+                                    BottomNavViews.CATALOGO -> onCatalogoClick()
+                                    else -> {}
+                                }
+                            } else {
+                                destination.route?.let { route -> navController.navigate(route) }
+                            }
+                        },
                         icon = {
                             Icon(
                                 destination.icon,
