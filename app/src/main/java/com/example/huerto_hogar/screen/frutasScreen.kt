@@ -1,94 +1,56 @@
 package com.example.huerto_hogar.screen
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.example.huerto_hogar.ui.theme.components.CategoriaCatalogo
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.example.huerto_hogar.AppScreens.AppScreens
+import com.example.huerto_hogar.ui.theme.Huerto_HogarTheme
+import com.example.huerto_hogar.ui.theme.components.Header
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FrutasScreen (navController: NavController){
-    Scaffold (
+fun FrutasScreen(
+    navController: NavHostController
+) {
+    Scaffold(
         topBar = {
-            Column {
-                //Barra arriba, flecha y título
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(
-                            "Frutas",
-                            fontWeight = FontWeight.Bold
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = {navController.popBackStack()}) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Atrás"
-                            )
-                        }
-                    }
-                )
-
-                //Opciones
-                Row (
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ){
-                    CategoriaCatalogo.values().forEach { categoria ->
-                        if (categoria != CategoriaCatalogo.FRUTAS){
-                            Text(
-                                text = categoria.label,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier
-                                    .clickable{
-                                        navController.navigate(categoria.route){
-                                            launchSingleTop = true
-                                        }
-                                    }
-                                    .padding(horizontal = 12.dp, vertical = 8.dp)
-                            )
-                        }
-
-                    }
-                }
-            }
+            Header(
+                navController = navController,
+                title = "Frutas"
+            )
         }
-
-
-    ){  paddingValues ->
-        Column(
+    ) { paddingValues ->
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
+                .padding(paddingValues)  // ← Este padding ya incluye el espacio del topBar
+                .padding(16.dp)  // ← Padding adicional para el contenido
         ) {
-            // TU CONTENIDO ESPECÍFICO DE FRUTAS
-            Text(
-                "Catálogo de Frutas",
-                style = MaterialTheme.typography.headlineSmall
-            )
-            // Aquí va tu lista de frutas...
+            items(10) { index ->
+                Text(
+                    text = "Fruta ${index + 1}",
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
         }
+    }
+}
+
+@Preview (showBackground = true, showSystemUi = true)
+@Composable
+fun FrutasScreenPrevew(){
+    Huerto_HogarTheme {
+        val navController = rememberNavController()
+
+        FrutasScreen(navController = navController)
     }
 }

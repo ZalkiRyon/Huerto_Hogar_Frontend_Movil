@@ -44,7 +44,6 @@ enum class CategoriaCatalogo(
 fun CatalogoNavigation(
     navController: NavHostController,
     onCloseMenu: () -> Unit ={},
-    onCategoriaSelected: () -> Unit={}
 ) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -79,7 +78,10 @@ fun CatalogoNavigation(
                         )
                         .clickable {
                             navController.navigate(categoria.route)
-                            onCategoriaSelected()
+                            onCloseMenu()
+//                            onCategorySelected(categoria)
+//                            navController.navigate(categoria.route)
+//                            onCategoriaSelected()
                         },
                     contentAlignment = Alignment.Center
                 ) {
