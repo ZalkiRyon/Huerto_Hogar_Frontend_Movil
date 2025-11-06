@@ -17,7 +17,13 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,9 +32,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.huerto_hogar.repository.RegisterUserViewModel
-import com.example.huerto_hogar.repository.RegistrationResult
+import com.example.huerto_hogar.model.RegistrationResult
 import com.example.huerto_hogar.ui.theme.components.InputField
+import com.example.huerto_hogar.viewmodel.RegisterUserViewModel
 
 @Composable
 fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewModel) {
@@ -42,7 +48,6 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
 
     val resultEvent = formState.registrationResultEvent
     LaunchedEffect(resultEvent) {
-
         if (resultEvent != null) {
 
             finalResult = resultEvent
@@ -169,10 +174,27 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
             }
 
             if (showSuccessDialog) {
+                val user = formState.registeredUser
                 AlertDialog(
                     onDismissRequest = { },
                     title = { Text(text = "¡Registro Exitoso!") },
-                    text = { Text("Tu cuenta ha sido creada con éxito. Serás redirigido al inicio de sesión para continuar.") },
+                    //text = { Text("Tu cuenta ha sido creada con éxito. Serás redirigido al inicio de sesión para continuar.") },
+                    text = {
+                        Column {
+                            Text("Tu cuenta ha sido creada con éxito. Aquí están tus detalles:")
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // Mostrando los detalles del usuario
+                            Text("Nombre: ${user?.name} ${user?.lastname}")
+                            Text("Email: ${user?.email}")
+                            Text("Rol Asignado: ${user?.role ?: "CLIENTE"}")
+                            Text("Dirección: ${user?.address}")
+                            Text("Teléfono: ${user?.phone ?: "No Registrado"}")
+
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text("Serás redirigido al inicio de sesión para continuar.")
+                        }
+                    },
                     confirmButton = {
                         Button(
                             onClick = {

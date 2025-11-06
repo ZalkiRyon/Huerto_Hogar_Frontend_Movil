@@ -1,18 +1,19 @@
-package com.example.huerto_hogar.repository
+package com.example.huerto_hogar.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.huerto_hogar.data.UserEntity
+import com.example.huerto_hogar.manager.UserManagerViewModel
 import com.example.huerto_hogar.model.RegisterUser
-import com.example.huerto_hogar.model.Role
+import com.example.huerto_hogar.model.RegistrationResult
+import com.example.huerto_hogar.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 
-class RegisterUserViewModel(private val userRepository: UserRepository) : ViewModel() {
+class RegisterUserViewModel() : ViewModel() {
+
+    lateinit var userManager: UserManagerViewModel
     // Unique StateFlow trying to clean the code without using multiples mutablestateflow
     private val _uiState = MutableStateFlow(RegisterUser())
     val uiState: StateFlow<RegisterUser> = _uiState.asStateFlow()
@@ -159,27 +160,52 @@ class RegisterUserViewModel(private val userRepository: UserRepository) : ViewMo
     fun onClickRegister() {
         val currentState = _uiState.value
 
-        viewModelScope.launch {
-            val newUserEntity = UserEntity(
-                id = 0,
-                email = currentState.email,
-                name = currentState.name,
-                lastname = currentState.lastname,
-                password = currentState.password,
-                address = currentState.password,
-                phone = currentState.phone.ifBlank { null },
-                role = Role.CLIENT,
-                comment = null
+        onChangeName(currentState.name)
+        onChangeLastname(currentState.lastname)
+        onChangeEmail(currentState.email)
+        onChangePassword(currentState.password)
+        onChangeConfirmPassword(currentState.confirmPassword)
+        onChangeAddress(currentState.address)
+        onChangePhone(currentState.phone)
 
-            )
+        val validatedState = _uiState.value
 
-            val result = userRepository.registerUser(newUserEntity)
-
-            _uiState.update {
-                it.copy(
-                    registrationResultEvent = result
-                )
-            }
+        val hasLocalErrors = with(validatedState.errors) {
+            emailError != null || passwordError != null || confirmPasswordError != null ||
+                    nameError != null || lastnameError != null
         }
+
+        if (hasLocalErrors) {
+            _uiState.update { it.copy(isLoading = false) }
+            return
+        }
+
+        val newUser = User(
+            name = validatedState.name,
+            lastname = validatedState.lastname,
+            email = validatedState.email,
+            password = validatedState.password,
+            address = validatedState.address,
+            phone = validatedState.phone.ifBlank { null },
+            comment = null,
+        )
+
+        val finalRegisteredUser = userManager.registerUser(newUser)
+
+        val result = if (finalRegisteredUser != null) {
+            RegistrationResult.SUCCESS
+        } else {
+            RegistrationResult.EMAIL_ALREADY_EXISTS
+        }
+
+
+        _uiState.update {
+            it.copy(
+                registrationResultEvent = result,
+                isLoading = false,
+                registeredUser = finalRegisteredUser
+            )
+        }
+
     }
 }

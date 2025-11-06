@@ -29,10 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.huerto_hogar.AppScreens.AppScreens
+import com.example.huerto_hogar.manager.UserManagerViewModel
 import com.example.huerto_hogar.screen.BlogScreen
 import com.example.huerto_hogar.screen.CartScreen
 import com.example.huerto_hogar.screen.FavScreen
@@ -43,11 +45,14 @@ import com.example.huerto_hogar.screen.OrganicosScreen
 import com.example.huerto_hogar.screen.RegistroScreen
 import com.example.huerto_hogar.screen.UsSettScreen
 import com.example.huerto_hogar.screen.VerdurasScreen
+import com.example.huerto_hogar.viewmodel.RegisterUserViewModel
 import kotlinx.coroutines.launch
 
 
 @Composable
 fun AppNavigationContainer() {
+    val userManager: UserManagerViewModel = viewModel()
+
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val showBarraCatalogo = remember { mutableStateOf(false) }
 
@@ -190,7 +195,10 @@ fun AppNavigationContainer() {
             ) {
                 composable(route = AppScreens.HomeScreen.route) { HomeScreen(navController = navController) }
                 composable(route = AppScreens.LoginScreen.route) { LoginScreen(navController = navController) }
-//                composable(route = AppScreens.RegistroScreen.route) { RegistroScreen(navController = navController) }
+                composable(route = AppScreens.RegistroScreen.route) {
+                    val registerVM: RegisterUserViewModel = viewModel()
+                    registerVM.userManager = userManager
+                    RegistroScreen(navController,registerVM ) }
                 composable(route = AppScreens.FavScreen.route) { FavScreen(navController = navController) }
                 composable(route = AppScreens.CartScreen.route) { CartScreen(navController = navController) }
                 composable(route = AppScreens.UsSettScreen.route) { UsSettScreen(navController = navController) }
