@@ -1,6 +1,5 @@
 package com.example.huerto_hogar.ui.theme.components
 
-import com.example.huerto_hogar.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,10 +9,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
@@ -21,6 +22,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -34,7 +37,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.huerto_hogar.AppScreens.AppScreens
+import com.example.huerto_hogar.R
 import com.example.huerto_hogar.manager.UserManagerViewModel
+import com.example.huerto_hogar.model.Role
 import com.example.huerto_hogar.screen.BlogScreen
 import com.example.huerto_hogar.screen.CartScreen
 import com.example.huerto_hogar.screen.FavScreen
@@ -47,12 +52,15 @@ import com.example.huerto_hogar.screen.UsSettScreen
 import com.example.huerto_hogar.screen.VerdurasScreen
 import com.example.huerto_hogar.viewmodel.LoginViewModel
 import com.example.huerto_hogar.viewmodel.RegisterUserViewModel
+import com.example.huerto_hogar.viewmodel.UserSettingsViewModel
 import kotlinx.coroutines.launch
 
 
 @Composable
 fun AppNavigationContainer() {
     val userManager: UserManagerViewModel = viewModel()
+
+    val currentUser by userManager.currentUser.collectAsState()
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val showBarraCatalogo = remember { mutableStateOf(false) }
@@ -68,50 +76,114 @@ fun AppNavigationContainer() {
         drawerContent = {
             ModalDrawerSheet {
                 //Logo cabecero//
-                Column (modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
-                ){
+                ) {
                     Image(
-                        painter = painterResource(id= R.drawable.logo_huerto),
+                        painter = painterResource(id = R.drawable.logo_huerto),
                         contentDescription = "Logo Huerto Hogar",
-                        modifier = Modifier.size(160.dp).padding(bottom = 2.dp),
+                        modifier = Modifier
+                            .size(160.dp)
+                            .padding(bottom = 2.dp),
                         contentScale = ContentScale.Fit
                     )
+
+                    currentUser?.let { user ->
+                        Text(
+                            text = "Bienvenido ${user.name} ${user.lastname}",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
                 }
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
                 Spacer(modifier = Modifier.padding(vertical = 4.dp))
 
-                NavigationDrawerItem(
-                    label = {Text("Iniciar Sesión")},
-                    selected = false,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navController.navigate(AppScreens.LoginScreen.route)
-                    },
-                    icon = {
-                        Icon(
-                            Icons.Default.AccountCircle,
-                            contentDescription = "Iniciar Sesión"
+                if (currentUser == null) {
+                    NavigationDrawerItem(
+                        label = { Text("Iniciar Sesión") },
+                        selected = false,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            navController.navigate(AppScreens.LoginScreen.route)
+                        },
+                        icon = {
+                            Icon(
+                                Icons.Default.AccountCircle,
+                                contentDescription = "Iniciar Sesión"
+                            )
+                        }
+                    )
+
+                    NavigationDrawerItem(
+                        label = { Text("Registrarse") },
+                        selected = false,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            navController.navigate(AppScreens.RegistroScreen.route)
+                        },
+                        icon = {
+                            Icon(
+                                Icons.Default.Create,
+                                contentDescription = "Registrarse"
+                            )
+                        }
+                    )
+                } else {
+                    if (currentUser?.role == Role.ADMIN) {
+                        NavigationDrawerItem(
+                            label = { Text("Administración") },
+                            selected = false,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navController.navigate(// TODO: ROUTE FOR ADMIN
+                                    Unit
+                                )
+                            },
+                            icon = {
+                                Icon(
+                                    Icons.Default.Person,
+                                    contentDescription = "Administración"
+                                )
+                            }
                         )
                     }
-                )
+                    NavigationDrawerItem(
+                        label = { Text("Configuración") },
+                        selected = false,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            navController.navigate(AppScreens.UsSettScreen.route)
+                        },
+                        icon = {
+                            Icon(
+                                Icons.Default.Settings,
+                                contentDescription = "Configuración"
+                            )
+                        })
 
-                NavigationDrawerItem(
-                    label = {Text("Registrarse")},
-                    selected = false,
-                    onClick = {
-                        scope.launch {drawerState.close()}
-                        navController.navigate(AppScreens.RegistroScreen.route)
-                    },
-                    icon ={
-                        Icon(
-                            Icons.Default.Create,
-                            contentDescription = "Registrarse"
-                        )
-                    }
-                )
-
+                    NavigationDrawerItem(
+                        label = { Text("Cerrar Sesión") },
+                        selected = false,
+                        onClick = {
+                            // TODO: DO FUNCTION TO LOGOUT
+                            userManager.setCurrentUser(null)
+                            scope.launch { drawerState.close() }
+                            navController.navigate(AppScreens.HomeScreen.route) {
+                                popUpTo(AppScreens.HomeScreen.route) { inclusive = true }
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                Icons.Default.AccountCircle,
+                                contentDescription = "Cerrar Sesión"
+                            )
+                        }
+                    )
+                }
 //                NavigationDrawerItem(
 //                    label = { Text("Inicio") },
 //                    selected = false,
@@ -152,16 +224,6 @@ fun AppNavigationContainer() {
                 Spacer(modifier = Modifier.weight(1f))
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-                NavigationDrawerItem(
-                    label = { Text("Configuración") },
-                    selected = false,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navController.navigate(AppScreens.UsSettScreen.route)
-                    },
-                    icon = { Icon(Icons.Default.Settings, contentDescription = "Configuración") }
-                )
-
             }
         },
         gesturesEnabled = drawerState.isOpen,
@@ -173,21 +235,15 @@ fun AppNavigationContainer() {
                     if (showBarraCatalogo.value) {
                         CatalogoNavigation(
                             navController = navController,
-                            onCloseMenu = { showBarraCatalogo.value = false }
-                        )
+                            onCloseMenu = { showBarraCatalogo.value = false })
                     }
-                    MainBottomBar(
-                        navController = navController,
-                        onMenuClick = {
-                            scope.launch { drawerState.open() }
-                        },
-                        onCatalogoClick = {
-                            showBarraCatalogo.value = !showBarraCatalogo.value
-                        }
-                    )
+                    MainBottomBar(navController = navController, onMenuClick = {
+                        scope.launch { drawerState.open() }
+                    }, onCatalogoClick = {
+                        showBarraCatalogo.value = !showBarraCatalogo.value
+                    })
                 }
-            }
-        ) { contentPadding ->
+            }) { contentPadding ->
             // La logica del router/enrutamiento
             NavHost(
                 navController = navController,
@@ -198,14 +254,20 @@ fun AppNavigationContainer() {
                 composable(route = AppScreens.LoginScreen.route) {
                     val loginVM: LoginViewModel = viewModel()
                     loginVM.userManager = userManager
-                    LoginScreen(navController = navController,loginVM) }
+                    LoginScreen(navController = navController, loginVM)
+                }
                 composable(route = AppScreens.RegistroScreen.route) {
                     val registerVM: RegisterUserViewModel = viewModel()
                     registerVM.userManager = userManager
-                    RegistroScreen(navController,registerVM ) }
+                    RegistroScreen(navController, registerVM)
+                }
                 composable(route = AppScreens.FavScreen.route) { FavScreen(navController = navController) }
                 composable(route = AppScreens.CartScreen.route) { CartScreen(navController = navController) }
-                composable(route = AppScreens.UsSettScreen.route) { UsSettScreen(navController = navController) }
+                composable(route = AppScreens.UsSettScreen.route) {
+                    val settingsVM: UserSettingsViewModel = viewModel()
+                    settingsVM.userManager = userManager
+                    UsSettScreen(navController = navController, viewModel = settingsVM)
+                }
                 composable(route = AppScreens.blogScreen.route) { BlogScreen(navController = navController) }
                 composable(route = AppScreens.FrutasScreen.route) { FrutasScreen(navController = navController) }
                 composable(route = AppScreens.OrganicosScreen.route) { OrganicosScreen(navController = navController) }

@@ -55,6 +55,7 @@ class LoginViewModel() : ViewModel() {
 
 
         val result = if (foundUser != null) {
+            userManager.setCurrentUser(foundUser)
             LoginResult.SUCCESS
         } else {
             LoginResult.INVALID_CREDENTIALS

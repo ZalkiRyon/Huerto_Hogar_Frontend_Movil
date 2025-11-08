@@ -39,6 +39,9 @@ class UserManagerViewModel : ViewModel() {
     private val _userList = MutableStateFlow(initialUsers.toMutableList())
     val userList: StateFlow<List<User>> = _userList.asStateFlow()
 
+    private val _currentUser = MutableStateFlow<User?>(null)
+    val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
+
     private var nextId = initialUsers.maxOf { it.id } + 1
 
     fun registerUser(newUser: User): User? {
@@ -64,8 +67,26 @@ class UserManagerViewModel : ViewModel() {
         }
     }
 
+    fun setCurrentUser(user: User?) {
+        _currentUser.value = user
+    }
+
+    fun updateUser(updatedUser: User): Boolean {
+        val currentList = _userList.value.toMutableList()
+
+        val index = currentList.indexOfFirst { it.id == updatedUser.id }
+
+        if (index != -1) {
+            currentList[index] = updatedUser
+            _userList.value = currentList.toList() as MutableList<User>
+
+            _currentUser.value = updatedUser
+            return true
+        }
+        return false
+    }
+
     fun findUserByEmail(email: String): User? {
         return _userList.value.find { it.email.equals(email, ignoreCase = true) }
     }
-
 }
