@@ -128,7 +128,7 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel){
 
 
             Button(
-                onClick = { navController.navigate("login_screen") },
+                onClick = { navController.navigate("registro_screen") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)
             ) {

@@ -164,13 +164,8 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
             Button(
                 onClick = { viewModel.onClickRegister() },
                 modifier = Modifier.fillMaxWidth()
-
-
             ) {
-
                 Text(text = "REGISTRAR", color = Color.White, fontSize = 18.sp)
-
-
             }
 
             if (showSuccessDialog) {
