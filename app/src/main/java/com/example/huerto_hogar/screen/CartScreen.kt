@@ -8,24 +8,35 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalContext
+import com.example.huerto_hogar.MainActivity
 import com.example.huerto_hogar.model.CartItem
 import com.example.huerto_hogar.viewmodel.CartViewModel
+import com.example.huerto_hogar.viewmodel.NFCViewModel
+import com.example.huerto_hogar.viewmodel.NFCState
+import com.example.huerto_hogar.manager.NFCManager
 
 @Composable
 fun CartScreen(
     navController: NavController,
-    cartViewModel: CartViewModel = viewModel()
+    cartViewModel: CartViewModel = viewModel(),
+    nfcViewModel: NFCViewModel = viewModel()
 ) {
+    val context = LocalContext.current
     val cartItems by cartViewModel.cartItems.collectAsState()
     val studentDiscount by cartViewModel.studentDiscount.collectAsState()
+    val nfcState by nfcViewModel.nfcState.collectAsState()
     
     val subtotal by remember {
         derivedStateOf { cartViewModel.calculateSubtotal() }
@@ -38,6 +49,39 @@ fun CartScreen(
     }
     
     var showClearDialog by remember { mutableStateOf(false) }
+    var showNFCDialog by remember { mutableStateOf(false) }
+    
+    val nfcManager = remember { NFCManager(context as MainActivity) }
+    
+    // Observar tags NFC
+    DisposableEffect(Unit) {
+        MainActivity.onNFCTagDiscovered = { tag ->
+            val isValid = nfcViewModel.processNFCTag(tag, nfcManager)
+            if (isValid && !studentDiscount) {
+                cartViewModel.toggleStudentDiscount()
+            }
+        }
+        onDispose {
+            MainActivity.onNFCTagDiscovered = null
+        }
+    }
+    
+    // Manejar estados NFC
+    LaunchedEffect(nfcState) {
+        when (val state = nfcState) {
+            is NFCState.Success -> {
+                showNFCDialog = false
+                // El descuento ya se aplicó en el callback
+            }
+            is NFCState.Error -> {
+                // Mostrar error por 2 segundos y cerrar
+                kotlinx.coroutines.delay(2000)
+                nfcViewModel.resetState()
+                showNFCDialog = false
+            }
+            else -> { /* Otros estados */ }
+        }
+    }
     
     Column(
         modifier = Modifier
@@ -150,9 +194,30 @@ fun CartScreen(
                             .padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Student discount button
+                        // Student discount button (NFC)
                         OutlinedButton(
-                            onClick = { cartViewModel.toggleStudentDiscount() },
+                            onClick = {
+                                if (!studentDiscount) {
+                                    // Verificar disponibilidad de NFC
+                                    when {
+                                        !nfcManager.isNFCAvailable() -> {
+                                            nfcViewModel.handleNFCNotAvailable()
+                                            showNFCDialog = true
+                                        }
+                                        !nfcManager.isNFCEnabled() -> {
+                                            nfcViewModel.handleNFCDisabled()
+                                            showNFCDialog = true
+                                        }
+                                        else -> {
+                                            nfcViewModel.startScanning()
+                                            showNFCDialog = true
+                                        }
+                                    }
+                                } else {
+                                    // Desactivar descuento
+                                    cartViewModel.toggleStudentDiscount()
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.outlinedButtonColors(
                                 containerColor = if (studentDiscount) 
@@ -162,7 +227,7 @@ fun CartScreen(
                             )
                         ) {
                             Icon(
-                                imageVector = if (studentDiscount) Icons.Default.Check else Icons.Default.Add,
+                                imageVector = if (studentDiscount) Icons.Default.Check else Icons.Default.Nfc,
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp)
                             )
@@ -171,7 +236,7 @@ fun CartScreen(
                                 if (studentDiscount) 
                                     "Descuento Estudiante Aplicado (10%)" 
                                 else 
-                                    "Aplicar Descuento Estudiante"
+                                    "Escanear Tarjeta Estudiante"
                             )
                         }
                         
@@ -250,6 +315,106 @@ fun CartScreen(
                 }
             }
         }
+    }
+    
+    // NFC Scanning Dialog
+    if (showNFCDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showNFCDialog = false
+                nfcViewModel.cancelScanning()
+            },
+            title = {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Nfc,
+                        contentDescription = "NFC",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text("Descuento Estudiante")
+                }
+            },
+            text = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    when (nfcState) {
+                        is NFCState.Scanning -> {
+                            CircularProgressIndicator()
+                            Text(
+                                "Acerca tu tarjeta estudiantil al lector NFC",
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                "(Parte trasera del teléfono)",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        is NFCState.Processing -> {
+                            CircularProgressIndicator()
+                            Text("Procesando tarjeta...", textAlign = TextAlign.Center)
+                        }
+                        is NFCState.Success -> {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = "Éxito",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(48.dp)
+                            )
+                            Text(
+                                "¡Descuento aplicado correctamente!",
+                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        is NFCState.Error -> {
+                            Icon(
+                                imageVector = Icons.Default.Error,
+                                contentDescription = "Error",
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(48.dp)
+                            )
+                            Text(
+                                (nfcState as NFCState.Error).message,
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                        else -> {
+                            Text("Preparando lector NFC...", textAlign = TextAlign.Center)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                if (nfcState is NFCState.Success || nfcState is NFCState.Error) {
+                    TextButton(onClick = {
+                        showNFCDialog = false
+                        nfcViewModel.resetState()
+                    }) {
+                        Text("Cerrar")
+                    }
+                }
+            },
+            dismissButton = {
+                if (nfcState is NFCState.Scanning || nfcState is NFCState.Idle) {
+                    TextButton(onClick = {
+                        showNFCDialog = false
+                        nfcViewModel.cancelScanning()
+                    }) {
+                        Text("Cancelar")
+                    }
+                }
+            }
+        )
     }
     
     // Clear cart confirmation dialog
