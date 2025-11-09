@@ -26,7 +26,7 @@ import androidx.navigation.NavController
 import com.example.huerto_hogar.manager.UserManagerViewModel
 import com.example.huerto_hogar.model.MockProducts
 import com.example.huerto_hogar.model.Role
-import com.example.huerto_hogar.ui.theme.components.animations.pressClickEffect
+import com.example.huerto_hogar.ui.theme.components.animations.pressClickEffectWithInteraction
 
 /**
  * Dashboard administrativo con estadísticas de la tienda (datos dinámicos).
@@ -263,7 +263,7 @@ fun QuickActionCard(
     Card(
         modifier = modifier
             .height(80.dp)
-            .pressClickEffect(interactionSource),
+            .pressClickEffectWithInteraction(interactionSource),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
     ) {
