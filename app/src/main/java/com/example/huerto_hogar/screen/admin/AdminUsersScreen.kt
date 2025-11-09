@@ -59,11 +59,14 @@ fun AdminUsersScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
                     text = "Gestión de Usuarios",
-                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.primary
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 2
                 )
                 Text(
                     text = "${filteredUsers.size} usuarios",
@@ -76,9 +79,9 @@ fun AdminUsersScreen(
                 onClick = { /* TODO: Add user */ },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar", modifier = Modifier.size(18.dp))
+                Icon(Icons.Default.Add, contentDescription = "Crear", modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Agregar")
+                Text("Crear")
             }
         }
         
@@ -112,7 +115,15 @@ fun AdminUsersScreen(
                 FilterChip(
                     selected = selectedRole == role,
                     onClick = { selectedRole = role },
-                    label = { Text(role.name) }
+                    label = { 
+                        Text(
+                            when(role) {
+                                Role.ADMIN -> "Admin"
+                                Role.CLIENT -> "Cliente"
+                                Role.SALESMAN -> "Vendedor"
+                            }
+                        ) 
+                    }
                 )
             }
         }
@@ -195,7 +206,11 @@ fun UserManagementCard(user: User) {
                         }
                     ) {
                         Text(
-                            text = user.role.name,
+                            text = when(user.role) {
+                                Role.ADMIN -> "Admin"
+                                Role.CLIENT -> "Cliente"
+                                Role.SALESMAN -> "Vendedor"
+                            },
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                             color = when(user.role) {
                                 Role.ADMIN -> Color(0xFFE91E63)
