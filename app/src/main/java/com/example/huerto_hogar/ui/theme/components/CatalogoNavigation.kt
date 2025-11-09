@@ -29,6 +29,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.huerto_hogar.AppScreens.AppScreens
+import com.example.huerto_hogar.ui.theme.components.animations.bounceInEffect
+import com.example.huerto_hogar.ui.theme.components.animations.pressClickEffect
 
 
 enum class CategoriaCatalogo(
@@ -40,6 +42,9 @@ enum class CategoriaCatalogo(
     ORGANICOS (AppScreens.OrganicosScreen.route, "Orgánicos")
 }
 
+/**
+ * Menú de navegación para categorías del catálogo con animaciones de entrada escalonadas.
+ */
 @Composable
 fun CatalogoNavigation(
     navController: NavHostController,
@@ -63,7 +68,7 @@ fun CatalogoNavigation(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            CategoriaCatalogo.values().forEach { categoria ->
+            CategoriaCatalogo.values().forEachIndexed { index, categoria ->
                 val isSelected = currentRoute == categoria.route
                 //Aquí parte la idea de D
                 Box(
@@ -71,6 +76,8 @@ fun CatalogoNavigation(
                         .weight(1f)
                         .height(48.dp)
                         .padding(4.dp)
+                        .bounceInEffect(delayMillis = index * 100)
+                        .pressClickEffect()
                         .clip(MaterialTheme.shapes.small)
                         .background(
                             if (isSelected) MaterialTheme.colorScheme.primaryContainer

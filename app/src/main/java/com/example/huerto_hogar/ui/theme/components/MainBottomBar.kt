@@ -1,5 +1,8 @@
 package com.example.huerto_hogar.ui.theme.components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.BottomAppBar
@@ -7,11 +10,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
+/**
+ * Barra de navegación inferior con animaciones de escala en íconos seleccionados.
+ */
 @Composable
 fun MainBottomBar(
     navController: NavHostController,
@@ -31,6 +39,14 @@ fun MainBottomBar(
                 val leftItems = listOf(BottomNavViews.HOME, BottomNavViews.CATALOGO)
                 leftItems.forEach { destination ->
                     val isSelected = currentRoute == destination.route
+                    val scale by animateFloatAsState(
+                        targetValue = if (isSelected) 1.15f else 1f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessMedium
+                        ),
+                        label = "icon_scale_${destination.label}"
+                    )
                     NavigationBarItem(
                         selected = isSelected,
                         onClick = {
@@ -47,7 +63,8 @@ fun MainBottomBar(
                         icon = {
                             Icon(
                                 destination.icon,
-                                contentDescription = destination.contentDescription
+                                contentDescription = destination.contentDescription,
+                                modifier = Modifier.scale(scale)
                             )
                         },
                         label = { Text(destination.label) }
@@ -56,6 +73,14 @@ fun MainBottomBar(
 
                 val cartRoute = BottomNavViews.CARRITO
                 val isSelectCart = currentRoute == cartRoute.route
+                val cartScale by animateFloatAsState(
+                    targetValue = if (isSelectCart) 1.15f else 1f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    ),
+                    label = "cart_icon_scale"
+                )
 
                 NavigationBarItem(
                     selected = isSelectCart,
@@ -63,7 +88,8 @@ fun MainBottomBar(
                     icon = {
                         Icon(
                             cartRoute.icon,
-                            contentDescription = cartRoute.contentDescription
+                            contentDescription = cartRoute.contentDescription,
+                            modifier = Modifier.scale(cartScale)
                         )
                     },
                     label = { Text(cartRoute.label) }
@@ -72,6 +98,14 @@ fun MainBottomBar(
                 val rightItems = listOf(BottomNavViews.FAVORITOS, BottomNavViews.MENU)
                 rightItems.forEach { destination ->
                     val isSelected = currentRoute == destination.route
+                    val scale by animateFloatAsState(
+                        targetValue = if (isSelected) 1.15f else 1f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessMedium
+                        ),
+                        label = "icon_scale_${destination.label}"
+                    )
 
                     NavigationBarItem(
                         selected = isSelected,
@@ -87,7 +121,8 @@ fun MainBottomBar(
                         icon = {
                             Icon(
                                 destination.icon,
-                                contentDescription = destination.contentDescription
+                                contentDescription = destination.contentDescription,
+                                modifier = Modifier.scale(scale)
                             )
                         },
                         label = { Text(destination.label) }
