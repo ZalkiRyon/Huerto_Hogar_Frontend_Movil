@@ -6,7 +6,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -236,7 +236,7 @@ fun InputFieldAnimationsExample() {
                     modifier = Modifier.passwordVisibilityAnimation(passwordVisible)
                 ) {
                     Icon(
-                        imageVector = if (passwordVisible) Icons.Default.LockOpen else Icons.Default.Lock,
+                        imageVector = if (passwordVisible) Icons.Default.RemoveRedEye else Icons.Default.Lock,
                         contentDescription = if (passwordVisible) "Ocultar" else "Mostrar"
                     )
                 }
@@ -459,7 +459,7 @@ fun LoginScreenAnimationExample() {
                     modifier = Modifier.passwordVisibilityAnimation(passwordVisible)
                 ) {
                     Icon(
-                        if (passwordVisible) Icons.Default.LockOpen else Icons.Default.Lock,
+                        if (passwordVisible) Icons.Default.RemoveRedEye else Icons.Default.Lock,
                         contentDescription = null
                     )
                 }
