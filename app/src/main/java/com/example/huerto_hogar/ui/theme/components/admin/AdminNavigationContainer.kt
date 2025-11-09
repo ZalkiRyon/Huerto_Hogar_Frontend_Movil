@@ -64,7 +64,10 @@ fun AdminNavigationContainer(
                 enterTransition = { slideInFromRightWithFade() },
                 exitTransition = { slideOutToLeftWithFade() }
             ) {
-                AdminUsersScreen(navController = navController)
+                AdminUsersScreen(
+                    navController = navController,
+                    userManager = userManager
+                )
             }
         }
     }
