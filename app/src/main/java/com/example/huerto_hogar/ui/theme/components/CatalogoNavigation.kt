@@ -76,7 +76,7 @@ fun CatalogoNavigation(
                         .weight(1f)
                         .height(48.dp)
                         .padding(4.dp)
-                        .bounceInEffect(delayMillis = index * 100)
+                        .bounceInEffect(delay = index * 100)
                         .pressClickEffect()
                         .clip(MaterialTheme.shapes.small)
                         .background(

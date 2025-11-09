@@ -5,8 +5,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -236,7 +236,7 @@ fun InputFieldAnimationsExample() {
                     modifier = Modifier.passwordVisibilityAnimation(passwordVisible)
                 ) {
                     Icon(
-                        imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        imageVector = if (passwordVisible) Icons.Default.LockOpen else Icons.Default.Lock,
                         contentDescription = if (passwordVisible) "Ocultar" else "Mostrar"
                     )
                 }
@@ -459,7 +459,7 @@ fun LoginScreenAnimationExample() {
                     modifier = Modifier.passwordVisibilityAnimation(passwordVisible)
                 ) {
                     Icon(
-                        if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        if (passwordVisible) Icons.Default.LockOpen else Icons.Default.Lock,
                         contentDescription = null
                     )
                 }
