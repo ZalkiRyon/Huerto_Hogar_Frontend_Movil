@@ -10,6 +10,9 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -58,6 +61,46 @@ fun AdminBottomBar(
     onLogout: () -> Unit
 ) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    var showLogoutDialog by remember { mutableStateOf(false) }
+    
+    // Modal de confirmación de logout
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.ExitToApp,
+                    contentDescription = "Cerrar sesión"
+                )
+            },
+            title = {
+                Text(text = "Cerrar Sesión")
+            },
+            text = {
+                Text(text = "¿Estás seguro de que deseas cerrar sesión del panel de administración?")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showLogoutDialog = false
+                        onLogout()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Sí, cerrar sesión")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showLogoutDialog = false }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
     
     BottomAppBar(
         content = {
@@ -87,7 +130,7 @@ fun AdminBottomBar(
                         selected = isSelected,
                         onClick = {
                             if (item == AdminBottomNavItem.Logout) {
-                                onLogout()
+                                showLogoutDialog = true
                             } else {
                                 navController.navigate(item.route) {
                                     popUpTo(AppScreens.AdminDashboardScreen.route) {

@@ -43,16 +43,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.huerto_hogar.AppScreens.AppScreens
 import com.example.huerto_hogar.R
+import com.example.huerto_hogar.model.MockProducts
 import java.text.NumberFormat
 import java.util.Locale
-
-// We have to change this one time is done list of products and categories
-data class Product(
-    val id: Int,
-    val name: String,
-    val price: Int,
-    val imageResId: Int
-)
 
 data class Category(
     val name: String,
@@ -60,13 +53,8 @@ data class Category(
     val iconResId: Int
 )
 
-val featuredProducts = listOf(
-    Product(1, "Manzanas Fuji", 1200, R.drawable.manzana_fuji),
-    Product(2, "Naranjas Valencia", 1000, R.drawable.naranja_valencia),
-    Product(3, "Plátanos Cavendish", 800, R.drawable.platano),
-    Product(4, "Pimentón Rojo", 1500, R.drawable.pimientos),
-    Product(5, "Espinaca Orgánica", 2500, R.drawable.espinaca)
-)
+// Usar los productos del modelo centralizado - top 5 para featured
+val featuredProducts = MockProducts.products.take(5)
 
 val categories = listOf(
     Category("Frutas", AppScreens.FrutasScreen.route, R.drawable.orange),
@@ -308,7 +296,7 @@ fun FeaturedProductsCarousel(products: List<Product>) {
                 ) {
 
                     Image(
-                        painter = painterResource(id = product.imageResId),
+                        painter = painterResource(id = product.imageUrl ?: R.drawable.imagen_no_found),
                         contentDescription = product.name,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
