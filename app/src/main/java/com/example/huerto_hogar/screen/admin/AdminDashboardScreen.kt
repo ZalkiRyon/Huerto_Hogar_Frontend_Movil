@@ -1,6 +1,8 @@
 package com.example.huerto_hogar.screen.admin
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,6 +26,7 @@ import androidx.navigation.NavController
 import com.example.huerto_hogar.manager.UserManagerViewModel
 import com.example.huerto_hogar.model.MockProducts
 import com.example.huerto_hogar.model.Role
+import com.example.huerto_hogar.ui.theme.components.animations.pressClickEffect
 
 /**
  * Dashboard administrativo con estadísticas de la tienda (datos dinámicos).
@@ -254,14 +258,22 @@ fun QuickActionCard(
     icon: ImageVector,
     modifier: Modifier = Modifier
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    
     Card(
-        modifier = modifier.height(80.dp),
+        modifier = modifier
+            .height(80.dp)
+            .pressClickEffect(interactionSource),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null
+                ) { /* TODO: Implement action */ }
                 .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically

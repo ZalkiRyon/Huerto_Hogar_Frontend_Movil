@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import com.example.huerto_hogar.model.MockProducts
 import com.example.huerto_hogar.model.Product
 import com.example.huerto_hogar.model.ProductCategory
+import com.example.huerto_hogar.ui.theme.components.animations.bounceInEffect
 
 /**
  * Pantalla de gestión de inventario (display only por ahora).
@@ -66,7 +67,8 @@ fun AdminInventoryScreen(navController: NavController) {
             
             Button(
                 onClick = { /* TODO: Add product */ },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                modifier = Modifier.bounceInEffect()
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Crear", modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(4.dp))

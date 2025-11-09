@@ -20,6 +20,7 @@ import androidx.navigation.NavController
 import com.example.huerto_hogar.manager.UserManagerViewModel
 import com.example.huerto_hogar.model.Role
 import com.example.huerto_hogar.model.User
+import com.example.huerto_hogar.ui.theme.components.animations.bounceInEffect
 
 // No necesitamos MockUsers aquí - usamos directamente UserManagerViewModel
 
@@ -77,7 +78,8 @@ fun AdminUsersScreen(
             
             Button(
                 onClick = { /* TODO: Add user */ },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                modifier = Modifier.bounceInEffect()
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Crear", modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(4.dp))
