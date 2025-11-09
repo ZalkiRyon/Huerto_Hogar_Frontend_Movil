@@ -48,11 +48,14 @@ fun AdminInventoryScreen(navController: NavController) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
                     text = "Inventario",
-                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.primary
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 2
                 )
                 Text(
                     text = "${filteredProducts.size} productos",
@@ -65,9 +68,9 @@ fun AdminInventoryScreen(navController: NavController) {
                 onClick = { /* TODO: Add product */ },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar", modifier = Modifier.size(18.dp))
+                Icon(Icons.Default.Add, contentDescription = "Crear", modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Agregar")
+                Text("Crear")
             }
         }
         

@@ -16,7 +16,7 @@ data class Product(
 enum class ProductCategory(val displayName: String) {
     VERDURAS("Verduras"),
     FRUTAS("Frutas"),
-    ORGANICOS("Orgánicos")
+    ORGANICOS("Organic.")
 }
 
 /**

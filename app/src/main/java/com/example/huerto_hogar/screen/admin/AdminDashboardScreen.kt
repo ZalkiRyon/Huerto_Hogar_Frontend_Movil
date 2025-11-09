@@ -36,8 +36,9 @@ fun AdminDashboardScreen(navController: NavController) {
         // Header
         Text(
             text = "Panel de Administración",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.primary
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.primary,
+            maxLines = 2
         )
         
         Text(
