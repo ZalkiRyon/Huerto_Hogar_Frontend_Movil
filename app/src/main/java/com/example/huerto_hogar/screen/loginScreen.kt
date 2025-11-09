@@ -117,7 +117,8 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel){
                 error = formState.errors.passwordError,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .bounceInEffect(delay = 200)
+                    .bounceInEffect(delay = 200),
+                isPassword = true
             )
 
             Spacer(modifier = Modifier.height(16.dp))

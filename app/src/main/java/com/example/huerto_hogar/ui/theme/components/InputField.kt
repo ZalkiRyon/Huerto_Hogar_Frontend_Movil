@@ -9,6 +9,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.huerto_hogar.ui.theme.components.animations.inputErrorShake
 import com.example.huerto_hogar.ui.theme.components.animations.inputFocusAnimation
@@ -16,6 +18,8 @@ import com.example.huerto_hogar.ui.theme.components.animations.inputFocusAnimati
 /**
  * Campo de entrada de texto reutilizable con animaciones integradas.
  * Incluye animación de foco y shake en errores de validación.
+ * 
+ * @param isPassword Si es true, ofusca el texto con PasswordVisualTransformation
  */
 @Composable
 fun InputField(
@@ -24,7 +28,8 @@ fun InputField(
     label: String,
     modifier: Modifier,
     placeholder: String? = null,
-    error: String? = null
+    error: String? = null,
+    isPassword: Boolean = false
 ) {
     Column(modifier.fillMaxWidth()) {
         Text(
@@ -42,7 +47,7 @@ fun InputField(
             placeholder = { placeholder?.let { Text(it) } },
             isError = error != null,
             singleLine = true,
-
+            visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None
         )
         if (error != null) {
             Text(

@@ -136,7 +136,8 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
                 onValueChange = { viewModel.onChangePassword(it) },
                 label = "Contrasena",
                 error = formState.errors.passwordError,
-                modifier = Modifier.bounceInEffect(delay = 200)
+                modifier = Modifier.bounceInEffect(delay = 200),
+                isPassword = true
             )
 
             InputField(
@@ -144,7 +145,8 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
                 onValueChange = { viewModel.onChangeConfirmPassword(it) },
                 label = "Confirmar contrasena",
                 error = formState.errors.confirmPasswordError,
-                modifier = Modifier.bounceInEffect(delay = 250)
+                modifier = Modifier.bounceInEffect(delay = 250),
+                isPassword = true
             )
 
             InputField(
