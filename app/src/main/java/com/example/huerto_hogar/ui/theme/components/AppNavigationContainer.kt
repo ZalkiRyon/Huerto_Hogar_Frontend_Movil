@@ -48,12 +48,14 @@ import com.example.huerto_hogar.screen.HomeScreen
 import com.example.huerto_hogar.screen.LoginScreen
 import com.example.huerto_hogar.screen.OrganicosScreen
 import com.example.huerto_hogar.screen.RegistroScreen
-import com.example.huerto_hogar.screen.UsSettScreen
+import com.example.huerto_hogar.screen.UsSetScreen
 import com.example.huerto_hogar.screen.VerdurasScreen
 import com.example.huerto_hogar.viewmodel.LoginViewModel
 import com.example.huerto_hogar.viewmodel.RegisterUserViewModel
 import com.example.huerto_hogar.viewmodel.UserSettingsViewModel
 import com.example.huerto_hogar.ui.theme.components.animations.*
+import com.example.huerto_hogar.ui.theme.components.admin.AdminNavigationContainer
+import com.example.huerto_hogar.screen.admin.*
 import kotlinx.coroutines.launch
 
 
@@ -62,6 +64,17 @@ fun AppNavigationContainer() {
     val userManager: UserManagerViewModel = viewModel()
 
     val currentUser by userManager.currentUser.collectAsState()
+    
+    // Si el usuario es admin, mostrar panel de administración
+    if (currentUser?.role == Role.ADMIN) {
+        AdminNavigationContainer(
+            userManager = userManager,
+            onLogout = {
+                userManager.setCurrentUser(null)
+            }
+        )
+        return
+    }
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val showBarraCatalogo = remember { mutableStateOf(false) }
@@ -157,7 +170,7 @@ fun AppNavigationContainer() {
                         selected = false,
                         onClick = {
                             scope.launch { drawerState.close() }
-                            navController.navigate(AppScreens.UsSettScreen.route)
+                            navController.navigate(AppScreens.UsSetScreen.route)
                         },
                         icon = {
                             Icon(
@@ -296,17 +309,17 @@ fun AppNavigationContainer() {
                 }
                 
                 composable(
-                    route = AppScreens.UsSettScreen.route,
+                    route = AppScreens.UsSetScreen.route,
                     enterTransition = { slideInFromBottomWithFade() },
                     exitTransition = { slideOutToBottomWithFade() }
                 ) {
                     val settingsVM: UserSettingsViewModel = viewModel()
                     settingsVM.userManager = userManager
-                    UsSettScreen(navController = navController, viewModel = settingsVM)
+                    UsSetScreen(navController = navController, viewModel = settingsVM)
                 }
                 
                 composable(
-                    route = AppScreens.blogScreen.route,
+                    route = AppScreens.BlogScreen.route,
                     enterTransition = { fadeIn() },
                     exitTransition = { fadeOut() }
                 ) { 
@@ -335,6 +348,31 @@ fun AppNavigationContainer() {
                     exitTransition = { fadeOut() }
                 ) { 
                     VerdurasScreen(navController = navController) 
+                }
+                
+                // Admin Routes
+                composable(
+                    route = AppScreens.AdminDashboardScreen.route,
+                    enterTransition = { fadeIn() },
+                    exitTransition = { fadeOut() }
+                ) {
+                    AdminDashboardScreen(navController = navController)
+                }
+                
+                composable(
+                    route = AppScreens.AdminInventoryScreen.route,
+                    enterTransition = { slideInFromRightWithFade() },
+                    exitTransition = { slideOutToLeftWithFade() }
+                ) {
+                    AdminInventoryScreen(navController = navController)
+                }
+                
+                composable(
+                    route = AppScreens.AdminUsersScreen.route,
+                    enterTransition = { slideInFromRightWithFade() },
+                    exitTransition = { slideOutToLeftWithFade() }
+                ) {
+                    AdminUsersScreen(navController = navController)
                 }
             }
         }

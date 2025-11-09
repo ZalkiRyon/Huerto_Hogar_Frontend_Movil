@@ -33,7 +33,7 @@ import com.example.huerto_hogar.ui.theme.components.InputField
 import com.example.huerto_hogar.viewmodel.UserSettingsViewModel
 
 @Composable
-fun UsSettScreen(navController: NavController, viewModel: UserSettingsViewModel) {
+fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) {
 
     val formState by viewModel.uiState.collectAsState()
     val context = LocalContext.current

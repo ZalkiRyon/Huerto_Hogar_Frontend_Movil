@@ -6,9 +6,14 @@ sealed class AppScreens(val route: String) {
     object RegistroScreen: AppScreens(route = "registro_screen")
     object CartScreen: AppScreens(route = "cart_screen")
     object FavScreen: AppScreens(route = "fav_screen")
-    object UsSettScreen: AppScreens(route = "ussett_screen")
-    object blogScreen: AppScreens(route = "blog_screen")
+    object UsSetScreen: AppScreens(route = "usset_screen")
+    object BlogScreen: AppScreens(route = "blog_screen")
     object VerdurasScreen: AppScreens(route = "verduras_screen")
     object FrutasScreen: AppScreens(route = "frutas_screen")
     object OrganicosScreen: AppScreens(route = "organicos_screen")
+    
+    // Admin routes
+    object AdminDashboardScreen: AppScreens(route = "admin_dashboard_screen")
+    object AdminInventoryScreen: AppScreens(route = "admin_inventory_screen")
+    object AdminUsersScreen: AppScreens(route = "admin_users_screen")
 }

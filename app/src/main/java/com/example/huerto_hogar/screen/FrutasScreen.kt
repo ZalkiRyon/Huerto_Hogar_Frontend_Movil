@@ -42,31 +42,18 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-
-//*--------------------------------------------------------------------*//
-//                 Solo para representar productos
-//*--------------------------------------------------------------------*//
-data class ProductoFrutas(
-    val id: Int,
-    val nombre: String,
-    val precio: Int,
-    val urlImagen: Int = R.drawable.imagen_no_found //defecto
-
-)
-
-//                      Productos de ejemplo
-val productosFrutas = listOf(
-    ProductoFrutas(1, "Manzanas Fuji",1200, R.drawable.manzana_fuji),
-    ProductoFrutas(2, "Naranjas Valencia", 1000, R.drawable.naranja_valencia),
-    ProductoFrutas(3, "Platanos Cavendish", 800, R.drawable.platano)
-)
+import com.example.huerto_hogar.model.Product
+import com.example.huerto_hogar.model.ProductCategory
+import com.example.huerto_hogar.model.MockProducts
 
 @Composable
 fun FrutasScreen(
     navController: NavHostController
 ) {
-
-    var frutas by remember { mutableStateOf(productosFrutas) }
+    // Filtrar solo productos de categoría FRUTAS
+    val frutas = remember {
+        MockProducts.products.filter { it.category == ProductCategory.FRUTAS }
+    }
 
     Scaffold(
         topBar = {
@@ -99,8 +86,8 @@ fun FrutasScreen(
 
 @Composable
 fun ProductoCard(
-    producto: ProductoFrutas,
-    onAgregarCarrito: (ProductoFrutas) -> Unit
+    producto: Product,
+    onAgregarCarrito: (Product) -> Unit
 ){
     ElevatedCard (
         elevation = CardDefaults.cardElevation(
@@ -123,8 +110,8 @@ fun ProductoCard(
                     .clip(RoundedCornerShape(8.dp))
             ){
                 Image(
-                    painter = painterResource(id = producto.urlImagen),
-                    contentDescription = producto.nombre,
+                    painter = painterResource(id = producto.imageUrl ?: R.drawable.imagen_no_found),
+                    contentDescription = producto.name,
                     modifier = Modifier
                         .fillMaxSize(),
                     contentScale = ContentScale.Crop
@@ -141,7 +128,7 @@ fun ProductoCard(
             ){
                 Column {
                     Text(
-                        text = producto.nombre,
+                        text = producto.name,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 2,
@@ -152,7 +139,7 @@ fun ProductoCard(
 
                     //Precio moneda
                     Text(
-                        text = "$${producto.precio.toInt()}",
+                        text = "$${producto.price.toInt()}",
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
@@ -193,11 +180,14 @@ fun FrutasScreenPrevew(){
 @Composable
 fun ProductoCardPreview(){
     Huerto_HogarTheme {
-        val productoEjemplo = ProductoFrutas(
+        val productoEjemplo = Product(
             id = 1,
-            nombre = "Manzanas Fuji",
-            precio = 1200,
-            urlImagen = R.drawable.manzana_fuji
+            name = "Manzanas Fuji",
+            category = ProductCategory.FRUTAS,
+            price = 1200.0,
+            stock = 45,
+            imageUrl = R.drawable.manzana_fuji,
+            description = "Manzanas frescas importadas"
         )
         ProductoCard(
             producto = productoEjemplo,

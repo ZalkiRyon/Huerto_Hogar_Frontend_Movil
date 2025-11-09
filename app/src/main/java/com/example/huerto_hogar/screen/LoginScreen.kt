@@ -54,7 +54,17 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel){
                         "¡Bienvenido, ${formState.loggedInUser?.name}!",
                         Toast.LENGTH_SHORT
                     ).show()
-                    navController.navigate("home_screen")
+                    
+                    // Redirigir según rol del usuario
+                    val destination = if (formState.loggedInUser?.role == com.example.huerto_hogar.model.Role.ADMIN) {
+                        "admin_dashboard_screen"
+                    } else {
+                        "home_screen"
+                    }
+                    
+                    navController.navigate(destination) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                    }
                 }
                 LoginResult.INVALID_CREDENTIALS -> {
                     Toast.makeText(
