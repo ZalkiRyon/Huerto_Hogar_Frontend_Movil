@@ -9,6 +9,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,14 +18,26 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.huerto_hogar.manager.UserManagerViewModel
+import com.example.huerto_hogar.model.MockProducts
+import com.example.huerto_hogar.model.Role
 
 /**
- * Dashboard administrativo con estadísticas de la tienda (placeholders).
+ * Dashboard administrativo con estadísticas de la tienda (datos dinámicos).
  */
 @Composable
-fun AdminDashboardScreen(navController: NavController) {
+fun AdminDashboardScreen(
+    navController: NavController,
+    userManager: UserManagerViewModel = viewModel()
+) {
     val scrollState = rememberScrollState()
+    
+    // Obtener datos dinámicos
+    val userList by userManager.userList.collectAsState()
+    val totalProducts = MockProducts.products.size
+    val clientsCount = userList.count { it.role == Role.CLIENT }
     
     Column(
         modifier = Modifier
@@ -64,7 +78,7 @@ fun AdminDashboardScreen(navController: NavController) {
             
             StatCard(
                 title = "Productos",
-                value = "148",
+                value = totalProducts.toString(),
                 icon = Icons.Default.List,
                 color = Color(0xFF2196F3),
                 modifier = Modifier.weight(1f)
@@ -76,8 +90,8 @@ fun AdminDashboardScreen(navController: NavController) {
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             StatCard(
-                title = "Usuarios",
-                value = "1,234",
+                title = "Clientes",
+                value = clientsCount.toString(),
                 icon = Icons.Default.Person,
                 color = Color(0xFFFF9800),
                 modifier = Modifier.weight(1f)

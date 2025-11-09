@@ -45,7 +45,10 @@ fun AdminNavigationContainer(
                 enterTransition = { fadeIn() },
                 exitTransition = { fadeOut() }
             ) {
-                AdminDashboardScreen(navController = navController)
+                AdminDashboardScreen(
+                    navController = navController,
+                    userManager = userManager
+                )
             }
             
             composable(
