@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -53,6 +54,7 @@ import com.example.huerto_hogar.screen.VerdurasScreen
 import com.example.huerto_hogar.viewmodel.LoginViewModel
 import com.example.huerto_hogar.viewmodel.RegisterUserViewModel
 import com.example.huerto_hogar.viewmodel.UserSettingsViewModel
+import com.example.huerto_hogar.viewmodel.CartViewModel
 import com.example.huerto_hogar.ui.theme.components.animations.*
 import com.example.huerto_hogar.ui.theme.components.admin.AdminNavigationContainer
 import com.example.huerto_hogar.screen.admin.*
@@ -62,6 +64,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun AppNavigationContainer() {
     val userManager: UserManagerViewModel = viewModel()
+    val cartViewModel: CartViewModel = viewModel()
 
     val currentUser by userManager.currentUser.collectAsState()
     
@@ -78,6 +81,7 @@ fun AppNavigationContainer() {
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val showBarraCatalogo = remember { mutableStateOf(false) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
@@ -183,12 +187,8 @@ fun AppNavigationContainer() {
                         label = { Text("Cerrar Sesión") },
                         selected = false,
                         onClick = {
-                            // TODO: DO FUNCTION TO LOGOUT
-                            userManager.setCurrentUser(null)
                             scope.launch { drawerState.close() }
-                            navController.navigate(AppScreens.HomeScreen.route) {
-                                popUpTo(AppScreens.HomeScreen.route) { inclusive = true }
-                            }
+                            showLogoutDialog = true
                         },
                         icon = {
                             Icon(
@@ -242,6 +242,19 @@ fun AppNavigationContainer() {
         },
         gesturesEnabled = drawerState.isOpen,
     ) {
+        // Diálogo de confirmación de logout
+        LogoutConfirmationDialog(
+            showDialog = showLogoutDialog,
+            onDismiss = { showLogoutDialog = false },
+            onConfirm = {
+                showLogoutDialog = false
+                userManager.setCurrentUser(null)
+                navController.navigate(AppScreens.HomeScreen.route) {
+                    popUpTo(AppScreens.HomeScreen.route) { inclusive = true }
+                }
+            }
+        )
+        
         Scaffold(
             // Menu de navegacion inferioor
             bottomBar = {
@@ -305,7 +318,10 @@ fun AppNavigationContainer() {
                     enterTransition = { slideInFromRightWithFade() },
                     exitTransition = { slideOutToLeftWithFade() }
                 ) { 
-                    CartScreen(navController = navController) 
+                    CartScreen(
+                        navController = navController,
+                        cartViewModel = cartViewModel
+                    ) 
                 }
                 
                 composable(
@@ -331,7 +347,10 @@ fun AppNavigationContainer() {
                     enterTransition = { fadeIn() },
                     exitTransition = { fadeOut() }
                 ) { 
-                    FrutasScreen(navController = navController) 
+                    FrutasScreen(
+                        navController = navController,
+                        cartViewModel = cartViewModel
+                    ) 
                 }
                 
                 composable(
@@ -339,7 +358,10 @@ fun AppNavigationContainer() {
                     enterTransition = { fadeIn() },
                     exitTransition = { fadeOut() }
                 ) { 
-                    OrganicosScreen(navController = navController) 
+                    OrganicosScreen(
+                        navController = navController,
+                        cartViewModel = cartViewModel
+                    ) 
                 }
                 
                 composable(
@@ -347,7 +369,10 @@ fun AppNavigationContainer() {
                     enterTransition = { fadeIn() },
                     exitTransition = { fadeOut() }
                 ) { 
-                    VerdurasScreen(navController = navController) 
+                    VerdurasScreen(
+                        navController = navController,
+                        cartViewModel = cartViewModel
+                    ) 
                 }
                 
                 // Admin Routes

@@ -16,7 +16,11 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,15 +49,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import com.example.huerto_hogar.model.Product
 import com.example.huerto_hogar.model.ProductCategory
 import com.example.huerto_hogar.model.MockProducts
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.huerto_hogar.viewmodel.CartViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun FrutasScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    cartViewModel: CartViewModel = viewModel()
 ) {
     // Filtrar solo productos de categoría FRUTAS
     val frutas = remember {
         MockProducts.products.filter { it.category == ProductCategory.FRUTAS }
     }
+    
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -61,7 +72,8 @@ fun FrutasScreen(
                 navController = navController,
                 title = "Frutas"
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -75,8 +87,14 @@ fun FrutasScreen(
             ){producto ->
                 ProductoCard(
                     producto = producto,
-                    onAgregarCarrito = {productoAgregado ->
-
+                    onAgregarCarrito = { productoAgregado ->
+                        cartViewModel.addToCart(productoAgregado)
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = "✓ ${productoAgregado.name} agregado al carrito",
+                                duration = SnackbarDuration.Short
+                            )
+                        }
                     }
                 )
             }

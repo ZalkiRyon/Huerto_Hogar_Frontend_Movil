@@ -1,6 +1,7 @@
 package com.example.huerto_hogar.screen
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -31,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.huerto_hogar.ui.theme.components.InputField
 import com.example.huerto_hogar.viewmodel.UserSettingsViewModel
+import com.example.huerto_hogar.ui.theme.components.animations.bounceInEffect
 
 @Composable
 fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) {
@@ -71,6 +74,7 @@ fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(scrollState)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -79,7 +83,8 @@ fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) 
 
         Text(
             text = "Configuración y Datos de Cuenta",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
@@ -158,7 +163,8 @@ fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) 
             onValueChange = viewModel::onChangeCurrentPassword,
             label = "Contraseña Actual",
             modifier = Modifier,
-            error = formState.errors.currentPasswordError
+            error = formState.errors.currentPasswordError,
+            isPassword = true
         )
 
         if (formState.currentPassword.isNotBlank()) {
@@ -167,34 +173,45 @@ fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) 
                 onValueChange = viewModel::onChangeNewPassword,
                 label = "Nueva Contraseña (Mín. 4 caracteres)",
                 modifier = Modifier,
-                error = formState.errors.newPasswordError
+                error = formState.errors.newPasswordError,
+                isPassword = true
             )
             InputField(
                 value = formState.confirmNewPassword,
                 onValueChange = viewModel::onChangeConfirmNewPassword,
                 label = "Confirmar Nueva Contraseña",
                 modifier = Modifier,
-                error = formState.errors.confirmNewPasswordError
+                error = formState.errors.confirmNewPasswordError,
+                isPassword = true
             )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-
+        // Botón Guardar Cambios
         Button(
             onClick = viewModel::onClickSave,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp),
-            enabled = !formState.isLoading
+                .height(56.dp)
+                .bounceInEffect(),
+            enabled = !formState.isLoading,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            )
         ) {
             if (formState.isLoading) {
-                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(24.dp)
+                )
             } else {
-                Text("GUARDAR CAMBIOS", color = Color.White, fontWeight = FontWeight.Bold)
+                Text(
+                    "Guardar Cambios",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
-
-
 }

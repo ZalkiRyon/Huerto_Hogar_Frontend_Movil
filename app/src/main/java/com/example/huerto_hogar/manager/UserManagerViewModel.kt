@@ -26,9 +26,9 @@ class UserManagerViewModel : ViewModel() {
             id = 2,
             role = Role.CLIENT,
             comment = "Cliente VIP, compra productos orgánicos semanalmente",
-            name = "Ana",
-            lastname = "Martinez",
-            email = "ana.martinez@gmail.com",
+            name = "Juan",
+            lastname = "Perez",
+            email = "juan.perez@duocuc.cl",
             password = "cliente123",
             phone = "945678912",
             address = "Av. Apoquindo 4567, Casa 78"

@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.huerto_hogar.AppScreens.AppScreens
+import com.example.huerto_hogar.ui.theme.components.LogoutConfirmationDialog
 
 /**
  * Navegación inferior para el panel de administración.
@@ -63,44 +64,16 @@ fun AdminBottomBar(
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     var showLogoutDialog by remember { mutableStateOf(false) }
     
-    // Modal de confirmación de logout
-    if (showLogoutDialog) {
-        AlertDialog(
-            onDismissRequest = { showLogoutDialog = false },
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.ExitToApp,
-                    contentDescription = "Cerrar sesión"
-                )
-            },
-            title = {
-                Text(text = "Cerrar Sesión")
-            },
-            text = {
-                Text(text = "¿Estás seguro de que deseas cerrar sesión del panel de administración?")
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showLogoutDialog = false
-                        onLogout()
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text("Sí, cerrar sesión")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showLogoutDialog = false }
-                ) {
-                    Text("Cancelar")
-                }
-            }
-        )
-    }
+    // Diálogo de confirmación de logout usando componente reutilizable
+    LogoutConfirmationDialog(
+        showDialog = showLogoutDialog,
+        onDismiss = { showLogoutDialog = false },
+        onConfirm = {
+            showLogoutDialog = false
+            onLogout()
+        },
+        message = "¿Estás seguro de que deseas cerrar sesión del panel de administración?"
+    )
     
     BottomAppBar(
         content = {
