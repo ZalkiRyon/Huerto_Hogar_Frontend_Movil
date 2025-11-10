@@ -10,6 +10,7 @@ data class UserSetting(
     val currentPassword: String = "",
     val newPassword: String = "",
     val confirmNewPassword: String = "",
+    val newProfilePhoto: String = "",
 
     val isLoading: Boolean = false,
     val isInitialLoadComplete: Boolean = false,

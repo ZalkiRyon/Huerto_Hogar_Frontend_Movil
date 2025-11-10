@@ -24,4 +24,5 @@ data class User(
     val email: String,
     val password: String,
     val address: String,
+    val profilePictureUrl: String? = null
 )

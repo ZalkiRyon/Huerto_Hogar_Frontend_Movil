@@ -3,11 +3,17 @@
 
     <!-- Permiso para usar NFC -->
     <uses-permission android:name="android.permission.NFC" />
-    
+
     <!-- Feature NFC (opcional, no requerido para que la app funcione sin NFC) -->
     <uses-feature
         android:name="android.hardware.nfc"
         android:required="false" />
+
+    <uses-feature
+        android:name="android.hardware.camera.any"
+        android:required="true" />
+
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:allowBackup="true"
@@ -38,10 +44,7 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-        <uses-feature
-            android:name="android.hardware.camera.any"
-            android:required="true" />
-        <uses-permission android:name="android.permission.CAMERA" />
+
     </application>
 
 </manifest>

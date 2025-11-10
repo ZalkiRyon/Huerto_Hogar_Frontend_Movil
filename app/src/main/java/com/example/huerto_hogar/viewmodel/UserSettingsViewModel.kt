@@ -1,5 +1,6 @@
 package com.example.huerto_hogar.viewmodel
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.huerto_hogar.manager.UserManagerViewModel
@@ -24,6 +25,9 @@ class UserSettingsViewModel() : ViewModel() {
     private val _saveResult = MutableSharedFlow<Boolean>()
     val saveResult: SharedFlow<Boolean> = _saveResult.asSharedFlow()
 
+    private val _profilePictureUri = MutableStateFlow<Uri?>(null)
+    val profilePictureUri: StateFlow<Uri?> = _profilePictureUri
+
 
     fun loadUserProfile() {
         val user = userManager.currentUser.value
@@ -39,6 +43,17 @@ class UserSettingsViewModel() : ViewModel() {
                     isInitialLoadComplete = true
                 )
             }
+        }
+    }
+
+    fun setProfilePictureUri(uri: Uri?) {
+        _profilePictureUri.value = uri
+        val uriString = uri.toString()
+
+        _uiState.update {
+            it.copy(
+                newProfilePhoto = uriString,
+            )
         }
     }
 
@@ -121,7 +136,8 @@ class UserSettingsViewModel() : ViewModel() {
             email = state.email,
             address = state.address,
             phone = state.phone.ifBlank { null },
-            password = finalPassword
+            password = finalPassword,
+            profilePictureUrl = state.newProfilePhoto
         )
 
 

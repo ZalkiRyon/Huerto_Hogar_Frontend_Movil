@@ -1,7 +1,16 @@
 package com.example.huerto_hogar.screen
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Environment
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,28 +21,41 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.huerto_hogar.ui.theme.components.InputField
-import com.example.huerto_hogar.viewmodel.UserSettingsViewModel
+import com.example.huerto_hogar.ui.theme.components.ConfirmationDialog
 import com.example.huerto_hogar.ui.theme.components.animations.bounceInEffect
+import com.example.huerto_hogar.viewmodel.UserSettingsViewModel
+import java.io.File
 
 @Composable
 fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) {
@@ -41,6 +63,10 @@ fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) 
     val formState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+    val showSourceDialog = remember { mutableStateOf(false) }
+    val profileUri by viewModel.profilePictureUri.collectAsState()
+
+    var isCameraPermissionGranted by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.loadUserProfile()
@@ -71,6 +97,58 @@ fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) 
         return
     }
 
+    val photoFile: File = remember {
+        File.createTempFile(
+            "profile_pic",
+            ".jpg",
+            context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        )
+    }
+
+    val uri: Uri = remember {
+        FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            photoFile
+        )
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { viewModel.setProfilePictureUri(it) }
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success: Boolean ->
+        if (success) {
+            viewModel.setProfilePictureUri(uri)
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        isCameraPermissionGranted = isGranted
+        if (isGranted) {
+            cameraLauncher.launch(uri)
+        }
+    }
+
+    fun launchCameraFlow() {
+        if (ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            cameraLauncher.launch(uri)
+        } else {
+            permissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -88,17 +166,64 @@ fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) 
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
+        Text(
+            text = "Foto de perfil",
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+            modifier = Modifier.align(Alignment.Start)
+        )
+        Spacer(
+            modifier = Modifier.height(4.dp)
+        )
 
-        if (formState.errors.errors != null) {
+        Box(
+            modifier = Modifier
+                .size(150.dp)
+                .clip(CircleShape)
+                .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                .clickable { showSourceDialog.value = true },
+            contentAlignment = Alignment.Center
+        ) {
+
+            if (profileUri != null) {
+                Image(
+                    painter = rememberAsyncImagePainter(model = profileUri),
+                    contentDescription = "Foto de perfil",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Icon(
+                    Icons.Default.AccountCircle,
+                    contentDescription = "Sin foto de perfil",
+                    modifier = Modifier.size(100.dp),
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            Spacer(Modifier.height(8.dp))
             Text(
-                text = formState.errors.errors!!,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
+                text = "Toca para cambiar la foto",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onPrimary
             )
         }
 
+        if (showSourceDialog.value) {
+            ConfirmationDialog(
+                showDialog = showSourceDialog.value,
+                title = "Seleccionar Foto",
+                message = "¿Desde dónde quieres obtener la foto de perfil?",
+                onConfirm = {
+                    showSourceDialog.value = false
+                    launchCameraFlow()
+                },
+                onDismiss = {
+                    showSourceDialog.value = false
+                    galleryLauncher.launch("image/*")
+                },
+                confirmButtonText = "Cámara",
+                dismissButtonText = "Galería"
+            )
+        }
 
         Text(
             text = "Información Personal",
@@ -188,7 +313,16 @@ fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) 
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Botón Guardar Cambios
+        if (formState.errors.errors != null) {
+            Text(
+                text = formState.errors.errors!!,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            )
+        }
+
         Button(
             onClick = viewModel::onClickSave,
             modifier = Modifier
