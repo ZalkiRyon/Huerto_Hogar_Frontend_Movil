@@ -1,42 +1,81 @@
 package com.example.huerto_hogar.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.ui.platform.LocalContext
+import com.example.huerto_hogar.AppScreens.AppScreens
 import com.example.huerto_hogar.MainActivity
-import com.example.huerto_hogar.model.CartItem
-import com.example.huerto_hogar.viewmodel.CartViewModel
-import com.example.huerto_hogar.viewmodel.NFCViewModel
-import com.example.huerto_hogar.viewmodel.NFCState
 import com.example.huerto_hogar.manager.NFCManager
+import com.example.huerto_hogar.model.CartItem
+import com.example.huerto_hogar.model.User
+import com.example.huerto_hogar.viewmodel.CartViewModel
+import com.example.huerto_hogar.viewmodel.NFCState
+import com.example.huerto_hogar.viewmodel.NFCViewModel
 
 @Composable
 fun CartScreen(
     navController: NavController,
     cartViewModel: CartViewModel = viewModel(),
-    nfcViewModel: NFCViewModel = viewModel()
+    nfcViewModel: NFCViewModel = viewModel(),
+    currentUser: User? = viewModel()
 ) {
     val context = LocalContext.current
     val cartItems by cartViewModel.cartItems.collectAsState()
     val studentDiscount by cartViewModel.studentDiscount.collectAsState()
     val nfcState by nfcViewModel.nfcState.collectAsState()
-    
+
     // Recalcular cuando cambian cartItems o studentDiscount
     val subtotal = remember(cartItems) {
         cartViewModel.calculateSubtotal()
@@ -47,12 +86,12 @@ fun CartScreen(
     val total = remember(studentDiscount, cartItems) {
         cartViewModel.calculateTotal()
     }
-    
+
     var showClearDialog by remember { mutableStateOf(false) }
     var showNFCDialog by remember { mutableStateOf(false) }
-    
+
     val nfcManager = remember { NFCManager(context as MainActivity) }
-    
+
     // Observar tags NFC
     DisposableEffect(Unit) {
         MainActivity.onNFCTagDiscovered = { tag ->
@@ -65,7 +104,7 @@ fun CartScreen(
             MainActivity.onNFCTagDiscovered = null
         }
     }
-    
+
     // Manejar estados NFC
     LaunchedEffect(nfcState) {
         when (val state = nfcState) {
@@ -73,16 +112,19 @@ fun CartScreen(
                 showNFCDialog = false
                 // El descuento ya se aplicó en el callback
             }
+
             is NFCState.Error -> {
                 // Mostrar error por 2 segundos y cerrar
                 kotlinx.coroutines.delay(2000)
                 nfcViewModel.resetState()
                 showNFCDialog = false
             }
-            else -> { /* Otros estados */ }
+
+            else -> { /* Otros estados */
+            }
         }
     }
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -114,7 +156,7 @@ fun CartScreen(
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     )
                 }
-                
+
                 if (cartItems.isNotEmpty()) {
                     IconButton(onClick = { showClearDialog = true }) {
                         Icon(
@@ -126,7 +168,7 @@ fun CartScreen(
                 }
             }
         }
-        
+
         if (cartItems.isEmpty()) {
             // Empty cart state
             Box(
@@ -180,7 +222,7 @@ fun CartScreen(
                         )
                     }
                 }
-                
+
                 // Summary section
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
@@ -204,10 +246,12 @@ fun CartScreen(
                                             nfcViewModel.handleNFCNotAvailable()
                                             showNFCDialog = true
                                         }
+
                                         !nfcManager.isNFCEnabled() -> {
                                             nfcViewModel.handleNFCDisabled()
                                             showNFCDialog = true
                                         }
+
                                         else -> {
                                             nfcViewModel.startScanning()
                                             showNFCDialog = true
@@ -219,9 +263,9 @@ fun CartScreen(
                             modifier = Modifier.fillMaxWidth(),
                             enabled = !studentDiscount, // Deshabilitar cuando está aplicado
                             colors = ButtonDefaults.outlinedButtonColors(
-                                containerColor = if (studentDiscount) 
-                                    MaterialTheme.colorScheme.primaryContainer 
-                                else 
+                                containerColor = if (studentDiscount)
+                                    MaterialTheme.colorScheme.primaryContainer
+                                else
                                     MaterialTheme.colorScheme.surface
                             )
                         ) {
@@ -232,15 +276,15 @@ fun CartScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                if (studentDiscount) 
-                                    "Descuento Estudiante Aplicado (10%)" 
-                                else 
+                                if (studentDiscount)
+                                    "Descuento Estudiante Aplicado (10%)"
+                                else
                                     "Escanear Tarjeta Estudiante"
                             )
                         }
-                        
+
                         Divider()
-                        
+
                         // Price breakdown
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -256,7 +300,7 @@ fun CartScreen(
                                 fontWeight = FontWeight.Medium
                             )
                         }
-                        
+
                         if (studentDiscount) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -275,7 +319,7 @@ fun CartScreen(
                                 )
                             }
                         }
-                        
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -293,29 +337,50 @@ fun CartScreen(
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
-                        
-                        // Checkout button
-                        Button(
-                            onClick = { /* TODO: Implement checkout */ },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            )
-                        ) {
-                            Text(
-                                text = "Terminar de Pagar",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
+
+                        if (currentUser == null) {
+                            Button(
+                                onClick = { navController.navigate(AppScreens.LoginScreen.route) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Text(
+                                    text = "Iniciar sesión",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        } else {
+
+                            Button(
+                                onClick = { /* TODO: Implement checkout */ },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Text(
+                                    text = "Terminar de Pagar",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+
+
+                            }
                         }
+
                     }
                 }
             }
         }
     }
-    
+
     // NFC Scanning Dialog
     if (showNFCDialog) {
         AlertDialog(
@@ -356,10 +421,12 @@ fun CartScreen(
                                 textAlign = TextAlign.Center
                             )
                         }
+
                         is NFCState.Processing -> {
                             CircularProgressIndicator()
                             Text("Procesando tarjeta...", textAlign = TextAlign.Center)
                         }
+
                         is NFCState.Success -> {
                             Icon(
                                 imageVector = Icons.Default.Check,
@@ -374,6 +441,7 @@ fun CartScreen(
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
+
                         is NFCState.Error -> {
                             Icon(
                                 imageVector = Icons.Default.Warning,
@@ -387,6 +455,7 @@ fun CartScreen(
                                 color = MaterialTheme.colorScheme.error
                             )
                         }
+
                         else -> {
                             Text("Preparando lector NFC...", textAlign = TextAlign.Center)
                         }
@@ -415,7 +484,7 @@ fun CartScreen(
             }
         )
     }
-    
+
     // Clear cart confirmation dialog
     if (showClearDialog) {
         AlertDialog(
@@ -485,7 +554,7 @@ fun CartItemCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            
+
             // Quantity controls
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -501,7 +570,7 @@ fun CartItemCard(
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
-                
+
                 Text(
                     text = "${cartItem.quantity}",
                     style = MaterialTheme.typography.titleLarge,
@@ -509,7 +578,7 @@ fun CartItemCard(
                     modifier = Modifier.widthIn(min = 32.dp),
                     textAlign = TextAlign.Center
                 )
-                
+
                 IconButton(
                     onClick = onIncrement,
                     modifier = Modifier.size(36.dp)
