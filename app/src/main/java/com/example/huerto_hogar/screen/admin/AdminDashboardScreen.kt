@@ -8,6 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -83,7 +84,7 @@ fun AdminDashboardScreen(
             StatCard(
                 title = "Productos",
                 value = totalProducts.toString(),
-                icon = Icons.Default.List,
+                icon = Icons.AutoMirrored.Filled.List,
                 color = Color(0xFF2196F3),
                 modifier = Modifier.weight(1f)
             )

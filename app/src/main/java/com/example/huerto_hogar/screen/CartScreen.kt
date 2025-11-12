@@ -239,8 +239,8 @@ fun CartScreen(
                             )
                         }
                         
-                        Divider()
-                        
+                        HorizontalDivider()
+
                         // Price breakdown
                         Row(
                             modifier = Modifier.fillMaxWidth(),

@@ -6,6 +6,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -39,7 +41,7 @@ sealed class AdminBottomNavItem(
     
     object Inventory : AdminBottomNavItem(
         AppScreens.AdminInventoryScreen.route,
-        Icons.Default.List,
+        Icons.AutoMirrored.Filled.List,
         "Inventario"
     )
     
@@ -51,7 +53,7 @@ sealed class AdminBottomNavItem(
     
     object Logout : AdminBottomNavItem(
         "logout",
-        Icons.Default.ExitToApp,
+        Icons.AutoMirrored.Filled.ExitToApp,
         "Salir"
     )
 }
