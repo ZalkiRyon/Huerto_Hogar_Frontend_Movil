@@ -51,6 +51,7 @@ import com.example.huerto_hogar.model.ProductCategory
 import com.example.huerto_hogar.model.MockProducts
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.huerto_hogar.viewmodel.CartViewModel
+import com.example.huerto_hogar.ui.theme.components.ProductCard
 import kotlinx.coroutines.launch
 
 @Composable
@@ -85,8 +86,11 @@ fun AllProductsScreen(
                 allProducts,
                 key = { it.id }
             ) { producto ->
-                ProductoCard(
+                ProductCard(
                     producto = producto,
+                    onProductClick = { product ->
+                        // TODO: Navegar a pantalla de detalle del producto
+                    },
                     onAgregarCarrito = { productoAgregado ->
                         cartViewModel.addToCart(productoAgregado)
                         coroutineScope.launch {
@@ -95,7 +99,17 @@ fun AllProductsScreen(
                                 duration = SnackbarDuration.Short
                             )
                         }
-                    }
+                    },
+                    onToggleFavorito = { product ->
+                        // TODO: Implementar lógica de favoritos
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = "Funcionalidad de favoritos próximamente",
+                                duration = SnackbarDuration.Short
+                            )
+                        }
+                    },
+                    isFavorito = false // TODO: Obtener estado real de favoritos
                 )
             }
         }

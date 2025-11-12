@@ -51,6 +51,7 @@ import com.example.huerto_hogar.model.ProductCategory
 import com.example.huerto_hogar.model.MockProducts
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.huerto_hogar.viewmodel.CartViewModel
+import com.example.huerto_hogar.ui.theme.components.ProductCard
 import kotlinx.coroutines.launch
 
 @Composable
@@ -84,9 +85,12 @@ fun FrutasScreen(
             items(
                 frutas,
                 key = { it.id }
-            ){producto ->
-                ProductoCard(
+            ) { producto ->
+                ProductCard(
                     producto = producto,
+                    onProductClick = { product ->
+                        // TODO: Navegar a pantalla de detalle del producto
+                    },
                     onAgregarCarrito = { productoAgregado ->
                         cartViewModel.addToCart(productoAgregado)
                         coroutineScope.launch {
@@ -95,93 +99,21 @@ fun FrutasScreen(
                                 duration = SnackbarDuration.Short
                             )
                         }
-                    }
+                    },
+                    onToggleFavorito = { product ->
+                        // TODO: Implementar lógica de favoritos
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = "Funcionalidad de favoritos próximamente",
+                                duration = SnackbarDuration.Short
+                            )
+                        }
+                    },
+                    isFavorito = false // TODO: Obtener estado real de favoritos
                 )
             }
         }
     }
-}
-
-@Composable
-fun ProductoCard(
-    producto: Product,
-    onAgregarCarrito: (Product) -> Unit
-){
-    ElevatedCard (
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp,
-            pressedElevation = 8.dp
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(140.dp),
-        shape = RoundedCornerShape(12.dp)
-    ){
-        Row (
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ){
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(RoundedCornerShape(8.dp))
-            ){
-                Image(
-                    painter = painterResource(id = producto.imageUrl ?: R.drawable.imagen_no_found),
-                    contentDescription = producto.name,
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-
-            //Información Producto
-            Column (
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween
-            ){
-                Column {
-                    Text(
-                        text = producto.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    //Precio moneda
-                    Text(
-                        text = "$${producto.price.toInt()}",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                Button(
-                    onClick = {onAgregarCarrito(producto)},
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ShoppingCart,
-                        contentDescription = "Agregar al carrito",
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Agregar al carrito")
-                }
-
-
-            }
-        }
-    }
-
 }
 
 @Preview (showBackground = true, showSystemUi = true)
@@ -194,22 +126,3 @@ fun FrutasScreenPrevew(){
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ProductoCardPreview(){
-    Huerto_HogarTheme {
-        val productoEjemplo = Product(
-            id = 1,
-            name = "Manzanas Fuji",
-            category = ProductCategory.FRUTAS,
-            price = 1200.0,
-            stock = 45,
-            imageUrl = R.drawable.manzana_fuji,
-            description = "Manzanas frescas importadas"
-        )
-        ProductoCard(
-            producto = productoEjemplo,
-            onAgregarCarrito = {}
-        )
-    }
-}
