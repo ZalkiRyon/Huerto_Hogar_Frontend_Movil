@@ -28,6 +28,7 @@ import com.example.huerto_hogar.model.ProductCategory
 import com.example.huerto_hogar.model.MockProducts
 import com.example.huerto_hogar.ui.theme.Huerto_HogarTheme
 import com.example.huerto_hogar.ui.theme.components.Header
+import com.example.huerto_hogar.ui.theme.components.ProductCard
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.huerto_hogar.viewmodel.CartViewModel
 import kotlinx.coroutines.launch
@@ -65,8 +66,11 @@ fun VerdurasScreen(
                 verduras,
                 key = { it.id }
             ) { producto ->
-                ProductoVerdurasCard(
+                ProductCard(
                     producto = producto,
+                    onProductClick = { product ->
+                        // TODO: Navegar a pantalla de detalle del producto
+                    },
                     onAgregarCarrito = { productoAgregado ->
                         cartViewModel.addToCart(productoAgregado)
                         coroutineScope.launch {
@@ -75,86 +79,18 @@ fun VerdurasScreen(
                                 duration = SnackbarDuration.Short
                             )
                         }
-                    }
+                    },
+                    onToggleFavorito = { product ->
+                        // TODO: Implementar lógica de favoritos
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = "Funcionalidad de favoritos próximamente",
+                                duration = SnackbarDuration.Short
+                            )
+                        }
+                    },
+                    isFavorito = false // TODO: Obtener estado real de favoritos
                 )
-            }
-        }
-    }
-}
-
-@Composable
-fun ProductoVerdurasCard(
-    producto: Product,
-    onAgregarCarrito: (Product) -> Unit
-) {
-    ElevatedCard(
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp,
-            pressedElevation = 8.dp
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(140.dp),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(RoundedCornerShape(8.dp))
-            ) {
-                Image(
-                    painter = painterResource(id = producto.imageUrl ?: R.drawable.imagen_no_found),
-                    contentDescription = producto.name,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Información Producto
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column {
-                    Text(
-                        text = producto.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    // Precio moneda
-                    Text(
-                        text = "$${producto.price.toInt()}",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                Button(
-                    onClick = { onAgregarCarrito(producto) },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ShoppingCart,
-                        contentDescription = "Agregar al carrito",
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Agregar al carrito")
-                }
             }
         }
     }
