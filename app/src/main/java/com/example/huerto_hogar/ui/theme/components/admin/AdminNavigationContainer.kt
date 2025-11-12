@@ -4,12 +4,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.huerto_hogar.AppScreens.AppScreens
 import com.example.huerto_hogar.manager.UserManagerViewModel
+import com.example.huerto_hogar.viewmodel.SalesViewModel
 import com.example.huerto_hogar.screen.admin.AdminDashboardScreen
 import com.example.huerto_hogar.screen.admin.AdminInventoryScreen
 import com.example.huerto_hogar.screen.admin.AdminUsersScreen
@@ -22,6 +22,7 @@ import com.example.huerto_hogar.ui.theme.components.animations.*
 @Composable
 fun AdminNavigationContainer(
     userManager: UserManagerViewModel,
+    salesViewModel: SalesViewModel,
     onLogout: () -> Unit
 ) {
     val navController = rememberNavController()
@@ -46,8 +47,8 @@ fun AdminNavigationContainer(
                 exitTransition = { fadeOut() }
             ) {
                 AdminDashboardScreen(
-                    navController = navController,
-                    userManager = userManager
+                    userManager = userManager,
+                    salesViewModel = salesViewModel
                 )
             }
             

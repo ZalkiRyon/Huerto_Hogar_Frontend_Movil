@@ -8,6 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -20,21 +21,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.example.huerto_hogar.manager.UserManagerViewModel
 import com.example.huerto_hogar.model.MockProducts
 import com.example.huerto_hogar.model.Role
 import com.example.huerto_hogar.ui.theme.components.animations.pressClickEffectWithInteraction
+import com.example.huerto_hogar.viewmodel.SalesViewModel
 
 /**
  * Dashboard administrativo con estadísticas de la tienda (datos dinámicos).
  */
 @Composable
 fun AdminDashboardScreen(
-    navController: NavController,
-    userManager: UserManagerViewModel = viewModel()
+    userManager: UserManagerViewModel = viewModel(),
+    salesViewModel: SalesViewModel = viewModel()
 ) {
     val scrollState = rememberScrollState()
     
@@ -42,7 +42,8 @@ fun AdminDashboardScreen(
     val userList by userManager.userList.collectAsState()
     val totalProducts = MockProducts.products.size
     val clientsCount = userList.count { it.role == Role.CLIENT }
-    
+    val dailySales by salesViewModel.dailySales.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -55,7 +56,7 @@ fun AdminDashboardScreen(
         Text(
             text = "Panel de Administración",
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onBackground,
+            color = MaterialTheme.colorScheme.primary,
             maxLines = 2
         )
         
@@ -74,17 +75,17 @@ fun AdminDashboardScreen(
         ) {
             StatCard(
                 title = "Ventas Hoy",
-                value = "$12,450",
+                value = "$${dailySales.toInt()}",
                 icon = Icons.Default.ShoppingCart,
-                color = MaterialTheme.colorScheme.tertiary,
+                color = Color(0xFF4CAF50),
                 modifier = Modifier.weight(1f)
             )
             
             StatCard(
                 title = "Productos",
                 value = totalProducts.toString(),
-                icon = Icons.Default.List,
-                color = MaterialTheme.colorScheme.secondary,
+                icon = Icons.AutoMirrored.Filled.List,
+                color = Color(0xFF2196F3),
                 modifier = Modifier.weight(1f)
             )
         }
@@ -97,7 +98,7 @@ fun AdminDashboardScreen(
                 title = "Clientes",
                 value = clientsCount.toString(),
                 icon = Icons.Default.Person,
-                color = MaterialTheme.colorScheme.error,
+                color = Color(0xFFFF9800),
                 modifier = Modifier.weight(1f)
             )
             
@@ -105,7 +106,7 @@ fun AdminDashboardScreen(
                 title = "Pedidos",
                 value = "87",
                 icon = Icons.Default.Star,
-                color = MaterialTheme.colorScheme.errorContainer,
+                color = Color(0xFF9C27B0),
                 modifier = Modifier.weight(1f)
             )
         }
