@@ -25,8 +25,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 @Composable
 fun MainBottomBar(
     navController: NavHostController,
-    onMenuClick: () -> Unit,
-    onCatalogoClick: () -> Unit
+    onMenuClick: () -> Unit
 ) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -56,7 +55,6 @@ fun MainBottomBar(
                             if (destination.route == null) {
                                 when (destination) {
                                     BottomNavViews.MENU -> onMenuClick()
-                                    BottomNavViews.CATALOGO -> onCatalogoClick()
                                     else -> {}
                                 }
                             } else {

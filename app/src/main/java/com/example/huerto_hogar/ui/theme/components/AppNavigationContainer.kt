@@ -41,8 +41,10 @@ import com.example.huerto_hogar.AppScreens.AppScreens
 import com.example.huerto_hogar.R
 import com.example.huerto_hogar.manager.UserManagerViewModel
 import com.example.huerto_hogar.model.Role
+import com.example.huerto_hogar.screen.AllProductsScreen
 import com.example.huerto_hogar.screen.BlogScreen
 import com.example.huerto_hogar.screen.CartScreen
+import com.example.huerto_hogar.screen.CatalogoScreen
 import com.example.huerto_hogar.screen.FavScreen
 import com.example.huerto_hogar.screen.FrutasScreen
 import com.example.huerto_hogar.screen.HomeScreen
@@ -83,7 +85,6 @@ fun AppNavigationContainer() {
     }
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val showBarraCatalogo = remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
@@ -243,18 +244,12 @@ fun AppNavigationContainer() {
         Scaffold(
             // Menu de navegacion inferioor
             bottomBar = {
-                Column {
-                    if (showBarraCatalogo.value) {
-                        CatalogoNavigation(
-                            navController = navController,
-                            onCloseMenu = { showBarraCatalogo.value = false })
-                    }
-                    MainBottomBar(navController = navController, onMenuClick = {
+                MainBottomBar(
+                    navController = navController, 
+                    onMenuClick = {
                         scope.launch { drawerState.open() }
-                    }, onCatalogoClick = {
-                        showBarraCatalogo.value = !showBarraCatalogo.value
-                    })
-                }
+                    }
+                )
             }) { contentPadding ->
             // La logica del router/enrutamiento
             NavHost(
@@ -355,6 +350,25 @@ fun AppNavigationContainer() {
                     exitTransition = { fadeOut() }
                 ) { 
                     VerdurasScreen(
+                        navController = navController,
+                        cartViewModel = cartViewModel
+                    ) 
+                }
+                
+                composable(
+                    route = AppScreens.CatalogoScreen.route,
+                    enterTransition = { fadeIn() },
+                    exitTransition = { fadeOut() }
+                ) { 
+                    CatalogoScreen(navController = navController) 
+                }
+                
+                composable(
+                    route = AppScreens.AllProductsScreen.route,
+                    enterTransition = { fadeIn() },
+                    exitTransition = { fadeOut() }
+                ) { 
+                    AllProductsScreen(
                         navController = navController,
                         cartViewModel = cartViewModel
                     ) 
