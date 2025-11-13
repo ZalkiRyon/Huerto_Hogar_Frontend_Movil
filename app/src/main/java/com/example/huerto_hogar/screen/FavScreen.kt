@@ -78,28 +78,22 @@ fun FavScreen(
     LaunchedEffect(snackbarMessage) {
         snackbarMessage?.let { message ->
             snackbarHostState.showSnackbar(
-                message = message,
-                duration = SnackbarDuration.Short
+                message = message, duration = SnackbarDuration.Short
             )
             snackbarMessage = null
         }
     }
 
-    Scaffold(
-        topBar = {
-            Header(
-                navController = navController,
-                title = "Mis Favoritos",
-            )
-        },
-        snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarHostState,
-                modifier = Modifier
-                    .padding(16.dp)
-            )
-        }
-    ) { paddingValues ->
+    Scaffold(topBar = {
+        Header(
+            navController = navController,
+            title = "Mis Favoritos",
+        )
+    }, snackbarHost = {
+        SnackbarHost(
+            hostState = snackbarHostState, modifier = Modifier.padding(16.dp)
+        )
+    }) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -171,23 +165,19 @@ fun FavScreen(
                             .weight(1f)
                             .fillMaxWidth(),
                         contentPadding = PaddingValues(
-                            horizontal = 16.dp,
-                            vertical = 8.dp
+                            horizontal = 16.dp, vertical = 8.dp
                         ),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(favoriteItems) { product ->
                             FavoriteItemCard(
-                                product = product,
-                                onRemove = {
+                                product = product, onRemove = {
                                     favoritesViewModel.removeFromFavorites(product.id)
                                     snackbarMessage = "Producto eliminado de favoritos"
-                                },
-                                onAddToCart = {
+                                }, onAddToCart = {
                                     cartViewModel.addToCart(product)
                                     snackbarMessage = "Producto agregado al carrito"
-                                },
-                                user = user
+                                }, user = user
                             )
                         }
                     }
@@ -203,33 +193,53 @@ fun FavScreen(
                                 .padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            // Add all to cart button
-                            Button(
-                                onClick = {
-                                    favoriteItems.forEach { product ->
-                                        cartViewModel.addToCart(product)
-                                    }
-                                    snackbarMessage =
-                                        "${favoriteItems.size} producto(s) agregado(s) al carrito"
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(56.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary
-                                )
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ShoppingCart,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Agregar Todos al Carrito",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
+                            // Verify if user is logged
+                            if (user != null) {
+                                // if user is logged button add cart
+                                Button(
+                                    onClick = {
+                                        favoriteItems.forEach { product ->
+                                            cartViewModel.addToCart(product)
+                                        }
+                                        snackbarMessage =
+                                            "${favoriteItems.size} producto(s) agregado(s) al carrito"
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(56.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.ShoppingCart,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "Agregar Todos al Carrito",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            } else {
+                                // if user is not logged button go to login
+                                Button(
+                                    onClick = { navController.navigate("login_screen") },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    ),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(56.dp),
+                                ) {
+                                    Text(
+                                        text = "Iniciar sesión para proceder",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
                     }
@@ -249,8 +259,7 @@ fun FavScreen(
                         favoritesViewModel.clearFavorites()
                         showClearDialog = false
                         snackbarMessage = "Lista de favoritos vaciada"
-                    }
-                ) {
+                    }) {
                     Text("Vaciar", color = MaterialTheme.colorScheme.error)
                 }
             },
@@ -258,17 +267,13 @@ fun FavScreen(
                 TextButton(onClick = { showClearDialog = false }) {
                     Text("Cancelar")
                 }
-            }
-        )
+            })
     }
 }
 
 @Composable
 fun FavoriteItemCard(
-    product: Product,
-    onRemove: () -> Unit,
-    onAddToCart: () -> Unit,
-    user: User?
+    product: Product, onRemove: () -> Unit, onAddToCart: () -> Unit, user: User?
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -296,8 +301,7 @@ fun FavoriteItemCard(
 
             // Product info
             Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
                     text = product.name,
@@ -324,37 +328,33 @@ fun FavoriteItemCard(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (user != null){
-                    // Add to cart button
-                    IconButton(
-                        onClick = onAddToCart,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ShoppingCart,
-                            contentDescription = "Agregar al carrito",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
 
-                    // Remove from favorites button
-                    IconButton(
-                        onClick = onRemove,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Eliminar de favoritos",
-                            tint = MaterialTheme.colorScheme.onError
-                        )
-                    }
-                } else {
-
+                // Add to cart button
+                IconButton(
+                    onClick = onAddToCart, colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ShoppingCart,
+                        contentDescription = "Agregar al carrito",
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
                 }
+
+                // Remove from favorites button
+                IconButton(
+                    onClick = onRemove, colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Eliminar de favoritos",
+                        tint = MaterialTheme.colorScheme.onError
+                    )
+                }
+
 
             }
         }

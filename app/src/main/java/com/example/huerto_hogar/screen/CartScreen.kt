@@ -58,6 +58,7 @@ import androidx.navigation.NavHostController
 import com.example.huerto_hogar.MainActivity
 import com.example.huerto_hogar.manager.NFCManager
 import com.example.huerto_hogar.model.CartItem
+import com.example.huerto_hogar.model.User
 import com.example.huerto_hogar.ui.theme.components.Header
 import com.example.huerto_hogar.ui.theme.components.dialogs.Receipt
 import com.example.huerto_hogar.ui.theme.components.dialogs.ReceiptDialog
@@ -74,7 +75,8 @@ fun CartScreen(
     navController: NavHostController,
     cartViewModel: CartViewModel = viewModel(),
     nfcViewModel: NFCViewModel = viewModel(),
-    salesViewModel: SalesViewModel = viewModel()
+    salesViewModel: SalesViewModel = viewModel(),
+    user: User?
 ) {
     val context = LocalContext.current
     val cartItems by cartViewModel.cartItems.collectAsState()
@@ -340,44 +342,65 @@ fun CartScreen(
                                     color = MaterialTheme.colorScheme.primary
                                 )
                             }
+                            if (user != null) {
+                                // Checkout button
+                                Button(
+                                    onClick = {
+                                        // Generar boleta
+                                        val receipt = Receipt(
+                                            receiptNumber = generateReceiptNumber(),
+                                            date = getCurrentDateTime(),
+                                            items = cartItems,
+                                            subtotal = subtotal,
+                                            discount = discount,
+                                            total = total,
+                                            hasStudentDiscount = studentDiscount
+                                        )
 
-                            // Checkout button
-                            Button(
-                                onClick = {
-                                    // Generar boleta
-                                    val receipt = Receipt(
-                                        receiptNumber = generateReceiptNumber(),
-                                        date = getCurrentDateTime(),
-                                        items = cartItems,
-                                        subtotal = subtotal,
-                                        discount = discount,
-                                        total = total,
-                                        hasStudentDiscount = studentDiscount
+                                        // Registrar venta en el sistema
+                                        salesViewModel.addSale(total)
+
+                                        // Guardar boleta y mostrar modal
+                                        currentReceipt = receipt
+                                        showReceiptDialog = true
+
+                                        // Limpiar carrito
+                                        cartViewModel.clearCart()
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(56.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
                                     )
-
-                                    // Registrar venta en el sistema
-                                    salesViewModel.addSale(total)
-
-                                    // Guardar boleta y mostrar modal
-                                    currentReceipt = receipt
-                                    showReceiptDialog = true
-
-                                    // Limpiar carrito
-                                    cartViewModel.clearCart()
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(56.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary
-                                )
-                            ) {
-                                Text(
-                                    text = "Terminar de Pagar",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
+                                ) {
+                                    Text(
+                                        text = "Terminar de Pagar",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            } else {
+                                // Checkout button
+                                Button(
+                                    onClick = {
+                                        navController.navigate("login_screen")
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(56.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    Text(
+                                        text = "Iniciar sesión para proceder",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
+
                         }
                     }
                 }
