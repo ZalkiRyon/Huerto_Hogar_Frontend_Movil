@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 class UserManagerViewModel : ViewModel() {
 
     private val initialUsers = listOf(
+        // ADMINISTRADORES
         User(
             id = 1,
             role = Role.ADMIN,
@@ -24,14 +25,117 @@ class UserManagerViewModel : ViewModel() {
         ),
         User(
             id = 2,
+            role = Role.ADMIN,
+            comment = "Administrador de operaciones y logística",
+            name = "Carlos",
+            lastname = "Rodríguez",
+            email = "carlos.rodriguez@duocuc.cl",
+            password = "admin123",
+            phone = "923456789",
+            address = "Av. Las Condes 8956, Depto 301"
+        ),
+        User(
+            id = 3,
+            role = Role.ADMIN,
+            comment = "Administrador de ventas y marketing",
+            name = "María",
+            lastname = "González",
+            email = "maria.gonzalez@duocuc.cl",
+            password = "admin123",
+            phone = "934567890",
+            address = "Av. Vicuña Mackenna 4502, Casa 12"
+        ),
+        
+        // CLIENTES
+        User(
+            id = 4,
             role = Role.CLIENT,
             comment = "Cliente VIP, compra productos orgánicos semanalmente",
             name = "Juan",
-            lastname = "Perez",
+            lastname = "Pérez",
             email = "juan.perez@duocuc.cl",
             password = "cliente123",
             phone = "945678912",
             address = "Av. Apoquindo 4567, Casa 78"
+        ),
+        User(
+            id = 5,
+            role = Role.CLIENT,
+            comment = "Cliente frecuente, prefiere frutas de temporada",
+            name = "Ana",
+            lastname = "Silva",
+            email = "ana.silva@duocuc.cl",
+            password = "cliente123",
+            phone = "956789123",
+            address = "Av. Irarrázaval 2345, Depto 506"
+        ),
+        User(
+            id = 6,
+            role = Role.CLIENT,
+            comment = "Cliente nuevo, interesado en productos orgánicos",
+            name = "Pedro",
+            lastname = "Martínez",
+            email = "pedro.martinez@duocuc.cl",
+            password = "cliente123",
+            phone = "967890234",
+            address = "Calle Los Aromos 789, Población Central"
+        ),
+        User(
+            id = 7,
+            role = Role.CLIENT,
+            comment = "Cliente regular, compra verduras cada semana",
+            name = "Laura",
+            lastname = "Torres",
+            email = "laura.torres@duocuc.cl",
+            password = "cliente123",
+            phone = "978901345",
+            address = "Av. Grecia 1023, Casa 45"
+        ),
+        User(
+            id = 8,
+            role = Role.CLIENT,
+            comment = "Cliente corporativo, pedidos grandes mensuales",
+            name = "Roberto",
+            lastname = "Fernández",
+            email = "roberto.fernandez@duocuc.cl",
+            password = "cliente123",
+            phone = "989012456",
+            address = "Av. Kennedy 5678, Oficina 1202"
+        ),
+        
+        // VENDEDORES
+        User(
+            id = 9,
+            role = Role.SALESMAN,
+            comment = "Vendedor senior, especializado en productos orgánicos",
+            name = "Diego",
+            lastname = "Vargas",
+            email = "diego.vargas@duocuc.cl",
+            password = "vendedor123",
+            phone = "990123567",
+            address = "Av. Tobalaba 3456, Depto 702"
+        ),
+        User(
+            id = 10,
+            role = Role.SALESMAN,
+            comment = "Vendedor junior, enfocado en atención al cliente",
+            name = "Carolina",
+            lastname = "Muñoz",
+            email = "carolina.munoz@duocuc.cl",
+            password = "vendedor123",
+            phone = "991234678",
+            address = "Calle Santa Rosa 890, Casa 23"
+        ),
+        User(
+            id = 11,
+            role = Role.SALESMAN,
+            comment = "Vendedor especialista en frutas y verduras frescas",
+            name = "Andrés",
+            lastname = "Soto",
+            email = "andres.soto@duocuc.cl",
+            password = "vendedor123",
+            phone = "992345789",
+            address = "Av. Quilín 2134, Depto 401"
         )
     )
 
