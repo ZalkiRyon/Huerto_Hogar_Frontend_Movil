@@ -63,8 +63,8 @@ class UserSettingsViewModel() : ViewModel() {
         val trimmedName = name.trim()
 
         if (trimmedName.isNotEmpty()) {
-            if (trimmedName.length < 4) {
-                error = "El nombre debe tener al menos 4 caracteres"
+            if (trimmedName.length < 1) {
+                error = "El nombre debe tener al menos 1 caracter"
             } else if (trimmedName.length > 20) {
                 error = "El nombre no puede exceder 20 caracteres"
             } else if (!trimmedName.matches(Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$"))) {
@@ -230,8 +230,8 @@ class UserSettingsViewModel() : ViewModel() {
         // Validación de nombre
         if (state.name.isBlank()) {
             errors = errors.copy(nameError = "El nombre es obligatorio"); hasError = true
-        } else if (state.name.trim().length < 4) {
-            errors = errors.copy(nameError = "El nombre debe tener al menos 4 caracteres"); hasError = true
+        } else if (state.name.trim().length < 1) {
+            errors = errors.copy(nameError = "El nombre debe tener al menos 1 caracter"); hasError = true
         } else if (state.name.trim().length > 20) {
             errors = errors.copy(nameError = "El nombre no puede exceder 20 caracteres"); hasError = true
         } else if (!state.name.trim().matches(Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$"))) {

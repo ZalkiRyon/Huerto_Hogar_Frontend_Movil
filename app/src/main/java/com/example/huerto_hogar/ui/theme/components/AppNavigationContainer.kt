@@ -101,6 +101,8 @@ fun AppNavigationContainer() {
             userManager = userManager,
             salesViewModel = salesViewModel,
             onLogout = {
+                cartViewModel.clearCart()
+                favoritesViewModel.clearFavorites()
                 userManager.setCurrentUser(null)
             }
         )
@@ -325,6 +327,8 @@ fun AppNavigationContainer() {
                     onDismiss = { showLogoutDialog = false },
                     onConfirm = {
                         showLogoutDialog = false
+                        cartViewModel.clearCart()
+                        favoritesViewModel.clearFavorites()
                         userManager.setCurrentUser(null)
                         navController.navigate(AppScreens.HomeScreen.route) {
                             popUpTo(AppScreens.HomeScreen.route) { inclusive = true }

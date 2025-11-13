@@ -93,8 +93,8 @@ class RegisterUserViewModel() : ViewModel() {
 
         if (normalizeName.isEmpty()) {
             error = "El nombre es obligatorio"
-        } else if (normalizeName.length < 4) {
-            error = "El nombre debe tener al menos 4 caracteres"
+        } else if (normalizeName.length < 1) {
+            error = "El nombre debe tener al menos 1 caracter"
         } else if (normalizeName.length > 20) {
             error = "El nombre no puede exceder 20 caracteres"
         } else if (!normalizeName.matches(Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$"))) {
