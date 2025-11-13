@@ -17,7 +17,7 @@ class UserManagerViewModel : ViewModel() {
             comment = "Usuario administrador principal del sistema",
             name = "Super",
             lastname = "Super",
-            email = "admin@duoc.cl",
+            email = "admin@duocuc.cl",
             password = "admin123",
             phone = "912345678",
             address = "Av. Providencia 1234, Oficina 501"

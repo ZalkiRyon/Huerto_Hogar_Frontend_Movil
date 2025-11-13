@@ -1,23 +1,25 @@
 package com.example.huerto_hogar.ui.theme.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -29,6 +31,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,13 +40,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.huerto_hogar.AppScreens.AppScreens
 import com.example.huerto_hogar.R
 import com.example.huerto_hogar.manager.UserManagerViewModel
@@ -60,13 +67,20 @@ import com.example.huerto_hogar.screen.OrganicosScreen
 import com.example.huerto_hogar.screen.RegistroScreen
 import com.example.huerto_hogar.screen.UsSetScreen
 import com.example.huerto_hogar.screen.VerdurasScreen
+import com.example.huerto_hogar.ui.theme.components.admin.AdminNavigationContainer
+import com.example.huerto_hogar.ui.theme.components.animations.fadeIn
+import com.example.huerto_hogar.ui.theme.components.animations.fadeOut
+import com.example.huerto_hogar.ui.theme.components.animations.scaleInWithFade
+import com.example.huerto_hogar.ui.theme.components.animations.scaleOutWithFade
+import com.example.huerto_hogar.ui.theme.components.animations.slideInFromBottomWithFade
+import com.example.huerto_hogar.ui.theme.components.animations.slideInFromRightWithFade
+import com.example.huerto_hogar.ui.theme.components.animations.slideOutToBottomWithFade
+import com.example.huerto_hogar.ui.theme.components.animations.slideOutToLeftWithFade
+import com.example.huerto_hogar.viewmodel.CartViewModel
 import com.example.huerto_hogar.viewmodel.LoginViewModel
 import com.example.huerto_hogar.viewmodel.RegisterUserViewModel
-import com.example.huerto_hogar.viewmodel.UserSettingsViewModel
-import com.example.huerto_hogar.viewmodel.CartViewModel
 import com.example.huerto_hogar.viewmodel.SalesViewModel
-import com.example.huerto_hogar.ui.theme.components.animations.*
-import com.example.huerto_hogar.ui.theme.components.admin.AdminNavigationContainer
+import com.example.huerto_hogar.viewmodel.UserSettingsViewModel
 import kotlinx.coroutines.launch
 
 
@@ -78,7 +92,7 @@ fun AppNavigationContainer() {
     val salesViewModel: SalesViewModel = viewModel()
 
     val currentUser by userManager.currentUser.collectAsState()
-    
+
     // Si el usuario es admin, mostrar panel de administración
     if (currentUser?.role == Role.ADMIN) {
         AdminNavigationContainer(
@@ -117,27 +131,64 @@ fun AppNavigationContainer() {
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.logo_huerto),
-                                contentDescription = "Logo Huerto Hogar",
-                                modifier = Modifier
-                                    .size(160.dp)
-                                    .padding(bottom = 2.dp),
-                                contentScale = ContentScale.Fit
-                            )
-
-                            currentUser?.let { user ->
-                                Text(
-                                    text = "Bienvenido ${user.name} ${user.lastname}",
-                                    style = MaterialTheme.typography.titleMedium
+                            if (currentUser == null) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.logo_huerto),
+                                    contentDescription = "Logo Huerto Hogar",
+                                    modifier = Modifier
+                                        .size(160.dp)
+                                        .padding(bottom = 2.dp),
+                                    contentScale = ContentScale.Fit
                                 )
+                            } else {
+                                currentUser?.let { user ->
+                                    val profileUrl = user.profilePictureUrl
+                                    Box(
+                                        modifier = Modifier
+                                            .size(100.dp)
+                                            .clip(CircleShape)
+                                            .border(
+                                                2.dp,
+                                                MaterialTheme.colorScheme.primary,
+                                                CircleShape
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+
+                                        if (profileUrl != null) {
+                                            Image(
+                                                painter = rememberAsyncImagePainter(model = profileUrl),
+                                                contentDescription = "Foto de perfil de ${user.name}",
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier.fillMaxSize()
+                                            )
+                                        } else {
+                                            Icon(
+                                                Icons.Default.AccountCircle,
+                                                contentDescription = "Sin foto de perfil",
+                                                modifier = Modifier.size(70.dp),
+                                                tint = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        }
+
+                                    }
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text(
+                                        text = "Bienvenido ${user.name} ${user.lastname}",
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                }
+
                             }
+
+
                         }
 
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-                        Spacer(modifier = Modifier.padding(vertical = 4.dp))
+
 
                         if (currentUser == null) {
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                            Spacer(modifier = Modifier.padding(vertical = 4.dp))
                             NavigationDrawerItem(
                                 label = { Text("Iniciar Sesión") },
                                 selected = false,
@@ -167,7 +218,70 @@ fun AppNavigationContainer() {
                                     )
                                 }
                             )
-                        } else {
+                        }
+
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+                        // Navegación principal
+                        NavigationDrawerItem(
+                            label = { Text("Inicio") },
+                            selected = false,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navController.navigate(AppScreens.HomeScreen.route)
+                            },
+                            icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") }
+                        )
+                        NavigationDrawerItem(
+                            label = { Text("Blogs") },
+                            selected = false,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navController.navigate(AppScreens.BlogScreen.route)
+                            },
+                            icon = { Icon(Icons.Default.ThumbUp, contentDescription = "Blogs") }
+                        )
+                        NavigationDrawerItem(
+                            label = { Text("Catálogo") },
+                            selected = false,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navController.navigate(AppScreens.CatalogoScreen.route)
+                            },
+                            icon = { Icon(Icons.Default.Search, contentDescription = "Catálogo") }
+                        )
+                        NavigationDrawerItem(
+                            label = { Text("Carrito") },
+                            selected = false,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navController.navigate(AppScreens.CartScreen.route)
+                            },
+                            icon = {
+                                Icon(
+                                    Icons.Default.ShoppingCart,
+                                    contentDescription = "Carrito"
+                                )
+                            }
+                        )
+                        NavigationDrawerItem(
+                            label = { Text("Favoritos") },
+                            selected = false,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navController.navigate(AppScreens.FavScreen.route)
+                            },
+                            icon = {
+                                Icon(
+                                    Icons.Default.Favorite,
+                                    contentDescription = "Favoritos"
+                                )
+                            }
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                        if (currentUser != null) {
                             NavigationDrawerItem(
                                 label = { Text("Configuración") },
                                 selected = false,
@@ -197,49 +311,6 @@ fun AppNavigationContainer() {
                                 }
                             )
                         }
-                        
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                        
-                        // Navegación principal
-                        NavigationDrawerItem(
-                            label = { Text("Inicio") },
-                            selected = false,
-                            onClick = {
-                                scope.launch { drawerState.close() }
-                                navController.navigate(AppScreens.HomeScreen.route)
-                            },
-                            icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") }
-                        )
-                        NavigationDrawerItem(
-                            label = { Text("Catálogo") },
-                            selected = false,
-                            onClick = {
-                                scope.launch { drawerState.close() }
-                                navController.navigate(AppScreens.CatalogoScreen.route)
-                            },
-                            icon = { Icon(Icons.Default.Search, contentDescription = "Catálogo") }
-                        )
-                        NavigationDrawerItem(
-                            label = { Text("Carrito") },
-                            selected = false,
-                            onClick = {
-                                scope.launch { drawerState.close() }
-                                navController.navigate(AppScreens.CartScreen.route)
-                            },
-                            icon = { Icon(Icons.Default.ShoppingCart, contentDescription = "Carrito") }
-                        )
-                        NavigationDrawerItem(
-                            label = { Text("Favoritos") },
-                            selected = false,
-                            onClick = {
-                                scope.launch { drawerState.close() }
-                                navController.navigate(AppScreens.FavScreen.route)
-                            },
-                            icon = { Icon(Icons.Default.Favorite, contentDescription = "Favoritos") }
-                        )
-
-                        Spacer(modifier = Modifier.weight(1f))
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                     }
                 }
             }
@@ -258,142 +329,142 @@ fun AppNavigationContainer() {
                         }
                     }
                 )
-                
+
                 Scaffold(
-            // Menu de navegacion inferioor
-            bottomBar = {
-                MainBottomBar(
-                    navController = navController, 
-                    onMenuClick = {
-                        scope.launch { drawerState.open() }
+                    // Menu de navegacion inferioor
+                    bottomBar = {
+                        MainBottomBar(
+                            navController = navController,
+                            onMenuClick = {
+                                scope.launch { drawerState.open() }
+                            }
+                        )
+                    }) { contentPadding ->
+                    // La logica del router/enrutamiento
+                    NavHost(
+                        navController = navController,
+                        startDestination = startDestination,
+                        modifier = Modifier.padding(contentPadding)
+                    ) {
+                        composable(
+                            route = AppScreens.HomeScreen.route,
+                            enterTransition = { fadeIn() },
+                            exitTransition = { fadeOut() }
+                        ) {
+                            HomeScreen(navController = navController)
+                        }
+
+                        composable(
+                            route = AppScreens.LoginScreen.route,
+                            enterTransition = { scaleInWithFade() },
+                            exitTransition = { scaleOutWithFade() }
+                        ) {
+                            val loginVM: LoginViewModel = viewModel()
+                            loginVM.userManager = userManager
+                            LoginScreen(navController = navController, loginVM)
+                        }
+
+                        composable(
+                            route = AppScreens.RegistroScreen.route,
+                            enterTransition = { slideInFromBottomWithFade() },
+                            exitTransition = { slideOutToBottomWithFade() }
+                        ) {
+                            val registerVM: RegisterUserViewModel = viewModel()
+                            registerVM.userManager = userManager
+                            RegistroScreen(navController, registerVM)
+                        }
+
+                        composable(
+                            route = AppScreens.FavScreen.route,
+                            enterTransition = { slideInFromRightWithFade() },
+                            exitTransition = { slideOutToLeftWithFade() }
+                        ) {
+                            FavScreen(navController = navController)
+                        }
+
+                        composable(
+                            route = AppScreens.CartScreen.route,
+                            enterTransition = { slideInFromRightWithFade() },
+                            exitTransition = { slideOutToLeftWithFade() }
+                        ) {
+                            CartScreen(
+                                cartViewModel = cartViewModel,
+                                salesViewModel = salesViewModel
+                            )
+                        }
+
+                        composable(
+                            route = AppScreens.UsSetScreen.route,
+                            enterTransition = { slideInFromBottomWithFade() },
+                            exitTransition = { slideOutToBottomWithFade() }
+                        ) {
+                            val settingsVM: UserSettingsViewModel = viewModel()
+                            settingsVM.userManager = userManager
+                            UsSetScreen(navController = navController, viewModel = settingsVM)
+                        }
+
+                        composable(
+                            route = AppScreens.BlogScreen.route,
+                            enterTransition = { fadeIn() },
+                            exitTransition = { fadeOut() }
+                        ) {
+                            BlogScreen(navController = navController)
+                        }
+
+                        composable(
+                            route = AppScreens.FrutasScreen.route,
+                            enterTransition = { fadeIn() },
+                            exitTransition = { fadeOut() }
+                        ) {
+                            FrutasScreen(
+                                navController = navController,
+                                cartViewModel = cartViewModel
+                            )
+                        }
+
+                        composable(
+                            route = AppScreens.OrganicosScreen.route,
+                            enterTransition = { fadeIn() },
+                            exitTransition = { fadeOut() }
+                        ) {
+                            OrganicosScreen(
+                                navController = navController,
+                                cartViewModel = cartViewModel
+                            )
+                        }
+
+                        composable(
+                            route = AppScreens.VerdurasScreen.route,
+                            enterTransition = { fadeIn() },
+                            exitTransition = { fadeOut() }
+                        ) {
+                            VerdurasScreen(
+                                navController = navController,
+                                cartViewModel = cartViewModel
+                            )
+                        }
+
+                        composable(
+                            route = AppScreens.CatalogoScreen.route,
+                            enterTransition = { fadeIn() },
+                            exitTransition = { fadeOut() }
+                        ) {
+                            CatalogoScreen(navController = navController)
+                        }
+
+                        composable(
+                            route = AppScreens.AllProductsScreen.route,
+                            enterTransition = { fadeIn() },
+                            exitTransition = { fadeOut() }
+                        ) {
+                            AllProductsScreen(
+                                navController = navController,
+                                cartViewModel = cartViewModel
+                            )
+                        }
                     }
-                )
-            }) { contentPadding ->
-            // La logica del router/enrutamiento
-            NavHost(
-                navController = navController,
-                startDestination = startDestination,
-                modifier = Modifier.padding(contentPadding)
-            ) {
-                composable(
-                    route = AppScreens.HomeScreen.route,
-                    enterTransition = { fadeIn() },
-                    exitTransition = { fadeOut() }
-                ) { 
-                    HomeScreen(navController = navController) 
-                }
-                
-                composable(
-                    route = AppScreens.LoginScreen.route,
-                    enterTransition = { scaleInWithFade() },
-                    exitTransition = { scaleOutWithFade() }
-                ) {
-                    val loginVM: LoginViewModel = viewModel()
-                    loginVM.userManager = userManager
-                    LoginScreen(navController = navController, loginVM)
-                }
-                
-                composable(
-                    route = AppScreens.RegistroScreen.route,
-                    enterTransition = { slideInFromBottomWithFade() },
-                    exitTransition = { slideOutToBottomWithFade() }
-                ) {
-                    val registerVM: RegisterUserViewModel = viewModel()
-                    registerVM.userManager = userManager
-                    RegistroScreen(navController, registerVM)
-                }
-                
-                composable(
-                    route = AppScreens.FavScreen.route,
-                    enterTransition = { slideInFromRightWithFade() },
-                    exitTransition = { slideOutToLeftWithFade() }
-                ) { 
-                    FavScreen(navController = navController) 
-                }
-                
-                composable(
-                    route = AppScreens.CartScreen.route,
-                    enterTransition = { slideInFromRightWithFade() },
-                    exitTransition = { slideOutToLeftWithFade() }
-                ) { 
-                    CartScreen(
-                        cartViewModel = cartViewModel,
-                        salesViewModel = salesViewModel
-                    )
-                }
-                
-                composable(
-                    route = AppScreens.UsSetScreen.route,
-                    enterTransition = { slideInFromBottomWithFade() },
-                    exitTransition = { slideOutToBottomWithFade() }
-                ) {
-                    val settingsVM: UserSettingsViewModel = viewModel()
-                    settingsVM.userManager = userManager
-                    UsSetScreen(navController = navController, viewModel = settingsVM)
-                }
-                
-                composable(
-                    route = AppScreens.BlogScreen.route,
-                    enterTransition = { fadeIn() },
-                    exitTransition = { fadeOut() }
-                ) { 
-                    BlogScreen(navController = navController) 
-                }
-                
-                composable(
-                    route = AppScreens.FrutasScreen.route,
-                    enterTransition = { fadeIn() },
-                    exitTransition = { fadeOut() }
-                ) { 
-                    FrutasScreen(
-                        navController = navController,
-                        cartViewModel = cartViewModel
-                    ) 
-                }
-                
-                composable(
-                    route = AppScreens.OrganicosScreen.route,
-                    enterTransition = { fadeIn() },
-                    exitTransition = { fadeOut() }
-                ) { 
-                    OrganicosScreen(
-                        navController = navController,
-                        cartViewModel = cartViewModel
-                    ) 
-                }
-                
-                composable(
-                    route = AppScreens.VerdurasScreen.route,
-                    enterTransition = { fadeIn() },
-                    exitTransition = { fadeOut() }
-                ) { 
-                    VerdurasScreen(
-                        navController = navController,
-                        cartViewModel = cartViewModel
-                    ) 
-                }
-                
-                composable(
-                    route = AppScreens.CatalogoScreen.route,
-                    enterTransition = { fadeIn() },
-                    exitTransition = { fadeOut() }
-                ) { 
-                    CatalogoScreen(navController = navController) 
-                }
-                
-                composable(
-                    route = AppScreens.AllProductsScreen.route,
-                    enterTransition = { fadeIn() },
-                    exitTransition = { fadeOut() }
-                ) { 
-                    AllProductsScreen(
-                        navController = navController,
-                        cartViewModel = cartViewModel
-                    ) 
                 }
             }
-            }
-        }
         }
     }
 }
