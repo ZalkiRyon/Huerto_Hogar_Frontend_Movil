@@ -94,6 +94,7 @@ fun VerdurasScreen(
                                     duration = SnackbarDuration.Short
                                 )
                             } else {
+                                favoritesViewModel.removeFromFavorites(product.id)
                                 snackbarHostState.showSnackbar(
                                     message = "El producto ya se encuentra agregado",
                                     duration = SnackbarDuration.Short

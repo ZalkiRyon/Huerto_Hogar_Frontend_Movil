@@ -44,7 +44,7 @@ fun CatalogoScreen(
             // Botón Verduras
             CategoryButton(
                 text = "Verduras",
-                imageRes = R.drawable.zanahorias,
+                imageRes = R.drawable.verdurascat,
                 onClick = {
                     navController.navigate(AppScreens.VerdurasScreen.route)
                 },
@@ -56,7 +56,7 @@ fun CatalogoScreen(
             // Botón Frutas
             CategoryButton(
                 text = "Frutas",
-                imageRes = R.drawable.manzana_fuji,
+                imageRes = R.drawable.frutascat,
                 onClick = {
                     navController.navigate(AppScreens.FrutasScreen.route)
                 },
@@ -68,7 +68,7 @@ fun CatalogoScreen(
             // Botón Orgánicos
             CategoryButton(
                 text = "Orgánicos",
-                imageRes = R.drawable.espinaca,
+                imageRes = R.drawable.organicocat,
                 onClick = {
                     navController.navigate(AppScreens.OrganicosScreen.route)
                 },
@@ -80,7 +80,7 @@ fun CatalogoScreen(
             // Botón Todos los Productos
             CategoryButton(
                 text = "Todos los Productos",
-                imageRes = R.drawable.naranja_valencia,
+                imageRes = R.drawable.todocat,
                 onClick = {
                     navController.navigate(AppScreens.AllProductsScreen.route)
                 },

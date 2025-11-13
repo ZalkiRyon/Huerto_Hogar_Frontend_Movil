@@ -1,39 +1,77 @@
 package com.example.huerto_hogar.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavHostController
 import com.example.huerto_hogar.MainActivity
-import com.example.huerto_hogar.model.CartItem
-import com.example.huerto_hogar.viewmodel.CartViewModel
-import com.example.huerto_hogar.viewmodel.NFCViewModel
-import com.example.huerto_hogar.viewmodel.NFCState
-import com.example.huerto_hogar.viewmodel.SalesViewModel
 import com.example.huerto_hogar.manager.NFCManager
+import com.example.huerto_hogar.model.CartItem
+import com.example.huerto_hogar.ui.theme.components.Header
 import com.example.huerto_hogar.ui.theme.components.dialogs.Receipt
 import com.example.huerto_hogar.ui.theme.components.dialogs.ReceiptDialog
 import com.example.huerto_hogar.ui.theme.components.dialogs.generateReceiptNumber
 import com.example.huerto_hogar.ui.theme.components.dialogs.getCurrentDateTime
+import com.example.huerto_hogar.viewmodel.CartViewModel
+import com.example.huerto_hogar.viewmodel.NFCState
+import com.example.huerto_hogar.viewmodel.NFCViewModel
+import com.example.huerto_hogar.viewmodel.SalesViewModel
 
 @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
 @Composable
 fun CartScreen(
+    navController: NavHostController,
     cartViewModel: CartViewModel = viewModel(),
     nfcViewModel: NFCViewModel = viewModel(),
     salesViewModel: SalesViewModel = viewModel()
@@ -42,7 +80,7 @@ fun CartScreen(
     val cartItems by cartViewModel.cartItems.collectAsState()
     val studentDiscount by cartViewModel.studentDiscount.collectAsState()
     val nfcState by nfcViewModel.nfcState.collectAsState()
-    
+
     // Recalcular cuando cambian cartItems o studentDiscount
     val subtotal = remember(cartItems) {
         cartViewModel.calculateSubtotal()
@@ -53,14 +91,14 @@ fun CartScreen(
     val total = remember(studentDiscount, cartItems) {
         cartViewModel.calculateTotal()
     }
-    
+
     var showClearDialog by remember { mutableStateOf(false) }
     var showNFCDialog by remember { mutableStateOf(false) }
     var showReceiptDialog by remember { mutableStateOf(false) }
     var currentReceipt by remember { mutableStateOf<Receipt?>(null) }
 
     val nfcManager = remember { NFCManager(context as MainActivity) }
-    
+
     // Observar tags NFC
     DisposableEffect(Unit) {
         MainActivity.onNFCTagDiscovered = { tag ->
@@ -73,7 +111,7 @@ fun CartScreen(
             MainActivity.onNFCTagDiscovered = null
         }
     }
-    
+
     // Manejar estados NFC
     LaunchedEffect(nfcState) {
         when (nfcState) {
@@ -81,48 +119,47 @@ fun CartScreen(
                 showNFCDialog = false
                 // El descuento ya se aplicó en el callback
             }
+
             is NFCState.Error -> {
                 // Mostrar error por 2 segundos y cerrar
                 kotlinx.coroutines.delay(2000)
                 nfcViewModel.resetState()
                 showNFCDialog = false
             }
-            else -> { /* Otros estados */ }
+
+            else -> { /* Otros estados */
+            }
         }
     }
-    
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        // Header
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.primaryContainer,
-            tonalElevation = 2.dp
+    Scaffold(
+        topBar = {
+            Header(
+                navController = navController,
+                title = "Mi Carrito",
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = paddingValues.calculateTopPadding())
+
         ) {
+            // Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
+
             ) {
-                Column {
-                    Text(
-                        text = "Mi Carrito",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = "${cartItems.size} producto(s)",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                    )
-                }
-                
+
+                Text(
+                    text = "${cartItems.size} producto(s)",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                )
                 if (cartItems.isNotEmpty()) {
                     IconButton(onClick = { showClearDialog = true }) {
                         Icon(
@@ -132,219 +169,222 @@ fun CartScreen(
                         )
                     }
                 }
+
             }
-        }
-        
-        if (cartItems.isEmpty()) {
-            // Empty cart state
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(32.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ShoppingCart,
-                        contentDescription = "Carrito vacío",
-                        modifier = Modifier.size(80.dp),
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                    )
-                    Text(
-                        text = "Tu carrito está vacío",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-                    )
-                    Text(
-                        text = "Agrega productos desde el catálogo",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        } else {
-            // Cart content
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                // List of items
-                LazyColumn(
+
+            if (cartItems.isEmpty()) {
+                // Empty cart state
+                Box(
                     modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    items(cartItems) { cartItem ->
-                        CartItemCard(
-                            cartItem = cartItem,
-                            onIncrement = { cartViewModel.incrementQuantity(cartItem.product.id) },
-                            onDecrement = { cartViewModel.decrementQuantity(cartItem.product.id) }
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ShoppingCart,
+                            contentDescription = "Carrito vacío",
+                            modifier = Modifier.size(80.dp),
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                        )
+                        Text(
+                            text = "Tu carrito está vacío",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                        )
+                        Text(
+                            text = "Agrega productos desde el catálogo",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
-                
-                // Summary section
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.surface,
-                    tonalElevation = 4.dp,
-                    shadowElevation = 8.dp
+            } else {
+                // Cart content
+                Column(
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    Column(
+                    // List of items
+                    LazyColumn(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Student discount button (NFC)
-                        OutlinedButton(
-                            onClick = {
-                                if (!studentDiscount) {
-                                    // Verificar disponibilidad de NFC
-                                    when {
-                                        !nfcManager.isNFCAvailable() -> {
-                                            nfcViewModel.handleNFCNotAvailable()
-                                            showNFCDialog = true
-                                        }
-                                        !nfcManager.isNFCEnabled() -> {
-                                            nfcViewModel.handleNFCDisabled()
-                                            showNFCDialog = true
-                                        }
-                                        else -> {
-                                            nfcViewModel.startScanning()
-                                            showNFCDialog = true
+                        items(cartItems) { cartItem ->
+                            CartItemCard(
+                                cartItem = cartItem,
+                                onIncrement = { cartViewModel.incrementQuantity(cartItem.product.id) },
+                                onDecrement = { cartViewModel.decrementQuantity(cartItem.product.id) }
+                            )
+                        }
+                    }
+
+                    // Summary section
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.surface,
+                        tonalElevation = 4.dp,
+                        shadowElevation = 8.dp
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            // Student discount button (NFC)
+                            OutlinedButton(
+                                onClick = {
+                                    if (!studentDiscount) {
+                                        // Verificar disponibilidad de NFC
+                                        when {
+                                            !nfcManager.isNFCAvailable() -> {
+                                                nfcViewModel.handleNFCNotAvailable()
+                                                showNFCDialog = true
+                                            }
+
+                                            !nfcManager.isNFCEnabled() -> {
+                                                nfcViewModel.handleNFCDisabled()
+                                                showNFCDialog = true
+                                            }
+
+                                            else -> {
+                                                nfcViewModel.startScanning()
+                                                showNFCDialog = true
+                                            }
                                         }
                                     }
-                                }
-                                // No hacer nada si ya está aplicado (no se puede desactivar)
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            enabled = !studentDiscount, // Deshabilitar cuando está aplicado
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                containerColor = if (studentDiscount) 
-                                    MaterialTheme.colorScheme.primaryContainer 
-                                else 
-                                    MaterialTheme.colorScheme.surface
-                            )
-                        ) {
-                            Icon(
-                                imageVector = if (studentDiscount) Icons.Default.Check else Icons.Default.AccountCircle,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                if (studentDiscount) 
-                                    "Descuento Estudiante Aplicado (10%)" 
-                                else 
-                                    "Escanear Tarjeta Estudiante"
-                            )
-                        }
-                        
-                        HorizontalDivider()
+                                    // No hacer nada si ya está aplicado (no se puede desactivar)
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = !studentDiscount, // Deshabilitar cuando está aplicado
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    containerColor = if (studentDiscount)
+                                        MaterialTheme.colorScheme.primaryContainer
+                                    else
+                                        MaterialTheme.colorScheme.surface
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = if (studentDiscount) Icons.Default.Check else Icons.Default.AccountCircle,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    if (studentDiscount)
+                                        "Descuento Estudiante Aplicado (10%)"
+                                    else
+                                        "Escanear Tarjeta Estudiante"
+                                )
+                            }
 
-                        // Price breakdown
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "Subtotal:",
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            Text(
-                                text = "$${subtotal.toInt()}",
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                        
-                        if (studentDiscount) {
+                            HorizontalDivider()
+
+                            // Price breakdown
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    text = "Descuento:",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.primary
+                                    text = "Subtotal:",
+                                    style = MaterialTheme.typography.bodyLarge
                                 )
                                 Text(
-                                    text = "-$${discount.toInt()}",
+                                    text = "$${subtotal.toInt()}",
                                     style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Medium,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+
+                            if (studentDiscount) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "Descuento:",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        text = "-$${discount.toInt()}",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Total:",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "$${total.toInt()}",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
                                 )
                             }
-                        }
-                        
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Total:",
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "$${total.toInt()}",
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        
-                        // Checkout button
-                        Button(
-                            onClick = {
-                                // Generar boleta
-                                val receipt = Receipt(
-                                    receiptNumber = generateReceiptNumber(),
-                                    date = getCurrentDateTime(),
-                                    items = cartItems,
-                                    subtotal = subtotal,
-                                    discount = discount,
-                                    total = total,
-                                    hasStudentDiscount = studentDiscount
+
+                            // Checkout button
+                            Button(
+                                onClick = {
+                                    // Generar boleta
+                                    val receipt = Receipt(
+                                        receiptNumber = generateReceiptNumber(),
+                                        date = getCurrentDateTime(),
+                                        items = cartItems,
+                                        subtotal = subtotal,
+                                        discount = discount,
+                                        total = total,
+                                        hasStudentDiscount = studentDiscount
+                                    )
+
+                                    // Registrar venta en el sistema
+                                    salesViewModel.addSale(total)
+
+                                    // Guardar boleta y mostrar modal
+                                    currentReceipt = receipt
+                                    showReceiptDialog = true
+
+                                    // Limpiar carrito
+                                    cartViewModel.clearCart()
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary
                                 )
-
-                                // Registrar venta en el sistema
-                                salesViewModel.addSale(total)
-
-                                // Guardar boleta y mostrar modal
-                                currentReceipt = receipt
-                                showReceiptDialog = true
-
-                                // Limpiar carrito
-                                cartViewModel.clearCart()
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            )
-                        ) {
-                            Text(
-                                text = "Terminar de Pagar",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
+                            ) {
+                                Text(
+                                    text = "Terminar de Pagar",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }
             }
         }
     }
-    
+
     // NFC Scanning Dialog
     if (showNFCDialog) {
         AlertDialog(
@@ -385,10 +425,12 @@ fun CartScreen(
                                 textAlign = TextAlign.Center
                             )
                         }
+
                         is NFCState.Processing -> {
                             CircularProgressIndicator()
                             Text("Procesando tarjeta...", textAlign = TextAlign.Center)
                         }
+
                         is NFCState.Success -> {
                             Icon(
                                 imageVector = Icons.Default.Check,
@@ -403,6 +445,7 @@ fun CartScreen(
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
+
                         is NFCState.Error -> {
                             Icon(
                                 imageVector = Icons.Default.Warning,
@@ -416,6 +459,7 @@ fun CartScreen(
                                 color = MaterialTheme.colorScheme.error
                             )
                         }
+
                         else -> {
                             Text("Preparando lector NFC...", textAlign = TextAlign.Center)
                         }
@@ -444,7 +488,7 @@ fun CartScreen(
             }
         )
     }
-    
+
     // Clear cart confirmation dialog
     if (showClearDialog) {
         AlertDialog(
@@ -525,7 +569,7 @@ fun CartItemCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            
+
             // Quantity controls
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -541,7 +585,7 @@ fun CartItemCard(
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
-                
+
                 Text(
                     text = "${cartItem.quantity}",
                     style = MaterialTheme.typography.titleLarge,
@@ -549,7 +593,7 @@ fun CartItemCard(
                     modifier = Modifier.widthIn(min = 32.dp),
                     textAlign = TextAlign.Center
                 )
-                
+
                 IconButton(
                     onClick = onIncrement,
                     modifier = Modifier.size(36.dp)

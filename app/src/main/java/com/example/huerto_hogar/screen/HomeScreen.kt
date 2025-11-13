@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,12 +40,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.huerto_hogar.AppScreens.AppScreens
 import com.example.huerto_hogar.R
-import com.example.huerto_hogar.manager.BlogManagerViewModel
-import com.example.huerto_hogar.model.Blog
 import com.example.huerto_hogar.model.MockProducts
 import com.example.huerto_hogar.model.Product
 import java.text.NumberFormat
@@ -69,7 +65,7 @@ val categories = listOf(
 
 /**
  * Pantalla principal de la aplicación. Preparada para contenido futuro con soporte de animaciones.
- * 
+ *
  * TODO: Implementar contenido de Home. Se pueden aplicar:
  * - LoadingAnimations.kt para estados de carga
  * - ListAnimations.kt para listas de productos destacados
@@ -96,12 +92,7 @@ fun HomeScreen(navController: NavController) {
         TitleWithDivider(title = "Productos Destacados")
         FeaturedProductsCarousel(products = featuredProducts)
 
-        Spacer(modifier = Modifier.height(24.dp))
 
-        TitleWithDivider(title = "Blogs")
-        BlogSection(navController = navController)
-        
-        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
@@ -284,6 +275,7 @@ fun CategorySection(categories: List<Category>, navController: NavController) {
 
 @Composable
 fun FeaturedProductsCarousel(products: List<Product>) {
+    val featuredProductsList: List<Product> = products.take(3)
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -291,7 +283,7 @@ fun FeaturedProductsCarousel(products: List<Product>) {
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
-        items(products) { product ->
+        items(featuredProductsList) { product ->
             Card(
                 modifier = Modifier
                     .width(140.dp)
@@ -308,7 +300,9 @@ fun FeaturedProductsCarousel(products: List<Product>) {
                 ) {
 
                     Image(
-                        painter = painterResource(id = product.imageUrl ?: R.drawable.imagen_no_found),
+                        painter = painterResource(
+                            id = product.imageUrl ?: R.drawable.imagen_no_found
+                        ),
                         contentDescription = product.name,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -358,91 +352,5 @@ fun FeaturedProductsCarousel(products: List<Product>) {
     }
 }
 
-@Composable
-fun BlogSection(navController: NavController) {
-    val blogViewModel: BlogManagerViewModel = viewModel()
-    val blogs = blogViewModel.getBlogs()
-    
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        blogs.forEach { blog ->
-            BlogEntry(
-                blog = blog,
-                onClick = { 
-                    navController.navigate(AppScreens.BlogScreen.route)
-                }
-            )
-        }
-    }
-}
 
-@Composable
-fun BlogEntry(
-    blog: Blog,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(120.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Imagen del blog a la izquierda
-            Image(
-                painter = painterResource(id = blog.bannerImg),
-                contentDescription = blog.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(96.dp)
-                    .clip(RoundedCornerShape(12.dp))
-            )
-            
-            Spacer(modifier = Modifier.width(12.dp))
-            
-            // Texto a la derecha
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = blog.title,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                
-                Spacer(modifier = Modifier.height(4.dp))
-                
-                Text(
-                    text = blog.summary,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    }
-}
 

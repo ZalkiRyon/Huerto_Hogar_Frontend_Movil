@@ -381,11 +381,13 @@ fun AppNavigationContainer() {
                     route = AppScreens.FavScreen.route,
                     enterTransition = { slideInFromRightWithFade() },
                     exitTransition = { slideOutToLeftWithFade() }
-                ) { 
+                ) {
+
                     FavScreen(
                         navController = navController,
                         favoritesViewModel = favoritesViewModel,
-                        cartViewModel = cartViewModel
+                        cartViewModel = cartViewModel,
+                        user = currentUser
                     ) 
                 }
                 
@@ -395,6 +397,7 @@ fun AppNavigationContainer() {
                     exitTransition = { slideOutToLeftWithFade() }
                 ) { 
                     CartScreen(
+                        navController = navController,
                         cartViewModel = cartViewModel,
                         salesViewModel = salesViewModel
                     )

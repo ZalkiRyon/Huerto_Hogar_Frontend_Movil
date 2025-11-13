@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -24,8 +25,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -41,6 +42,8 @@ import com.example.huerto_hogar.R
 import com.example.huerto_hogar.model.Product
 import com.example.huerto_hogar.model.ProductCategory
 import com.example.huerto_hogar.ui.theme.Huerto_HogarTheme
+import java.text.NumberFormat
+import java.util.Locale
 
 /**
  * Tarjeta de producto reutilizable con opciones de agregar al carrito y favoritos
@@ -65,7 +68,8 @@ fun ProductCard(
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp),
+            .height(180.dp)
+            .padding(bottom = 16.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
@@ -87,7 +91,7 @@ fun ProductCard(
                     contentScale = ContentScale.Crop
                 )
             }
-            
+
             Spacer(modifier = Modifier.width(16.dp))
 
             // Información del producto
@@ -97,28 +101,59 @@ fun ProductCard(
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Nombre y precio - clickeable
-                Column(
-                    modifier = Modifier.clickable { onProductClick(producto) }
-                ) {
-                    Text(
-                        text = producto.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ){
+                    // Nombre y precio - clickeable
+                    Column(
+                        modifier = Modifier.clickable { onProductClick(producto) }
+                    ) {
+                        Text(
+                            text = producto.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
 
-                    Text(
-                        text = "$${producto.price.toInt()}",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold
-                    )
+                        fun formatAmount(amount: Double, locale: Locale): String {
+                            val formatter = NumberFormat.getCurrencyInstance(locale)
+                            formatter.maximumFractionDigits = 0
+                            return formatter.format(amount)
+                        }
+
+                        val deviceLocale = Locale.getDefault()
+                        val formattedPrice = formatAmount(producto.price, deviceLocale)
+
+                        Text(
+                            text = formattedPrice,
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    // Botón favoritos
+                    IconButton(
+                        onClick = { onToggleFavorito(producto) },
+                        modifier = Modifier.size(30.dp),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = if (isFavorito) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
+                        )
+                    ) {
+                        Icon(
+                            imageVector = if (isFavorito) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = if (isFavorito) "Quitar de favoritos" else "Agregar a favoritos",
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
                 }
-
                 // Botones de acción
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -138,22 +173,7 @@ fun ProductCard(
                         Text("Carrito", maxLines = 1)
                     }
 
-                    // Botón favoritos
-                    Button(
-                        onClick = { onToggleFavorito(producto) },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isFavorito) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
-                        )
-                    ) {
-                        Icon(
-                            imageVector = if (isFavorito) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = if (isFavorito) "Quitar de favoritos" else "Agregar a favoritos",
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Favoritos", maxLines = 1)
-                    }
+
                 }
             }
         }
