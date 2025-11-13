@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -60,7 +61,7 @@ val featuredProducts = MockProducts.products.take(5)
 val categories = listOf(
     Category("Frutas", AppScreens.FrutasScreen.route, R.drawable.orange),
     Category("Verduras", AppScreens.VerdurasScreen.route, R.drawable.carrot),
-    Category("Productos orgánicos", AppScreens.OrganicosScreen.route, R.drawable.plant)
+    Category("Organicos", AppScreens.OrganicosScreen.route, R.drawable.plant)
 )
 
 /**
@@ -91,6 +92,13 @@ fun HomeScreen(navController: NavController) {
 
         TitleWithDivider(title = "Productos Destacados")
         FeaturedProductsCarousel(products = featuredProducts)
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        TitleWithDivider(title = "Blogs")
+        BlogSection(navController = navController)
+        
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
@@ -185,7 +193,7 @@ fun HeaderBanner(navController: NavController) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { /* TODO: Navegar a la ruta principal del catálogo */ },
+                onClick = { navController.navigate(AppScreens.CatalogoScreen.route) },
                 colors = ButtonDefaults.buttonColors(containerColor = brandPrimary),
                 shape = RoundedCornerShape(12.dp),
                 contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp),
@@ -342,6 +350,100 @@ fun FeaturedProductsCarousel(products: List<Product>) {
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun BlogSection(navController: NavController) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Primera entrada de blog
+        BlogEntry(
+            imageRes = R.drawable.manzana_fuji,
+            title = "Beneficios de los productos orgánicos",
+            description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.",
+            onClick = { /* TODO: Navegar a blog detail */ }
+        )
+        
+        // Segunda entrada de blog
+        BlogEntry(
+            imageRes = R.drawable.naranja_valencia,
+            title = "Cómo conservar frutas y verduras frescas",
+            description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.",
+            onClick = { /* TODO: Navegar a blog detail */ }
+        )
+    }
+}
+
+@Composable
+fun BlogEntry(
+    imageRes: Int,
+    title: String,
+    description: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Imagen a la izquierda
+            Image(
+                painter = painterResource(id = imageRes),
+                contentDescription = title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(96.dp)
+                    .clip(RoundedCornerShape(12.dp))
+            )
+            
+            Spacer(modifier = Modifier.width(12.dp))
+            
+            // Texto a la derecha
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }
