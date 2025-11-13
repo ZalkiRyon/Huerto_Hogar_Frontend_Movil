@@ -101,37 +101,66 @@ fun CartScreen(
     var showReceiptDialog by remember { mutableStateOf(false) }
     var currentReceipt by remember { mutableStateOf<Receipt?>(null) }
 
+    // Gestor NFC para interactuar con hardware NFC del dispositivo
     val nfcManager = remember { NFCManager(context as MainActivity) }
 
-    // Observar tags NFC
+    /**
+     * CONFIGURACI\u00d3N DE LISTENER NFC
+     * 
+     * DisposableEffect se ejecuta cuando el Composable entra en composici\u00f3n
+     * y limpia cuando sale. Ideal para suscripciones y listeners.
+     * 
+     * Flujo de escaneo NFC:
+     * 1. Usuario presiona "Escanear Tarjeta Estudiante"
+     * 2. Se abre di\u00e1logo de escaneo (showNFCDialog = true)
+     * 3. Usuario acerca tarjeta NFC al tel\u00e9fono
+     * 4. Sistema Android detecta tag y llama MainActivity.onNewIntent()
+     * 5. MainActivity invoca este callback con el Tag detectado
+     * 6. Se procesa tag y aplica descuento si es v\u00e1lido
+     */
     DisposableEffect(Unit) {
+        // Registrar callback para recibir tags NFC detectados
         MainActivity.onNFCTagDiscovered = { tag ->
+            // Procesar tag y extraer informaci\u00f3n (UID, tipo, etc.)
             val isValid = nfcViewModel.processNFCTag(tag, nfcManager)
+            
+            // Si es v\u00e1lida y a\u00fan no se ha aplicado descuento, aplicarlo
+            // MVP: Cualquier tarjeta NFC es v\u00e1lida
             if (isValid && !studentDiscount) {
                 cartViewModel.toggleStudentDiscount()
             }
         }
+        
+        // Cleanup: Limpiar callback cuando CartScreen se desmonte
         onDispose {
             MainActivity.onNFCTagDiscovered = null
         }
     }
 
-    // Manejar estados NFC
+    /**
+     * MANEJO DE ESTADOS NFC
+     * 
+     * Observa cambios en el estado del proceso NFC y ejecuta acciones seg\u00fan estado:
+     * - Success: Cierra di\u00e1logo (descuento ya aplicado en callback)
+     * - Error: Muestra error por 2 segundos y cierra di\u00e1logo
+     * - Otros: Sin acci\u00f3n (Idle, Scanning, Processing se manejan en UI del di\u00e1logo)
+     */
     LaunchedEffect(nfcState) {
         when (nfcState) {
             is NFCState.Success -> {
+                // Tarjeta le\u00edda exitosamente - cerrar di\u00e1logo
                 showNFCDialog = false
-                // El descuento ya se aplicó en el callback
             }
 
             is NFCState.Error -> {
-                // Mostrar error por 2 segundos y cerrar
+                // Error en lectura - esperar 2 segundos para que usuario lea mensaje
                 kotlinx.coroutines.delay(2000)
                 nfcViewModel.resetState()
                 showNFCDialog = false
             }
 
-            else -> { /* Otros estados */
+            else -> {
+                // Estados Idle, Scanning, Processing se manejan en UI del di\u00e1logo
             }
         }
     }
@@ -247,35 +276,55 @@ fun CartScreen(
                                 .padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            // Student discount button (NFC)
+                            /**
+                             * BOT\u00d3N DE DESCUENTO ESTUDIANTIL (NFC)
+                             * 
+                             * Permite aplicar descuento del 10% mediante escaneo de tarjeta NFC
+                             * 
+                             * Estados:
+                             * - No aplicado: Bot\u00f3n activo, muestra "Escanear Tarjeta Estudiante"
+                             * - Aplicado: Bot\u00f3n deshabilitado, muestra "Descuento Aplicado (10%)"
+                             * 
+                             * Flujo de validaci\u00f3n:
+                             * 1. Verificar si dispositivo tiene hardware NFC
+                             * 2. Verificar si NFC est\u00e1 habilitado
+                             * 3. Iniciar proceso de escaneo
+                             * 4. Mostrar di\u00e1logo con instrucciones
+                             * 
+                             * Nota: El descuento NO se puede desactivar una vez aplicado
+                             * (evita uso indebido de tarjeta compartida)
+                             */
                             OutlinedButton(
                                 onClick = {
+                                    // Solo procesar click si el descuento NO est\u00e1 aplicado
                                     if (!studentDiscount) {
-                                        // Verificar disponibilidad de NFC
+                                        // Validar estado de NFC antes de iniciar escaneo
                                         when {
+                                            // Caso 1: Dispositivo sin hardware NFC
                                             !nfcManager.isNFCAvailable() -> {
                                                 nfcViewModel.handleNFCNotAvailable()
                                                 showNFCDialog = true
                                             }
 
+                                            // Caso 2: NFC deshabilitado en configuraci\u00f3n
                                             !nfcManager.isNFCEnabled() -> {
                                                 nfcViewModel.handleNFCDisabled()
                                                 showNFCDialog = true
                                             }
 
+                                            // Caso 3: NFC disponible y habilitado - iniciar escaneo
                                             else -> {
                                                 nfcViewModel.startScanning()
                                                 showNFCDialog = true
                                             }
                                         }
                                     }
-                                    // No hacer nada si ya está aplicado (no se puede desactivar)
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .bounceInEffect(delay = 0)
                                     .pressClickEffect(),
-                                enabled = !studentDiscount, // Deshabilitar cuando está aplicado
+                                enabled = !studentDiscount, // Deshabilitar cuando ya est\u00e1 aplicado
                                 colors = ButtonDefaults.outlinedButtonColors(
                                     containerColor = if (studentDiscount)
                                         MaterialTheme.colorScheme.primaryContainer
@@ -283,12 +332,14 @@ fun CartScreen(
                                         MaterialTheme.colorScheme.surface
                                 )
                             ) {
+                                // Icono cambia seg\u00fan estado (Check si aplicado, AccountCircle si no)
                                 Icon(
                                     imageVector = if (studentDiscount) Icons.Default.Check else Icons.Default.AccountCircle,
                                     contentDescription = null,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
+                                // Texto cambia seg\u00fan estado
                                 Text(
                                     if (studentDiscount)
                                         "Descuento Estudiante Aplicado (10%)"
@@ -421,12 +472,27 @@ fun CartScreen(
         }
     }
 
-    // NFC Scanning Dialog
+    /**
+     * DI\u00c1LOGO DE ESCANEO NFC
+     * 
+     * Muestra el estado actual del proceso de escaneo NFC con feedback visual
+     * 
+     * Estados mostrados:
+     * - Scanning: Indicador de carga + instrucci\u00f3n de acercar tarjeta
+     * - Processing: Indicador de carga + mensaje de procesamiento
+     * - Success: Icono de \u00e9xito + mensaje de confirmaci\u00f3n
+     * - Error: Icono de advertencia + mensaje de error espec\u00edfico
+     * - Idle: Mensaje de preparaci\u00f3n
+     * 
+     * Botones:
+     * - Cancelar: Disponible durante Scanning/Idle
+     * - Cerrar: Disponible despu\u00e9s de Success/Error
+     */
     if (showNFCDialog) {
         AlertDialog(
             onDismissRequest = {
                 showNFCDialog = false
-                nfcViewModel.cancelScanning()
+                nfcViewModel.resetState()
             },
             title = {
                 Row(
@@ -447,7 +513,9 @@ fun CartScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    // UI din\u00e1mica seg\u00fan estado NFC
                     when (nfcState) {
+                        // Estado: Esperando detecci\u00f3n de tarjeta
                         is NFCState.Scanning -> {
                             CircularProgressIndicator()
                             Text(
@@ -455,33 +523,36 @@ fun CartScreen(
                                 textAlign = TextAlign.Center
                             )
                             Text(
-                                "(Parte trasera del teléfono)",
+                                "(Parte trasera del tel\u00e9fono)",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center
                             )
                         }
 
+                        // Estado: Procesando tarjeta detectada
                         is NFCState.Processing -> {
                             CircularProgressIndicator()
                             Text("Procesando tarjeta...", textAlign = TextAlign.Center)
                         }
 
+                        // Estado: Tarjeta validada correctamente
                         is NFCState.Success -> {
                             Icon(
                                 imageVector = Icons.Default.Check,
-                                contentDescription = "Éxito",
+                                contentDescription = "\u00c9xito",
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(48.dp)
                             )
                             Text(
-                                "¡Descuento aplicado correctamente!",
+                                "\u00a1Descuento aplicado correctamente!",
                                 textAlign = TextAlign.Center,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
 
+                        // Estado: Error en lectura o validaci\u00f3n
                         is NFCState.Error -> {
                             Icon(
                                 imageVector = Icons.Default.Warning,
@@ -496,12 +567,14 @@ fun CartScreen(
                             )
                         }
 
+                        // Estado: Inicializaci\u00f3n
                         else -> {
                             Text("Preparando lector NFC...", textAlign = TextAlign.Center)
                         }
                     }
                 }
             },
+            // Bot\u00f3n Cerrar: Solo visible en estados finales (Success/Error)
             confirmButton = {
                 if (nfcState is NFCState.Success || nfcState is NFCState.Error) {
                     TextButton(onClick = {
@@ -512,11 +585,12 @@ fun CartScreen(
                     }
                 }
             },
+            // Bot\u00f3n Cancelar: Visible durante escaneo activo
             dismissButton = {
                 if (nfcState is NFCState.Scanning || nfcState is NFCState.Idle) {
                     TextButton(onClick = {
                         showNFCDialog = false
-                        nfcViewModel.cancelScanning()
+                        nfcViewModel.resetState()
                     }) {
                         Text("Cancelar")
                     }
