@@ -41,9 +41,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.huerto_hogar.AppScreens.AppScreens
 import com.example.huerto_hogar.R
+import com.example.huerto_hogar.manager.BlogManagerViewModel
+import com.example.huerto_hogar.model.Blog
 import com.example.huerto_hogar.model.MockProducts
 import com.example.huerto_hogar.model.Product
 import java.text.NumberFormat
@@ -357,35 +360,29 @@ fun FeaturedProductsCarousel(products: List<Product>) {
 
 @Composable
 fun BlogSection(navController: NavController) {
+    val blogViewModel: BlogManagerViewModel = viewModel()
+    val blogs = blogViewModel.getBlogs()
+    
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Primera entrada de blog
-        BlogEntry(
-            imageRes = R.drawable.manzana_fuji,
-            title = "Beneficios de los productos orgánicos",
-            description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.",
-            onClick = { /* TODO: Navegar a blog detail */ }
-        )
-        
-        // Segunda entrada de blog
-        BlogEntry(
-            imageRes = R.drawable.naranja_valencia,
-            title = "Cómo conservar frutas y verduras frescas",
-            description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.",
-            onClick = { /* TODO: Navegar a blog detail */ }
-        )
+        blogs.forEach { blog ->
+            BlogEntry(
+                blog = blog,
+                onClick = { 
+                    navController.navigate(AppScreens.BlogScreen.route)
+                }
+            )
+        }
     }
 }
 
 @Composable
 fun BlogEntry(
-    imageRes: Int,
-    title: String,
-    description: String,
+    blog: Blog,
     onClick: () -> Unit
 ) {
     Card(
@@ -406,10 +403,10 @@ fun BlogEntry(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Imagen a la izquierda
+            // Imagen del blog a la izquierda
             Image(
-                painter = painterResource(id = imageRes),
-                contentDescription = title,
+                painter = painterResource(id = blog.bannerImg),
+                contentDescription = blog.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(96.dp)
@@ -426,7 +423,7 @@ fun BlogEntry(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = title,
+                    text = blog.title,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold
                     ),
@@ -438,7 +435,7 @@ fun BlogEntry(
                 Spacer(modifier = Modifier.height(4.dp))
                 
                 Text(
-                    text = description,
+                    text = blog.summary,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     maxLines = 3,
