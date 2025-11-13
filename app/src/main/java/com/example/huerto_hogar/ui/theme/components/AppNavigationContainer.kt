@@ -79,6 +79,9 @@ import com.example.huerto_hogar.ui.theme.components.animations.slideOutToLeftWit
 import com.example.huerto_hogar.viewmodel.CartViewModel
 import com.example.huerto_hogar.viewmodel.LoginViewModel
 import com.example.huerto_hogar.viewmodel.RegisterUserViewModel
+import com.example.huerto_hogar.viewmodel.UserSettingsViewModel
+import com.example.huerto_hogar.viewmodel.CartViewModel
+import com.example.huerto_hogar.viewmodel.FavoritesViewModel
 import com.example.huerto_hogar.viewmodel.SalesViewModel
 import com.example.huerto_hogar.viewmodel.UserSettingsViewModel
 import kotlinx.coroutines.launch
@@ -89,6 +92,7 @@ import kotlinx.coroutines.launch
 fun AppNavigationContainer() {
     val userManager: UserManagerViewModel = viewModel()
     val cartViewModel: CartViewModel = viewModel()
+    val favoritesViewModel: FavoritesViewModel = viewModel()
     val salesViewModel: SalesViewModel = viewModel()
 
     val currentUser by userManager.currentUser.collectAsState()
@@ -331,138 +335,144 @@ fun AppNavigationContainer() {
                 )
 
                 Scaffold(
-                    // Menu de navegacion inferioor
-                    bottomBar = {
-                        MainBottomBar(
-                            navController = navController,
-                            onMenuClick = {
-                                scope.launch { drawerState.open() }
-                            }
-                        )
-                    }) { contentPadding ->
-                    // La logica del router/enrutamiento
-                    NavHost(
-                        navController = navController,
-                        startDestination = startDestination,
-                        modifier = Modifier.padding(contentPadding)
-                    ) {
-                        composable(
-                            route = AppScreens.HomeScreen.route,
-                            enterTransition = { fadeIn() },
-                            exitTransition = { fadeOut() }
-                        ) {
-                            HomeScreen(navController = navController)
-                        }
-
-                        composable(
-                            route = AppScreens.LoginScreen.route,
-                            enterTransition = { scaleInWithFade() },
-                            exitTransition = { scaleOutWithFade() }
-                        ) {
-                            val loginVM: LoginViewModel = viewModel()
-                            loginVM.userManager = userManager
-                            LoginScreen(navController = navController, loginVM)
-                        }
-
-                        composable(
-                            route = AppScreens.RegistroScreen.route,
-                            enterTransition = { slideInFromBottomWithFade() },
-                            exitTransition = { slideOutToBottomWithFade() }
-                        ) {
-                            val registerVM: RegisterUserViewModel = viewModel()
-                            registerVM.userManager = userManager
-                            RegistroScreen(navController, registerVM)
-                        }
-
-                        composable(
-                            route = AppScreens.FavScreen.route,
-                            enterTransition = { slideInFromRightWithFade() },
-                            exitTransition = { slideOutToLeftWithFade() }
-                        ) {
-                            FavScreen(navController = navController)
-                        }
-
-                        composable(
-                            route = AppScreens.CartScreen.route,
-                            enterTransition = { slideInFromRightWithFade() },
-                            exitTransition = { slideOutToLeftWithFade() }
-                        ) {
-                            CartScreen(
-                                cartViewModel = cartViewModel,
-                                salesViewModel = salesViewModel
-                            )
-                        }
-
-                        composable(
-                            route = AppScreens.UsSetScreen.route,
-                            enterTransition = { slideInFromBottomWithFade() },
-                            exitTransition = { slideOutToBottomWithFade() }
-                        ) {
-                            val settingsVM: UserSettingsViewModel = viewModel()
-                            settingsVM.userManager = userManager
-                            UsSetScreen(navController = navController, viewModel = settingsVM)
-                        }
-
-                        composable(
-                            route = AppScreens.BlogScreen.route,
-                            enterTransition = { fadeIn() },
-                            exitTransition = { fadeOut() }
-                        ) {
-                            BlogScreen(navController = navController)
-                        }
-
-                        composable(
-                            route = AppScreens.FrutasScreen.route,
-                            enterTransition = { fadeIn() },
-                            exitTransition = { fadeOut() }
-                        ) {
-                            FrutasScreen(
-                                navController = navController,
-                                cartViewModel = cartViewModel
-                            )
-                        }
-
-                        composable(
-                            route = AppScreens.OrganicosScreen.route,
-                            enterTransition = { fadeIn() },
-                            exitTransition = { fadeOut() }
-                        ) {
-                            OrganicosScreen(
-                                navController = navController,
-                                cartViewModel = cartViewModel
-                            )
-                        }
-
-                        composable(
-                            route = AppScreens.VerdurasScreen.route,
-                            enterTransition = { fadeIn() },
-                            exitTransition = { fadeOut() }
-                        ) {
-                            VerdurasScreen(
-                                navController = navController,
-                                cartViewModel = cartViewModel
-                            )
-                        }
-
-                        composable(
-                            route = AppScreens.CatalogoScreen.route,
-                            enterTransition = { fadeIn() },
-                            exitTransition = { fadeOut() }
-                        ) {
-                            CatalogoScreen(navController = navController)
-                        }
-
-                        composable(
-                            route = AppScreens.AllProductsScreen.route,
-                            enterTransition = { fadeIn() },
-                            exitTransition = { fadeOut() }
-                        ) {
-                            AllProductsScreen(
-                                navController = navController,
-                                cartViewModel = cartViewModel
-                            )
-                        }
+            // Menu de navegacion inferioor
+            bottomBar = {
+                MainBottomBar(
+                    navController = navController, 
+                    onMenuClick = {
+                        scope.launch { drawerState.open() }
                     }
+                )
+            }) { contentPadding ->
+            // La logica del router/enrutamiento
+            NavHost(
+                navController = navController,
+                startDestination = startDestination,
+                modifier = Modifier.padding(contentPadding)
+            ) {
+                composable(
+                    route = AppScreens.HomeScreen.route,
+                    enterTransition = { fadeIn() },
+                    exitTransition = { fadeOut() }
+                ) { 
+                    HomeScreen(navController = navController) 
+                }
+                
+                composable(
+                    route = AppScreens.LoginScreen.route,
+                    enterTransition = { scaleInWithFade() },
+                    exitTransition = { scaleOutWithFade() }
+                ) {
+                    val loginVM: LoginViewModel = viewModel()
+                    loginVM.userManager = userManager
+                    LoginScreen(navController = navController, loginVM)
+                }
+                
+                composable(
+                    route = AppScreens.RegistroScreen.route,
+                    enterTransition = { slideInFromBottomWithFade() },
+                    exitTransition = { slideOutToBottomWithFade() }
+                ) {
+                    val registerVM: RegisterUserViewModel = viewModel()
+                    registerVM.userManager = userManager
+                    RegistroScreen(navController, registerVM)
+                }
+                
+                composable(
+                    route = AppScreens.FavScreen.route,
+                    enterTransition = { slideInFromRightWithFade() },
+                    exitTransition = { slideOutToLeftWithFade() }
+                ) { 
+                    FavScreen(
+                        navController = navController,
+                        favoritesViewModel = favoritesViewModel,
+                        cartViewModel = cartViewModel
+                    ) 
+                }
+                
+                composable(
+                    route = AppScreens.CartScreen.route,
+                    enterTransition = { slideInFromRightWithFade() },
+                    exitTransition = { slideOutToLeftWithFade() }
+                ) { 
+                    CartScreen(
+                        cartViewModel = cartViewModel,
+                        salesViewModel = salesViewModel
+                    )
+                }
+                
+                composable(
+                    route = AppScreens.UsSetScreen.route,
+                    enterTransition = { slideInFromBottomWithFade() },
+                    exitTransition = { slideOutToBottomWithFade() }
+                ) {
+                    val settingsVM: UserSettingsViewModel = viewModel()
+                    settingsVM.userManager = userManager
+                    UsSetScreen(navController = navController, viewModel = settingsVM)
+                }
+                
+                composable(
+                    route = AppScreens.BlogScreen.route,
+                    enterTransition = { fadeIn() },
+                    exitTransition = { fadeOut() }
+                ) { 
+                    BlogScreen(navController = navController) 
+                }
+                
+                composable(
+                    route = AppScreens.FrutasScreen.route,
+                    enterTransition = { fadeIn() },
+                    exitTransition = { fadeOut() }
+                ) { 
+                    FrutasScreen(
+                        navController = navController,
+                        cartViewModel = cartViewModel,
+                        favoritesViewModel = favoritesViewModel
+                    ) 
+                }
+                
+                composable(
+                    route = AppScreens.OrganicosScreen.route,
+                    enterTransition = { fadeIn() },
+                    exitTransition = { fadeOut() }
+                ) { 
+                    OrganicosScreen(
+                        navController = navController,
+                        cartViewModel = cartViewModel,
+                        favoritesViewModel = favoritesViewModel
+                    ) 
+                }
+                
+                composable(
+                    route = AppScreens.VerdurasScreen.route,
+                    enterTransition = { fadeIn() },
+                    exitTransition = { fadeOut() }
+                ) { 
+                    VerdurasScreen(
+                        navController = navController,
+                        cartViewModel = cartViewModel,
+                        favoritesViewModel = favoritesViewModel
+                    ) 
+                }
+                
+                composable(
+                    route = AppScreens.CatalogoScreen.route,
+                    enterTransition = { fadeIn() },
+                    exitTransition = { fadeOut() }
+                ) { 
+                    CatalogoScreen(navController = navController) 
+                }
+                
+                composable(
+                    route = AppScreens.AllProductsScreen.route,
+                    enterTransition = { fadeIn() },
+                    exitTransition = { fadeOut() }
+                ) { 
+                    AllProductsScreen(
+                        navController = navController,
+                        cartViewModel = cartViewModel,
+                        favoritesViewModel = favoritesViewModel
+                    ) 
                 }
             }
         }

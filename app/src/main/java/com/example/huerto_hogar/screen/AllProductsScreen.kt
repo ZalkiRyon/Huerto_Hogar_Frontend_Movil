@@ -51,19 +51,23 @@ import com.example.huerto_hogar.model.ProductCategory
 import com.example.huerto_hogar.model.MockProducts
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.huerto_hogar.viewmodel.CartViewModel
+import com.example.huerto_hogar.viewmodel.FavoritesViewModel
 import com.example.huerto_hogar.ui.theme.components.ProductCard
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun AllProductsScreen(
     navController: NavHostController,
-    cartViewModel: CartViewModel = viewModel()
+    cartViewModel: CartViewModel = viewModel(),
+    favoritesViewModel: FavoritesViewModel = viewModel()
 ) {
     // Mostrar todos los productos sin filtrar
     val allProducts = remember {
         MockProducts.products
     }
     
+    val favoriteItems by favoritesViewModel.favoriteItems.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
@@ -101,15 +105,22 @@ fun AllProductsScreen(
                         }
                     },
                     onToggleFavorito = { product ->
-                        // TODO: Implementar lógica de favoritos
+                        val wasAdded = favoritesViewModel.addToFavorites(product)
                         coroutineScope.launch {
-                            snackbarHostState.showSnackbar(
-                                message = "Funcionalidad de favoritos próximamente",
-                                duration = SnackbarDuration.Short
-                            )
+                            if (wasAdded) {
+                                snackbarHostState.showSnackbar(
+                                    message = "✓ ${product.name} agregado a favoritos",
+                                    duration = SnackbarDuration.Short
+                                )
+                            } else {
+                                snackbarHostState.showSnackbar(
+                                    message = "El producto ya se encuentra agregado",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
                         }
                     },
-                    isFavorito = false // TODO: Obtener estado real de favoritos
+                    isFavorito = favoriteItems.any { it.id == producto.id }
                 )
             }
         }
