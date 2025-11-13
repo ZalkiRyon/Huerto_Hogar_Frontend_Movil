@@ -194,7 +194,7 @@ fun HeaderBanner(navController: NavController) {
                 elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = 4.dp,
                     pressedElevation = 8.dp
-                )
+                ),
             ) {
                 Text(
                     "EXPLORAR PRODUCTOS",
@@ -236,7 +236,7 @@ fun CategorySection(categories: List<Category>, navController: NavController) {
         horizontalArrangement = Arrangement.SpaceEvenly,
         contentPadding = PaddingValues(horizontal = 8.dp)
     ) {
-        items(categories) { category ->
+        items(categories.withIndex().toList()) { (index, category) ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -283,7 +283,7 @@ fun FeaturedProductsCarousel(products: List<Product>) {
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
-        items(featuredProductsList) { product ->
+        items(featuredProductsList.withIndex().toList()) { (index, product) ->
             Card(
                 modifier = Modifier
                     .width(140.dp)

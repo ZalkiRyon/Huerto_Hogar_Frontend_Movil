@@ -64,6 +64,8 @@ import com.example.huerto_hogar.ui.theme.components.dialogs.Receipt
 import com.example.huerto_hogar.ui.theme.components.dialogs.ReceiptDialog
 import com.example.huerto_hogar.ui.theme.components.dialogs.generateReceiptNumber
 import com.example.huerto_hogar.ui.theme.components.dialogs.getCurrentDateTime
+import com.example.huerto_hogar.ui.theme.components.animations.bounceInEffect
+import com.example.huerto_hogar.ui.theme.components.animations.pressClickEffect
 import com.example.huerto_hogar.viewmodel.CartViewModel
 import com.example.huerto_hogar.viewmodel.NFCState
 import com.example.huerto_hogar.viewmodel.NFCViewModel
@@ -189,20 +191,24 @@ fun CartScreen(
                         Icon(
                             imageVector = Icons.Default.ShoppingCart,
                             contentDescription = "Carrito vacío",
-                            modifier = Modifier.size(80.dp),
+                            modifier = Modifier
+                                .size(80.dp)
+                                .bounceInEffect(delay = 0),
                             tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                         )
                         Text(
                             text = "Tu carrito está vacío",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                            modifier = Modifier.bounceInEffect(delay = 100)
                         )
                         Text(
                             text = "Agrega productos desde el catálogo",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.bounceInEffect(delay = 200)
                         )
                     }
                 }
@@ -265,7 +271,10 @@ fun CartScreen(
                                     }
                                     // No hacer nada si ya está aplicado (no se puede desactivar)
                                 },
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .bounceInEffect(delay = 0)
+                                    .pressClickEffect(),
                                 enabled = !studentDiscount, // Deshabilitar cuando está aplicado
                                 colors = ButtonDefaults.outlinedButtonColors(
                                     containerColor = if (studentDiscount)
@@ -369,7 +378,9 @@ fun CartScreen(
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(56.dp),
+                                        .height(56.dp)
+                                        .bounceInEffect(delay = 100)
+                                        .pressClickEffect(),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = MaterialTheme.colorScheme.primary
                                     )
@@ -388,7 +399,9 @@ fun CartScreen(
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(56.dp),
+                                        .height(56.dp)
+                                        .bounceInEffect(delay = 100)
+                                        .pressClickEffect(),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = MaterialTheme.colorScheme.primary
                                     )

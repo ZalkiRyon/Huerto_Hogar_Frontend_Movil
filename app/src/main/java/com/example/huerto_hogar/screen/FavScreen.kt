@@ -59,6 +59,8 @@ import com.example.huerto_hogar.R
 import com.example.huerto_hogar.model.Product
 import com.example.huerto_hogar.model.User
 import com.example.huerto_hogar.ui.theme.components.Header
+import com.example.huerto_hogar.ui.theme.components.animations.bounceInEffect
+import com.example.huerto_hogar.ui.theme.components.animations.pressClickEffect
 import com.example.huerto_hogar.viewmodel.CartViewModel
 import com.example.huerto_hogar.viewmodel.FavoritesViewModel
 
@@ -139,20 +141,24 @@ fun FavScreen(
                         Icon(
                             imageVector = Icons.Default.FavoriteBorder,
                             contentDescription = "Sin favoritos",
-                            modifier = Modifier.size(80.dp),
+                            modifier = Modifier
+                                .size(80.dp)
+                                .bounceInEffect(delay = 0),
                             tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                         )
                         Text(
                             text = "No tienes favoritos",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                            modifier = Modifier.bounceInEffect(delay = 100)
                         )
                         Text(
                             text = "Agrega productos desde el catálogo",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.bounceInEffect(delay = 200)
                         )
                     }
                 }
@@ -206,7 +212,9 @@ fun FavScreen(
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(56.dp),
+                                        .height(56.dp)
+                                        .bounceInEffect(delay = 0)
+                                        .pressClickEffect(),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = MaterialTheme.colorScheme.primary
                                     )
@@ -232,7 +240,9 @@ fun FavScreen(
                                     ),
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(56.dp),
+                                        .height(56.dp)
+                                        .bounceInEffect(delay = 0)
+                                        .pressClickEffect(),
                                 ) {
                                     Text(
                                         text = "Iniciar sesión para proceder",

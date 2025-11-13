@@ -32,6 +32,7 @@ import com.example.huerto_hogar.ui.theme.components.ProductCard
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.huerto_hogar.viewmodel.CartViewModel
 import com.example.huerto_hogar.viewmodel.FavoritesViewModel
+import com.example.huerto_hogar.ui.theme.components.animations.bounceInEffect
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.collectAsState
@@ -68,9 +69,9 @@ fun VerdurasScreen(
                 .padding(16.dp)
         ) {
             items(
-                verduras,
-                key = { it.id }
-            ) { producto ->
+                verduras.withIndex().toList(),
+                key = { (_, product) -> product.id }
+            ) { (index, producto) ->
                 ProductCard(
                     producto = producto,
                     onProductClick = { product ->

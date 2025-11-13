@@ -33,7 +33,6 @@ import androidx.navigation.NavController
 import com.example.huerto_hogar.model.LoginResult
 import com.example.huerto_hogar.ui.theme.components.InputField
 import com.example.huerto_hogar.ui.theme.components.animations.bounceInEffect
-import com.example.huerto_hogar.ui.theme.components.animations.loadingPulseEffect
 import com.example.huerto_hogar.ui.theme.components.animations.pressClickEffect
 import com.example.huerto_hogar.viewmodel.LoginViewModel
 
@@ -147,8 +146,7 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel) {
                     .fillMaxWidth()
                     .bounceInEffect(delay = 300)
                     .pressClickEffect()
-                    .height(56.dp)
-                    .loadingPulseEffect(formState.isLoading),
+                    .height(56.dp),
                 enabled = !formState.isLoading && formState.errors.emailError == null && formState.errors.passwordError == null,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,

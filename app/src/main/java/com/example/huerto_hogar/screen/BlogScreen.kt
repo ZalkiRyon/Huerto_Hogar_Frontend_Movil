@@ -23,6 +23,7 @@ import com.example.huerto_hogar.manager.BlogManagerViewModel
 import com.example.huerto_hogar.model.Blog
 import com.example.huerto_hogar.ui.theme.components.NewsCard
 import com.example.huerto_hogar.ui.theme.components.NewsModal
+import com.example.huerto_hogar.ui.theme.components.animations.bounceInEffect
 
 @Composable
 fun BlogScreen(navController: NavController) {
@@ -44,6 +45,7 @@ fun BlogScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
+                .bounceInEffect(delay = 0)
         )
 
         LazyColumn(

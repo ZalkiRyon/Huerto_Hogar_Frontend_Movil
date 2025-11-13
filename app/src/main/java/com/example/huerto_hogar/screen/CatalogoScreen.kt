@@ -18,6 +18,8 @@ import com.example.huerto_hogar.R
 import com.example.huerto_hogar.ui.theme.Huerto_HogarTheme
 import com.example.huerto_hogar.ui.theme.components.CategoryButton
 import com.example.huerto_hogar.ui.theme.components.Header
+import com.example.huerto_hogar.ui.theme.components.animations.bounceInEffect
+import com.example.huerto_hogar.ui.theme.components.animations.pressClickEffect
 
 /**
  * Pantalla principal del catálogo que muestra botones para navegar
@@ -48,7 +50,10 @@ fun CatalogoScreen(
                 onClick = {
                     navController.navigate(AppScreens.VerdurasScreen.route)
                 },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    .bounceInEffect(delay = 0)
+                    .pressClickEffect()
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -60,7 +65,10 @@ fun CatalogoScreen(
                 onClick = {
                     navController.navigate(AppScreens.FrutasScreen.route)
                 },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    .bounceInEffect(delay = 100)
+                    .pressClickEffect()
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -72,7 +80,10 @@ fun CatalogoScreen(
                 onClick = {
                     navController.navigate(AppScreens.OrganicosScreen.route)
                 },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    .bounceInEffect(delay = 200)
+                    .pressClickEffect()
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -84,7 +95,10 @@ fun CatalogoScreen(
                 onClick = {
                     navController.navigate(AppScreens.AllProductsScreen.route)
                 },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    .bounceInEffect(delay = 300)
+                    .pressClickEffect()
             )
         }
     }
