@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.huerto_hogar.manager.UserManagerViewModel
-import com.example.huerto_hogar.model.Role
 import com.example.huerto_hogar.model.User
 import com.example.huerto_hogar.ui.theme.components.animations.bounceInEffect
 
@@ -32,7 +31,7 @@ fun AdminUsersScreen(
     navController: NavController,
     userManager: com.example.huerto_hogar.manager.UserManagerViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
-    var selectedRole by remember { mutableStateOf<Role?>(null) }
+    var selectedRole by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     
     val userList by userManager.userList.collectAsState()
@@ -113,19 +112,11 @@ fun AdminUsersScreen(
                 label = { Text("Todos") }
             )
             
-            Role.values().forEach { role ->
+            listOf("admin" to "Admin", "cliente" to "Cliente", "vendedor" to "Vendedor").forEach { (roleValue, roleLabel) ->
                 FilterChip(
-                    selected = selectedRole == role,
-                    onClick = { selectedRole = role },
-                    label = { 
-                        Text(
-                            when(role) {
-                                Role.ADMIN -> "Admin"
-                                Role.CLIENT -> "Cliente"
-                                Role.SALESMAN -> "Vendedor"
-                            }
-                        ) 
-                    }
+                    selected = selectedRole == roleValue,
+                    onClick = { selectedRole = roleValue },
+                    label = { Text(roleLabel) }
                 )
             }
         }
@@ -167,9 +158,10 @@ fun UserManagementCard(user: User) {
                     modifier = Modifier.size(48.dp),
                     shape = CircleShape,
                     color = when(user.role) {
-                        Role.ADMIN -> MaterialTheme.colorScheme.error
-                        Role.SALESMAN -> MaterialTheme.colorScheme.secondary
-                        Role.CLIENT -> MaterialTheme.colorScheme.tertiary
+                        "admin" -> MaterialTheme.colorScheme.error
+                        "vendedor" -> MaterialTheme.colorScheme.secondary
+                        "cliente" -> MaterialTheme.colorScheme.tertiary
+                        else -> MaterialTheme.colorScheme.tertiary
                     }
                 ) {
                     Box(
@@ -202,22 +194,25 @@ fun UserManagementCard(user: User) {
                     Surface(
                         shape = RoundedCornerShape(6.dp),
                         color = when(user.role) {
-                            Role.ADMIN -> MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
-                            Role.SALESMAN -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
-                            Role.CLIENT -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
+                            "admin" -> MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
+                            "vendedor" -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
+                            "cliente" -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
+                            else -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
                         }
                     ) {
                         Text(
                             text = when(user.role) {
-                                Role.ADMIN -> "Admin"
-                                Role.CLIENT -> "Cliente"
-                                Role.SALESMAN -> "Vendedor"
+                                "admin" -> "Admin"
+                                "cliente" -> "Cliente"
+                                "vendedor" -> "Vendedor"
+                                else -> "Cliente"
                             },
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                             color = when(user.role) {
-                                Role.ADMIN -> MaterialTheme.colorScheme.error
-                                Role.SALESMAN -> MaterialTheme.colorScheme.secondary
-                                Role.CLIENT -> MaterialTheme.colorScheme.tertiary
+                                "admin" -> MaterialTheme.colorScheme.error
+                                "vendedor" -> MaterialTheme.colorScheme.secondary
+                                "cliente" -> MaterialTheme.colorScheme.tertiary
+                                else -> MaterialTheme.colorScheme.tertiary
                             },
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )

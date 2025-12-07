@@ -85,9 +85,9 @@ fun NewsModal(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                         }
-                        items(article.bodyText) { paragraph ->
+                        item {
                             Text(
-                                text = paragraph,
+                                text = article.bodyText,
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.padding(vertical = 4.dp)
                             )
@@ -98,7 +98,7 @@ fun NewsModal(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                article.tags.forEach { tag ->
+                                article.tags?.forEach { tag ->
                                     AssistChip(
                                         onClick = {},
                                         label = { Text(tag) }
@@ -123,11 +123,11 @@ fun NewsModal(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column {
                                     Text(
-                                        text = article.authorName,
+                                        text = article.authorName ?: "Autor desconocido",
                                         style = MaterialTheme.typography.titleMedium
                                     )
                                     Text(
-                                        text = "Publicado el ${article.publishDate}",
+                                        text = "Publicado el ${article.publishDate ?: "Fecha desconocida"}",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

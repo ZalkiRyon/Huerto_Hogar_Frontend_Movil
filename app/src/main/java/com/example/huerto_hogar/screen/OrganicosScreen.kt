@@ -59,11 +59,11 @@ fun OrganicosScreen(
     
     // Cargar productos de categoría ORGANICOS
     LaunchedEffect(Unit) {
-        productViewModel.getProductsByCategory(ProductCategory.ORGANICOS)
+        productViewModel.getProductsByCategory("Orgánicos")
     }
     
     // Filtrar solo orgánicos del estado
-    val organicos = products.filter { it.category == ProductCategory.ORGANICOS }
+    val organicos = products.filter { it.category.contains("Orgánico", ignoreCase = true) }
 
     val favoriteItems by favoritesViewModel.favoriteItems.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -141,7 +141,7 @@ fun OrganicosScreen(
                             fontWeight = FontWeight.Medium
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { productViewModel.getProductsByCategory(ProductCategory.ORGANICOS) }) {
+                        Button(onClick = { productViewModel.getProductsByCategory("Orgánicos") }) {
                             Text("Reintentar")
                         }
                     }

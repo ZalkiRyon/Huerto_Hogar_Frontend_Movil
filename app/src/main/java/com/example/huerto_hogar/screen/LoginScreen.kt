@@ -55,7 +55,7 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel) {
 
                     // Redirigir según rol del usuario
                     val destination =
-                        if (formState.loggedInUser?.role == com.example.huerto_hogar.model.Role.ADMIN) {
+                        if (formState.loggedInUser?.role == "admin") {
                             "admin_dashboard_screen"
                         } else {
                             "home_screen"

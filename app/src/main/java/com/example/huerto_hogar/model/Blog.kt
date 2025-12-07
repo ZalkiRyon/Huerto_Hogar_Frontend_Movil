@@ -5,8 +5,8 @@ import com.google.gson.annotations.SerializedName
 /**
  * Modelo de Blog (DTO) que coincide con el backend
  * 
- * @SerializedName mapea los nombres de campos del JSON a las propiedades de Kotlin
- * bannerImg y authorImg ahora son String para URLs remotas (antes eran Int para recursos drawable)
+ * Backend envía: id, title, bannerImg, summary, bodyText (String), 
+ * authorImg, authorName, publishDate, tags (puede estar ausente)
  */
 data class Blog(
     @SerializedName("id")
@@ -16,23 +16,23 @@ data class Blog(
     val title: String,
     
     @SerializedName("bannerImg")
-    val bannerImg: String, // Ahora es String para URLs remotas
+    val bannerImg: String,
     
     @SerializedName("summary")
     var summary: String,
     
     @SerializedName("bodyText")
-    val bodyText: List<String>,
+    val bodyText: String, // Backend envía String, no List
     
     @SerializedName("authorImg")
-    val authorImg: String, // Ahora es String para URLs remotas
+    val authorImg: String? = null,
     
     @SerializedName("authorName")
-    val authorName: String,
+    val authorName: String? = null,
     
     @SerializedName("publishDate")
-    val publishDate: String,
+    val publishDate: String? = null,
     
     @SerializedName("tags")
-    val tags: List<String>
+    val tags: List<String>? = null
 )

@@ -188,7 +188,7 @@ fun ProductCardPreview() {
         val productoEjemplo = Product(
             id = 1,
             name = "Manzanas Fuji",
-            category = ProductCategory.FRUTAS,
+            category = "Frutas frescas",
             price = 1200.0,
             stock = 45,
             imageUrl = "https://example.com/manzana.jpg",
@@ -211,7 +211,7 @@ fun ProductCardFavoritoPreview() {
         val productoEjemplo = Product(
             id = 1,
             name = "Manzanas Fuji Premium Seleccionadas",
-            category = ProductCategory.FRUTAS,
+            category = "Frutas frescas",
             price = 1200.0,
             stock = 45,
             imageUrl = "https://example.com/manzana.jpg",

@@ -59,11 +59,11 @@ fun FrutasScreen(
     
     // Cargar productos de categoría FRUTAS
     LaunchedEffect(Unit) {
-        productViewModel.getProductsByCategory(ProductCategory.FRUTAS)
+        productViewModel.getProductsByCategory("Frutas frescas")
     }
     
     // Filtrar solo frutas del estado
-    val frutas = products.filter { it.category == ProductCategory.FRUTAS }
+    val frutas = products.filter { it.category.contains("Frutas", ignoreCase = true) }
 
     val favoriteItems by favoritesViewModel.favoriteItems.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -141,7 +141,7 @@ fun FrutasScreen(
                             fontWeight = FontWeight.Medium
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { productViewModel.getProductsByCategory(ProductCategory.FRUTAS) }) {
+                        Button(onClick = { productViewModel.getProductsByCategory("Frutas frescas") }) {
                             Text("Reintentar")
                         }
                     }

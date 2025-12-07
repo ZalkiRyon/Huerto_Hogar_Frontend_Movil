@@ -32,7 +32,7 @@ interface UserApiService {
     /**
      * Inicia sesión de usuario
      */
-    @POST("users/login")
+    @POST("usuarios/login")
     suspend fun login(
         @Body credentials: LoginUser
     ): Response<LoginResponse>
@@ -40,7 +40,7 @@ interface UserApiService {
     /**
      * Registra un nuevo usuario
      */
-    @POST("users/register")
+    @POST("usuarios/register")
     suspend fun register(
         @Body userData: RegisterUser
     ): Response<RegisterResponse>
@@ -48,7 +48,7 @@ interface UserApiService {
     /**
      * Obtiene todos los usuarios (solo admin)
      */
-    @GET("users")
+    @GET("usuarios")
     suspend fun getAllUsers(
         @Header("Authorization") token: String
     ): Response<List<User>>
@@ -56,7 +56,7 @@ interface UserApiService {
     /**
      * Obtiene un usuario por su ID
      */
-    @GET("users/{id}")
+    @GET("usuarios/{id}")
     suspend fun getUserById(
         @Path("id") id: Int,
         @Header("Authorization") token: String
@@ -65,7 +65,7 @@ interface UserApiService {
     /**
      * Actualiza información del usuario
      */
-    @PUT("users/{id}")
+    @PUT("usuarios/{id}")
     suspend fun updateUser(
         @Path("id") id: Int,
         @Body user: User,
@@ -75,7 +75,7 @@ interface UserApiService {
     /**
      * Elimina un usuario (solo admin)
      */
-    @DELETE("users/{id}")
+    @DELETE("usuarios/{id}")
     suspend fun deleteUser(
         @Path("id") id: Int,
         @Header("Authorization") token: String
@@ -84,7 +84,7 @@ interface UserApiService {
     /**
      * Cambia la contraseña del usuario
      */
-    @PATCH("users/{id}/password")
+    @PATCH("usuarios/{id}/password")
     suspend fun changePassword(
         @Path("id") id: Int,
         @Body passwordData: Map<String, String>,
@@ -94,7 +94,7 @@ interface UserApiService {
     /**
      * Obtiene el perfil del usuario autenticado
      */
-    @GET("users/profile")
+    @GET("usuarios/profile")
     suspend fun getProfile(
         @Header("Authorization") token: String
     ): Response<User>

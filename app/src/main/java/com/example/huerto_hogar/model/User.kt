@@ -17,36 +17,49 @@ enum class Role {
 /**
  * Modelo de Usuario (DTO) que coincide con el backend
  * 
- * @SerializedName mapea los nombres de campos del JSON a las propiedades de Kotlin
+ * Backend envía: id, email, password, nombre, apellido, run, telefono, region, 
+ * comuna, direccion, comentario, fechaRegistro, fotoPerfil, roleNombre
  */
 data class User(
     @SerializedName("id")
     val id: Int = 0,
     
-    @SerializedName("role")
-    val role: Role = Role.CLIENT,
+    @SerializedName("roleNombre")
+    val role: String? = "cliente",
 
-    @SerializedName("comment")
+    @SerializedName("comentario")
     val comment: String? = null,
     
-    @SerializedName("phone")
+    @SerializedName("telefono")
     val phone: String?,
 
-    @SerializedName("name")
+    @SerializedName("nombre")
     val name: String,
     
-    @SerializedName("lastname")
+    @SerializedName("apellido")
     val lastname: String,
     
     @SerializedName("email")
     val email: String,
     
     @SerializedName("password")
-    val password: String,
+    val password: String = "",
     
-    @SerializedName("address")
+    @SerializedName("run")
+    val run: String? = null,
+    
+    @SerializedName("region")
+    val region: String? = null,
+    
+    @SerializedName("comuna")
+    val comuna: String? = null,
+    
+    @SerializedName("direccion")
     val address: String,
     
-    @SerializedName("profilePictureUrl")
+    @SerializedName("fechaRegistro")
+    val registrationDate: String? = null,
+    
+    @SerializedName("fotoPerfil")
     val profilePictureUrl: String? = null
 )

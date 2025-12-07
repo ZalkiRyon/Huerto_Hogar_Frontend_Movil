@@ -96,7 +96,7 @@ fun AppNavigationContainer() {
     val currentUser by userManager.currentUser.collectAsState()
 
     // Si el usuario es admin, mostrar panel de administración
-    if (currentUser?.role == Role.ADMIN) {
+    if (currentUser?.role == "admin") {
         AdminNavigationContainer(
             userManager = userManager,
             salesViewModel = salesViewModel,

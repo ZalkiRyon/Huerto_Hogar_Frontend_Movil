@@ -59,11 +59,11 @@ fun VerdurasScreen(
     
     // Cargar productos de categoría VERDURAS
     LaunchedEffect(Unit) {
-        productViewModel.getProductsByCategory(ProductCategory.VERDURAS)
+        productViewModel.getProductsByCategory("Verduras frescas")
     }
     
     // Filtrar solo verduras del estado
-    val verduras = products.filter { it.category == ProductCategory.VERDURAS }
+    val verduras = products.filter { it.category.contains("Verduras", ignoreCase = true) }
 
     val favoriteItems by favoritesViewModel.favoriteItems.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -141,7 +141,7 @@ fun VerdurasScreen(
                             fontWeight = FontWeight.Medium
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { productViewModel.getProductsByCategory(ProductCategory.VERDURAS) }) {
+                        Button(onClick = { productViewModel.getProductsByCategory("Verduras frescas") }) {
                             Text("Reintentar")
                         }
                     }

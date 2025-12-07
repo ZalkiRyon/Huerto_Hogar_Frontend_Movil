@@ -46,14 +46,14 @@ class ProductRepository(
     /**
      * Obtiene productos filtrados por categoría
      * 
-     * @param category Categoría de productos a filtrar
+     * @param category Categoría de productos a filtrar (String del backend)
      * @return Flow<Resource<List<Product>>> - Stream de estados de la petición
      */
-    fun getProductsByCategory(category: ProductCategory): Flow<Resource<List<Product>>> = flow {
+    fun getProductsByCategory(category: String): Flow<Resource<List<Product>>> = flow {
         try {
             emit(Resource.Loading())
             
-            val response = apiService.getProductsByCategory(category.name)
+            val response = apiService.getProductsByCategory(category)
             
             if (response.isSuccessful && response.body() != null) {
                 emit(Resource.Success(response.body()!!))

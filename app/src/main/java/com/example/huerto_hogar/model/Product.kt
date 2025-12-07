@@ -6,28 +6,28 @@ import com.google.gson.annotations.SerializedName
  * Modelo de producto (DTO) que coincide con el backend
  * 
  * @SerializedName mapea los nombres de campos del JSON a las propiedades de Kotlin
- * imageUrl ahora es String para URLs remotas (antes era Int para recursos drawable)
+ * Backend envía: nombre, categoria (String), precio, stock, descripcion, imagen
  */
 data class Product(
     @SerializedName("id")
     val id: Int = 0,
     
-    @SerializedName("name")
+    @SerializedName("nombre")
     val name: String,
     
-    @SerializedName("category")
-    val category: ProductCategory,
+    @SerializedName("categoria")
+    val category: String, // Backend envía String, no enum
     
-    @SerializedName("price")
+    @SerializedName("precio")
     val price: Double,
     
     @SerializedName("stock")
     val stock: Int,
     
-    @SerializedName("imageUrl")
-    val imageUrl: String? = null, // Ahora es String para URLs remotas
+    @SerializedName("imagen")
+    val imageUrl: String? = null, // Nombre del archivo de imagen
     
-    @SerializedName("description")
+    @SerializedName("descripcion")
     val description: String = ""
 )
 

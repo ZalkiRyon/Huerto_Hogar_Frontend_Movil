@@ -322,7 +322,7 @@ fun FavoriteItemCard(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = product.category.displayName,
+                    text = product.category,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )

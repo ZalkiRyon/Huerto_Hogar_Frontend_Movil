@@ -28,6 +28,10 @@
         android:required="true" />
 
     <uses-permission android:name="android.permission.CAMERA" />
+    
+    <!-- PERMISO OBLIGATORIO PARA CONEXIÓN AL BACKEND -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -37,7 +41,8 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/logo_huerto"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Huerto_Hogar">
+        android:theme="@style/Theme.Huerto_Hogar"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"

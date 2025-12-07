@@ -68,9 +68,9 @@ class ProductViewModel(
     /**
      * Obtiene productos filtrados por categoría
      * 
-     * @param category Categoría de productos a filtrar
+     * @param category Categoría de productos a filtrar (String del backend)
      */
-    fun getProductsByCategory(category: ProductCategory) {
+    fun getProductsByCategory(category: String) {
         viewModelScope.launch {
             repository.getProductsByCategory(category).collect { resource ->
                 when (resource) {

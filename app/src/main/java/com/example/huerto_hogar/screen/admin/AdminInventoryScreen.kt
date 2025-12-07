@@ -64,7 +64,7 @@ fun AdminInventoryScreen(
     navController: NavController,
     productViewModel: ProductViewModel = viewModel()
 ) {
-    var selectedCategory by remember { mutableStateOf<ProductCategory?>(null) }
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
 
     // Observar estados del ViewModel
@@ -181,11 +181,11 @@ fun AdminInventoryScreen(
                 )
             )
 
-            ProductCategory.values().forEach { category ->
+            listOf("Frutas frescas", "Verduras frescas", "Orgánicos").forEach { category ->
                 FilterChip(
                     selected = selectedCategory == category,
                     onClick = { selectedCategory = category },
-                    label = { Text(category.displayName) },
+                    label = { Text(category) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = MaterialTheme.colorScheme.primary,
                         selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
@@ -273,7 +273,7 @@ fun ProductInventoryCard(product: Product) {
                         color = MaterialTheme.colorScheme.primaryContainer
                     ) {
                         Text(
-                            text = product.category.displayName,
+                            text = product.category,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)

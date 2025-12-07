@@ -1,7 +1,6 @@
 package com.example.huerto_hogar.manager
 
 import androidx.lifecycle.ViewModel
-import com.example.huerto_hogar.model.Role
 import com.example.huerto_hogar.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +13,7 @@ class UserManagerViewModel : ViewModel() {
         // ADMINISTRADORES
         User(
             id = 1,
-            role = Role.ADMIN,
+            role = "admin",
             comment = "Usuario administrador principal del sistema",
             name = "Super",
             lastname = "Super",
@@ -25,7 +24,7 @@ class UserManagerViewModel : ViewModel() {
         ),
         User(
             id = 2,
-            role = Role.ADMIN,
+            role = "admin",
             comment = "Administrador de operaciones y logística",
             name = "Carlos",
             lastname = "Rodríguez",
@@ -36,7 +35,7 @@ class UserManagerViewModel : ViewModel() {
         ),
         User(
             id = 3,
-            role = Role.ADMIN,
+            role = "admin",
             comment = "Administrador de ventas y marketing",
             name = "María",
             lastname = "González",
@@ -49,7 +48,7 @@ class UserManagerViewModel : ViewModel() {
         // CLIENTES
         User(
             id = 4,
-            role = Role.CLIENT,
+            role = "cliente",
             comment = "Cliente VIP, compra productos orgánicos semanalmente",
             name = "Juan",
             lastname = "Pérez",
@@ -60,7 +59,7 @@ class UserManagerViewModel : ViewModel() {
         ),
         User(
             id = 5,
-            role = Role.CLIENT,
+            role = "cliente",
             comment = "Cliente frecuente, prefiere frutas de temporada",
             name = "Ana",
             lastname = "Silva",
@@ -71,7 +70,7 @@ class UserManagerViewModel : ViewModel() {
         ),
         User(
             id = 6,
-            role = Role.CLIENT,
+            role = "cliente",
             comment = "Cliente nuevo, interesado en productos orgánicos",
             name = "Pedro",
             lastname = "Martínez",
@@ -82,7 +81,7 @@ class UserManagerViewModel : ViewModel() {
         ),
         User(
             id = 7,
-            role = Role.CLIENT,
+            role = "cliente",
             comment = "Cliente regular, compra verduras cada semana",
             name = "Laura",
             lastname = "Torres",
@@ -93,7 +92,7 @@ class UserManagerViewModel : ViewModel() {
         ),
         User(
             id = 8,
-            role = Role.CLIENT,
+            role = "cliente",
             comment = "Cliente corporativo, pedidos grandes mensuales",
             name = "Roberto",
             lastname = "Fernández",
@@ -106,7 +105,7 @@ class UserManagerViewModel : ViewModel() {
         // VENDEDORES
         User(
             id = 9,
-            role = Role.SALESMAN,
+            role = "vendedor",
             comment = "Vendedor senior, especializado en productos orgánicos",
             name = "Diego",
             lastname = "Vargas",
@@ -117,7 +116,7 @@ class UserManagerViewModel : ViewModel() {
         ),
         User(
             id = 10,
-            role = Role.SALESMAN,
+            role = "vendedor",
             comment = "Vendedor junior, enfocado en atención al cliente",
             name = "Carolina",
             lastname = "Muñoz",
@@ -128,7 +127,7 @@ class UserManagerViewModel : ViewModel() {
         ),
         User(
             id = 11,
-            role = Role.SALESMAN,
+            role = "vendedor",
             comment = "Vendedor especialista en frutas y verduras frescas",
             name = "Andrés",
             lastname = "Soto",
