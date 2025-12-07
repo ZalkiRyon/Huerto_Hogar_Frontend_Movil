@@ -4,7 +4,7 @@ import com.example.huerto_hogar.data.api.UserApiService
 import com.example.huerto_hogar.data.api.LoginResponse
 import com.example.huerto_hogar.data.api.RegisterResponse
 import com.example.huerto_hogar.data.di.NetworkModule
-import com.example.huerto_hogar.model.LoginUser
+import com.example.huerto_hogar.model.LoginRequest
 import com.example.huerto_hogar.model.RegisterUser
 import com.example.huerto_hogar.model.User
 import com.example.huerto_hogar.utils.NetworkUtils
@@ -36,7 +36,7 @@ class UserRepository(
         try {
             emit(Resource.Loading())
             
-            val credentials = LoginUser(email = email, password = password)
+            val credentials = LoginRequest(email = email, password = password)
             val response = apiService.login(credentials)
             
             if (response.isSuccessful && response.body() != null) {

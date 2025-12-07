@@ -1,6 +1,6 @@
 package com.example.huerto_hogar.data.api
 
-import com.example.huerto_hogar.model.LoginUser
+import com.example.huerto_hogar.model.LoginRequest
 import com.example.huerto_hogar.model.RegisterUser
 import com.example.huerto_hogar.model.User
 import retrofit2.Response
@@ -34,7 +34,7 @@ interface UserApiService {
      */
     @POST("usuarios/login")
     suspend fun login(
-        @Body credentials: LoginUser
+        @Body credentials: LoginRequest
     ): Response<LoginResponse>
     
     /**
