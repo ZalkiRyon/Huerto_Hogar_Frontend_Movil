@@ -29,7 +29,7 @@ import com.example.huerto_hogar.viewmodel.SalesViewModel
 import androidx.compose.runtime.LaunchedEffect
 
 /**
- * Dashboard administrativo con estadísticas de la tienda (datos dinámicos).
+ * Dashboard administrativo con estadísticas de la tienda (datos dinámicos desde el backend).
  */
 @Composable
 fun AdminDashboardScreen(
@@ -39,16 +39,22 @@ fun AdminDashboardScreen(
 ) {
     val scrollState = rememberScrollState()
     
-    // Obtener datos dinámicos
+    // Obtener datos dinámicos del backend
     val userList by userManager.userList.collectAsState()
     val products by productViewModel.products.collectAsState()
     val totalProducts = products.size
     val clientsCount = userList.count { it.role == "cliente" }
-    val dailySales by salesViewModel.dailySales.collectAsState()
     
-    // Cargar productos al iniciar
+    // Obtener estadísticas de órdenes
+    val orderStats by salesViewModel.orderStats.collectAsState()
+    val orders by salesViewModel.orders.collectAsState()
+    val dailySales = orderStats.todaySales
+    val totalOrders = orderStats.totalOrders
+    
+    // Cargar datos al iniciar
     LaunchedEffect(Unit) {
         productViewModel.getAllProducts()
+        salesViewModel.loadOrders()
     }
 
     Column(
@@ -111,7 +117,7 @@ fun AdminDashboardScreen(
             
             StatCard(
                 title = "Pedidos",
-                value = "87",
+                value = totalOrders.toString(),
                 icon = Icons.Default.Star,
                 color = Color(0xFF9C27B0),
                 modifier = Modifier.weight(1f)
@@ -137,27 +143,41 @@ fun AdminDashboardScreen(
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
                 
-                ActivityItem(
-                    title = "Nuevo pedido #1234",
-                    subtitle = "Cliente: María González",
-                    time = "Hace 5 minutos"
-                )
-                
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                
-                ActivityItem(
-                    title = "Producto sin stock",
-                    subtitle = "Manzanas Fuji - Reponer",
-                    time = "Hace 15 minutos"
-                )
-                
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                
-                ActivityItem(
-                    title = "Nuevo usuario registrado",
-                    subtitle = "Cliente: Juan Pérez",
-                    time = "Hace 1 hora"
-                )
+                // Mostrar últimas 3 órdenes
+                val recentOrders = orders.take(3)
+                if (recentOrders.isNotEmpty()) {
+                    recentOrders.forEachIndexed { index, order ->
+                        ActivityItem(
+                            title = "Pedido ${order.orderNumber}",
+                            subtitle = "Cliente: ${order.customerName}",
+                            time = order.createdDate
+                        )
+                        if (index < recentOrders.size - 1) {
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                        }
+                    }
+                } else {
+                    // Mostrar productos con stock bajo
+                    val lowStockProducts = products.filter { it.stock < 20 }.take(3)
+                    if (lowStockProducts.isNotEmpty()) {
+                        lowStockProducts.forEachIndexed { index, product ->
+                            ActivityItem(
+                                title = "Stock bajo: ${product.name}",
+                                subtitle = "Stock actual: ${product.stock} unidades",
+                                time = "Reponer pronto"
+                            )
+                            if (index < lowStockProducts.size - 1) {
+                                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                            }
+                        }
+                    } else {
+                        ActivityItem(
+                            title = "Sin actividad reciente",
+                            subtitle = "No hay pedidos pendientes",
+                            time = "---"
+                        )
+                    }
+                }
             }
         }
         

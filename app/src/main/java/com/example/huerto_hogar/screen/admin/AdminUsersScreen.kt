@@ -225,7 +225,10 @@ fun UserManagementCard(user: User) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 IconButton(
-                    onClick = { /* TODO: Edit */ },
+                    onClick = { 
+                        // TODO: Implementar diálogo de edición
+                        // Por ahora solo muestra un placeholder
+                    },
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
@@ -238,7 +241,10 @@ fun UserManagementCard(user: User) {
                 }
                 
                 IconButton(
-                    onClick = { /* TODO: Delete */ },
+                    onClick = { 
+                        // TODO: Implementar confirmación de eliminación
+                        // Por ahora solo muestra un placeholder
+                    },
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = Color.Red.copy(alpha = 0.1f)
                     )

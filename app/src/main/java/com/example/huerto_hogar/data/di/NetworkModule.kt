@@ -1,6 +1,7 @@
 package com.example.huerto_hogar.data.di
 
 import com.example.huerto_hogar.data.api.BlogApiService
+import com.example.huerto_hogar.data.api.OrderApiService
 import com.example.huerto_hogar.data.api.ProductApiService
 import com.example.huerto_hogar.data.api.UserApiService
 import com.example.huerto_hogar.utils.Constants
@@ -95,5 +96,12 @@ object NetworkModule {
      */
     val blogApiService: BlogApiService by lazy {
         retrofit.create(BlogApiService::class.java)
+    }
+    
+    /**
+     * Servicio de API para operaciones con órdenes
+     */
+    val orderApiService: OrderApiService by lazy {
+        retrofit.create(OrderApiService::class.java)
     }
 }
