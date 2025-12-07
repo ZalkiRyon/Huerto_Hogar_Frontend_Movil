@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.huerto_hogar.AppScreens.AppScreens
 import com.example.huerto_hogar.R
 import com.example.huerto_hogar.model.Product
@@ -383,15 +384,12 @@ fun FeaturedProductsCarousel(products: List<Product>) {
                     modifier = Modifier.fillMaxSize()
                 ) {
 
-                    Image(
-                        painter = painterResource(
-                            id = product.imageUrl ?: R.drawable.imagen_no_found
-                        ),
+                    AsyncImage(
+                        model = product.imageUrl,
                         contentDescription = product.name,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxWidth()
-
                             .height(110.dp)
                             .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
                     )

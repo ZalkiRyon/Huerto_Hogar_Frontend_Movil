@@ -300,8 +300,8 @@ fun FavoriteItemCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Product image
-            Image(
-                painter = painterResource(id = product.imageUrl ?: R.drawable.imagen_no_found),
+            AsyncImage(
+                model = product.imageUrl,
                 contentDescription = product.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

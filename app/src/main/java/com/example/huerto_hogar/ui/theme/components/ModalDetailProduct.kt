@@ -83,8 +83,8 @@ fun ModalDetailProduct(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Image(
-                    painter = painterResource(id = product.imageUrl ?: R.drawable.imagen_no_found),
+                AsyncImage(
+                    model = product.imageUrl,
                     contentDescription = "Banner de ${product.name}",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

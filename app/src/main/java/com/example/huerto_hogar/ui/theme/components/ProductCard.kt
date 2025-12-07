@@ -28,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import coil.compose.AsyncImage
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -84,8 +85,8 @@ fun ProductCard(
                     .clip(RoundedCornerShape(8.dp))
                     .clickable { onProductClick(producto) }
             ) {
-                Image(
-                    painter = painterResource(id = producto.imageUrl ?: R.drawable.imagen_no_found),
+                AsyncImage(
+                    model = producto.imageUrl,
                     contentDescription = producto.name,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
@@ -190,7 +191,7 @@ fun ProductCardPreview() {
             category = ProductCategory.FRUTAS,
             price = 1200.0,
             stock = 45,
-            imageUrl = R.drawable.manzana_fuji,
+            imageUrl = "https://example.com/manzana.jpg",
             description = "Manzanas frescas importadas"
         )
         ProductCard(
@@ -213,7 +214,7 @@ fun ProductCardFavoritoPreview() {
             category = ProductCategory.FRUTAS,
             price = 1200.0,
             stock = 45,
-            imageUrl = R.drawable.manzana_fuji,
+            imageUrl = "https://example.com/manzana.jpg",
             description = "Manzanas frescas importadas"
         )
         ProductCard(

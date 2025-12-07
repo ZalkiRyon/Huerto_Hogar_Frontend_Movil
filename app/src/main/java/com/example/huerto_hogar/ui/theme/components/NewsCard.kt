@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.huerto_hogar.model.Blog
 
 @Composable
@@ -62,8 +63,8 @@ fun NewsCard(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            Image(
-                painter = painterResource(id = article.bannerImg),
+            AsyncImage(
+                model = article.bannerImg,
                 contentDescription = "Imagen de ${article.title}",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

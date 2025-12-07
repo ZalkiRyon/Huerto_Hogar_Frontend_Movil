@@ -32,6 +32,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import coil.compose.AsyncImage
 import com.example.huerto_hogar.model.Blog
 
 @Composable
@@ -73,8 +74,8 @@ fun NewsModal(
                         contentPadding = PaddingValues(bottom = 16.dp)
                     ) {
                         item {
-                            Image(
-                                painter = painterResource(id = article.bannerImg),
+                            AsyncImage(
+                                model = article.bannerImg,
                                 contentDescription = "Banner de ${article.title}",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
@@ -111,8 +112,8 @@ fun NewsModal(
                             Row(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Image(
-                                    painter = painterResource(id = article.authorImg),
+                                AsyncImage(
+                                    model = article.authorImg,
                                     contentDescription = "Avatar de ${article.authorName}",
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
