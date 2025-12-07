@@ -1,17 +1,28 @@
 package com.example.huerto_hogar.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.huerto_hogar.manager.UserManagerViewModel
 import com.example.huerto_hogar.model.RegisterUser
 import com.example.huerto_hogar.model.RegistrationResult
 import com.example.huerto_hogar.model.User
+import com.example.huerto_hogar.repository.UserRepository
+import com.example.huerto_hogar.utils.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-
-class RegisterUserViewModel() : ViewModel() {
+/**
+ * ViewModel refactorizado para Registro con integración de API
+ * 
+ * Usa UserRepository para registrar usuarios en el backend
+ * Mantiene compatibilidad con UserManagerViewModel para gestión local temporal
+ */
+class RegisterUserViewModel(
+    private val repository: UserRepository = UserRepository()
+) : ViewModel() {
 
     lateinit var userManager: UserManagerViewModel
     // Unique StateFlow trying to clean the code without using multiples mutablestateflow
@@ -188,7 +199,7 @@ class RegisterUserViewModel() : ViewModel() {
         _uiState.update { RegisterUser() }
     }
 
-    // Function for button register
+    // Function for button register - Refactorizado para usar API
     fun onClickRegister() {
         val currentState = _uiState.value
 
@@ -212,6 +223,65 @@ class RegisterUserViewModel() : ViewModel() {
             return
         }
 
+        // Iniciar proceso de registro
+        _uiState.update { it.copy(isLoading = true) }
+
+        // TODO: Descomentar cuando el backend esté listo
+        /*
+        viewModelScope.launch {
+            repository.register(
+                name = validatedState.name,
+                lastname = validatedState.lastname,
+                email = validatedState.email,
+                password = validatedState.password,
+                phone = validatedState.phone.ifBlank { "" },
+                address = validatedState.address
+            ).collect { resource ->
+                when (resource) {
+                    is Resource.Loading -> {
+                        // Ya establecimos isLoading = true arriba
+                    }
+                    is Resource.Success -> {
+                        resource.data?.let { registerResponse ->
+                            // Guardar usuario y token en UserManager
+                            userManager.setCurrentUser(registerResponse.user)
+                            if (registerResponse.token != null) {
+                                userManager.saveAuthToken(registerResponse.token)
+                            }
+                            
+                            _uiState.update {
+                                it.copy(
+                                    registrationResultEvent = RegistrationResult.SUCCESS,
+                                    isLoading = false,
+                                    registeredUser = registerResponse.user
+                                )
+                            }
+                        }
+                    }
+                    is Resource.Error -> {
+                        val result = if (resource.message?.contains("ya existe") == true) {
+                            RegistrationResult.EMAIL_ALREADY_EXISTS
+                        } else {
+                            RegistrationResult.ERROR
+                        }
+                        
+                        _uiState.update {
+                            it.copy(
+                                registrationResultEvent = result,
+                                isLoading = false,
+                                errors = it.errors.copy(
+                                    emailError = if (result == RegistrationResult.EMAIL_ALREADY_EXISTS) 
+                                        "Este correo ya está registrado" else null
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        */
+
+        // Versión temporal usando UserManager hasta que el backend esté listo
         val newUser = User(
             name = validatedState.name,
             lastname = validatedState.lastname,
@@ -230,7 +300,6 @@ class RegisterUserViewModel() : ViewModel() {
             RegistrationResult.EMAIL_ALREADY_EXISTS
         }
 
-
         _uiState.update {
             it.copy(
                 registrationResultEvent = result,
@@ -238,6 +307,5 @@ class RegisterUserViewModel() : ViewModel() {
                 registeredUser = finalRegisteredUser
             )
         }
-
     }
 }

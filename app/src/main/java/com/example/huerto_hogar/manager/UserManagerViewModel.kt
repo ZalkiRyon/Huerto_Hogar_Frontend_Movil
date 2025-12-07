@@ -145,6 +145,10 @@ class UserManagerViewModel : ViewModel() {
 
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
+    
+    // Token de autenticación
+    private val _authToken = MutableStateFlow<String?>(null)
+    val authToken: StateFlow<String?> = _authToken.asStateFlow()
 
     private var nextId = initialUsers.maxOf { it.id } + 1
 
@@ -192,5 +196,31 @@ class UserManagerViewModel : ViewModel() {
 
     fun findUserByEmail(email: String): User? {
         return _userList.value.find { it.email.equals(email, ignoreCase = true) }
+    }
+    
+    /**
+     * Guarda el token de autenticación
+     * 
+     * @param token Token JWT del backend
+     */
+    fun saveAuthToken(token: String) {
+        _authToken.value = token
+    }
+    
+    /**
+     * Obtiene el token de autenticación actual
+     * 
+     * @return Token o null si no hay usuario autenticado
+     */
+    fun getAuthToken(): String? {
+        return _authToken.value
+    }
+    
+    /**
+     * Cierra sesión del usuario actual
+     */
+    fun logout() {
+        _currentUser.value = null
+        _authToken.value = null
     }
 }

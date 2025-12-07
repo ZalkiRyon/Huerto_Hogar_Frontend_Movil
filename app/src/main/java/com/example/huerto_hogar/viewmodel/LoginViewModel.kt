@@ -1,15 +1,27 @@
 package com.example.huerto_hogar.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.huerto_hogar.manager.UserManagerViewModel
 import com.example.huerto_hogar.model.LoginResult
 import com.example.huerto_hogar.model.LoginUser
+import com.example.huerto_hogar.repository.UserRepository
+import com.example.huerto_hogar.utils.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class LoginViewModel() : ViewModel() {
+/**
+ * ViewModel refactorizado para Login con integración de API
+ * 
+ * Usa UserRepository para autenticar usuarios contra el backend
+ * Mantiene compatibilidad con UserManagerViewModel para gestión de sesión
+ */
+class LoginViewModel(
+    private val repository: UserRepository = UserRepository()
+) : ViewModel() {
 
     lateinit var userManager: UserManagerViewModel
 
@@ -44,6 +56,11 @@ class LoginViewModel() : ViewModel() {
         _uiState.update { it.copy(loginResultEvent = null) }
     }
 
+    /**
+     * Inicia sesión usando el repositorio (API)
+     * 
+     * Realiza validaciones locales y luego llama al backend
+     */
     fun onClickLogin() {
         val currentState = _uiState.value
 
@@ -73,30 +90,48 @@ class LoginViewModel() : ViewModel() {
             return
         }
 
-
-        _uiState.update { it.copy(isLoading = true, errors = it.errors.copy(emailError = null, passwordError = null)) }
-
-
-        val foundUser = userManager.findUserByCredentials(
-            email = currentState.email,
-            password = currentState.password
-        )
-
-
-        val result = if (foundUser != null) {
-            userManager.setCurrentUser(foundUser)
-            LoginResult.SUCCESS
-        } else {
-            LoginResult.INVALID_CREDENTIALS
+        // Iniciar proceso de login con API
+        _uiState.update { 
+            it.copy(
+                isLoading = true, 
+                errors = it.errors.copy(emailError = null, passwordError = null)
+            ) 
         }
 
-
-        _uiState.update {
-            it.copy(
-                loginResultEvent = result,
-                isLoading = false,
-                loggedInUser = foundUser
-            )
+        viewModelScope.launch {
+            repository.login(currentState.email, currentState.password).collect { resource ->
+                when (resource) {
+                    is Resource.Loading -> {
+                        // Ya establecimos isLoading = true arriba
+                    }
+                    is Resource.Success -> {
+                        resource.data?.let { loginResponse ->
+                            // Guardar usuario y token en UserManager
+                            userManager.setCurrentUser(loginResponse.user)
+                            userManager.saveAuthToken(loginResponse.token)
+                            
+                            _uiState.update {
+                                it.copy(
+                                    loginResultEvent = LoginResult.SUCCESS,
+                                    isLoading = false,
+                                    loggedInUser = loginResponse.user
+                                )
+                            }
+                        }
+                    }
+                    is Resource.Error -> {
+                        _uiState.update {
+                            it.copy(
+                                loginResultEvent = LoginResult.INVALID_CREDENTIALS,
+                                isLoading = false,
+                                errors = it.errors.copy(
+                                    passwordError = resource.message ?: "Error al iniciar sesión"
+                                )
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

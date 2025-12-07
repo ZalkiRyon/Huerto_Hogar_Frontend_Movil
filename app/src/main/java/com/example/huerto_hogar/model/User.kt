@@ -1,28 +1,52 @@
 package com.example.huerto_hogar.model
 
+import com.google.gson.annotations.SerializedName
+
 // Roles in the system
 enum class Role {
+    @SerializedName("ADMIN")
     ADMIN,
+    
+    @SerializedName("CLIENT")
     CLIENT,
+    
+    @SerializedName("SALESMAN")
     SALESMAN
 }
 
-
-// THIS IS THE FINAL CLASS FOR USER
+/**
+ * Modelo de Usuario (DTO) que coincide con el backend
+ * 
+ * @SerializedName mapea los nombres de campos del JSON a las propiedades de Kotlin
+ */
 data class User(
-    // we use 0 for initial parameter but with the function it will be replace by another id
+    @SerializedName("id")
     val id: Int = 0,
+    
+    @SerializedName("role")
     val role: Role = Role.CLIENT,
 
-    // variables nullables
+    @SerializedName("comment")
     val comment: String? = null,
+    
+    @SerializedName("phone")
     val phone: String?,
 
-    // THIS THE USER HAVE TO FILL
+    @SerializedName("name")
     val name: String,
+    
+    @SerializedName("lastname")
     val lastname: String,
+    
+    @SerializedName("email")
     val email: String,
+    
+    @SerializedName("password")
     val password: String,
+    
+    @SerializedName("address")
     val address: String,
+    
+    @SerializedName("profilePictureUrl")
     val profilePictureUrl: String? = null
 )
