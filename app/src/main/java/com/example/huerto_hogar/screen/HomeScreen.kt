@@ -24,11 +24,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,11 +44,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.huerto_hogar.AppScreens.AppScreens
 import com.example.huerto_hogar.R
-import com.example.huerto_hogar.model.MockProducts
 import com.example.huerto_hogar.model.Product
+import com.example.huerto_hogar.viewmodel.ProductUiState
+import com.example.huerto_hogar.viewmodel.ProductViewModel
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -54,9 +60,6 @@ data class Category(
     val iconResId: Int
 )
 
-// Usar los productos del modelo centralizado - top 5 para featured
-val featuredProducts = MockProducts.products.take(5)
-
 val categories = listOf(
     Category("Frutas", AppScreens.FrutasScreen.route, R.drawable.orange),
     Category("Verduras", AppScreens.VerdurasScreen.route, R.drawable.carrot),
@@ -64,15 +67,28 @@ val categories = listOf(
 )
 
 /**
- * Pantalla principal de la aplicación. Preparada para contenido futuro con soporte de animaciones.
- *
- * TODO: Implementar contenido de Home. Se pueden aplicar:
- * - LoadingAnimations.kt para estados de carga
- * - ListAnimations.kt para listas de productos destacados
- * - TransitionAnimations.kt para navegación a detalle de productos
+ * Pantalla principal REFACTORIZADA con integración de API
+ * 
+ * Cambios:
+ * - Eliminado MockProducts
+ * - Agregado ProductViewModel para consumir API
+ * - Agregado manejo de estados (Loading, Success, Error)
+ * - Usa Flow y StateFlow para reactividad
  */
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(
+    navController: NavController,
+    productViewModel: ProductViewModel = viewModel()
+) {
+    // Observar estados del ViewModel
+    val productsState by productViewModel.productsState.collectAsState()
+    val products by productViewModel.products.collectAsState()
+    
+    // Cargar productos al iniciar la pantalla
+    LaunchedEffect(Unit) {
+        productViewModel.getAllProducts()
+    }
+    
     val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
@@ -90,9 +106,77 @@ fun HomeScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(24.dp))
 
         TitleWithDivider(title = "Productos Destacados")
-        FeaturedProductsCarousel(products = featuredProducts)
-
-
+        
+        // Renderizar según el estado de la petición
+        when (val state = productsState) {
+            is ProductUiState.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Cargando productos...")
+                    }
+                }
+            }
+            
+            is ProductUiState.Success -> {
+                val featuredProducts = products.take(5)
+                if (featuredProducts.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("No hay productos disponibles")
+                    }
+                } else {
+                    FeaturedProductsCarousel(products = featuredProducts)
+                }
+            }
+            
+            is ProductUiState.Error -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Error al cargar productos",
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Text(
+                            text = state.message,
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = { productViewModel.getAllProducts() }
+                        ) {
+                            Text("Reintentar")
+                        }
+                    }
+                }
+            }
+            
+            ProductUiState.Idle -> {
+                // Estado inicial
+            }
+        }
     }
 }
 

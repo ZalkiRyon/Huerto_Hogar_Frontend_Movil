@@ -1,27 +1,39 @@
 package com.example.huerto_hogar.screen
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.huerto_hogar.model.MockProducts
 import com.example.huerto_hogar.model.Product
 import com.example.huerto_hogar.model.ProductCategory
 import com.example.huerto_hogar.ui.theme.Huerto_HogarTheme
@@ -30,18 +42,28 @@ import com.example.huerto_hogar.ui.theme.components.ModalDetailProduct
 import com.example.huerto_hogar.ui.theme.components.ProductCard
 import com.example.huerto_hogar.viewmodel.CartViewModel
 import com.example.huerto_hogar.viewmodel.FavoritesViewModel
+import com.example.huerto_hogar.viewmodel.ProductUiState
+import com.example.huerto_hogar.viewmodel.ProductViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun FrutasScreen(
     navController: NavHostController,
+    productViewModel: ProductViewModel = viewModel(),
     cartViewModel: CartViewModel = viewModel(),
     favoritesViewModel: FavoritesViewModel = viewModel()
 ) {
-    // Filtrar solo productos de categoría FRUTAS
-    val frutas = remember {
-        MockProducts.products.filter { it.category == ProductCategory.FRUTAS }
+    // Observar estados del ViewModel
+    val productsState by productViewModel.productsState.collectAsState()
+    val products by productViewModel.products.collectAsState()
+    
+    // Cargar productos de categoría FRUTAS
+    LaunchedEffect(Unit) {
+        productViewModel.getProductsByCategory(ProductCategory.FRUTAS)
     }
+    
+    // Filtrar solo frutas del estado
+    val frutas = products.filter { it.category == ProductCategory.FRUTAS }
 
     val favoriteItems by favoritesViewModel.favoriteItems.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -90,22 +112,58 @@ fun FrutasScreen(
                 },
             )
         }
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)  // ← Este padding ya incluye el espacio del topBar
-                .padding(16.dp)  // ← Padding adicional para el contenido
-        ) {
-            items(
-                frutas.withIndex().toList(),
-                key = { (_, product) -> product.id }
-            ) { (index, producto) ->
-                ProductCard(
-                    producto = producto,
-                    onProductClick = { product ->
-                        selectedProduct = product
-                        showModal = true
-                    },
+        
+        // Manejo de estados de carga y error
+        when (productsState) {
+            is ProductUiState.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            is ProductUiState.Error -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = (productsState as ProductUiState.Error).message,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = { productViewModel.getProductsByCategory(ProductCategory.FRUTAS) }) {
+                            Text("Reintentar")
+                        }
+                    }
+                }
+            }
+            is ProductUiState.Success, ProductUiState.Idle -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(16.dp)
+                ) {
+                    items(
+                        frutas.withIndex().toList(),
+                        key = { (_, product) -> product.id }
+                    ) { (index, producto) ->
+                        ProductCard(
+                            producto = producto,
+                            onProductClick = { product ->
+                                selectedProduct = product
+                                showModal = true
+                            },
                     onAgregarCarrito = { productoAgregado ->
                         cartViewModel.addToCart(productoAgregado)
                         coroutineScope.launch {
@@ -134,6 +192,8 @@ fun FrutasScreen(
                     },
                     isFavorito = favoriteItems.any { it.id == producto.id }
                 )
+            }
+        }
             }
         }
     }

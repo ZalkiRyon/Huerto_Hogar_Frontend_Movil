@@ -44,22 +44,39 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.huerto_hogar.model.MockProducts
 import com.example.huerto_hogar.model.Product
 import com.example.huerto_hogar.model.ProductCategory
 import com.example.huerto_hogar.ui.theme.components.animations.bounceInEffect
+import com.example.huerto_hogar.viewmodel.ProductViewModel
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.CircularProgressIndicator
+import com.example.huerto_hogar.viewmodel.ProductUiState
 
 /**
  * Pantalla de gestión de inventario (display only por ahora).
  */
 @Composable
-fun AdminInventoryScreen(navController: NavController) {
+fun AdminInventoryScreen(
+    navController: NavController,
+    productViewModel: ProductViewModel = viewModel()
+) {
     var selectedCategory by remember { mutableStateOf<ProductCategory?>(null) }
     var searchQuery by remember { mutableStateOf("") }
 
-    val filteredProducts = remember(selectedCategory, searchQuery) {
-        MockProducts.products.filter { product ->
+    // Observar estados del ViewModel
+    val productsState by productViewModel.productsState.collectAsState()
+    val products by productViewModel.products.collectAsState()
+    
+    // Cargar todos los productos al iniciar
+    LaunchedEffect(Unit) {
+        productViewModel.getAllProducts()
+    }
+
+    val filteredProducts = remember(products, selectedCategory, searchQuery) {
+        products.filter { product ->
             val matchesCategory = selectedCategory == null || product.category == selectedCategory
             val matchesSearch = searchQuery.isEmpty() ||
                     product.name.contains(searchQuery, ignoreCase = true)
@@ -180,12 +197,43 @@ fun AdminInventoryScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Products List
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(filteredProducts) { product ->
-                ProductInventoryCard(product = product)
+        // Manejo de estados de carga
+        when (productsState) {
+            is ProductUiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            is ProductUiState.Error -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = (productsState as ProductUiState.Error).message,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = { productViewModel.getAllProducts() }) {
+                            Text("Reintentar")
+                        }
+                    }
+                }
+            }
+            is ProductUiState.Success, ProductUiState.Idle -> {
+                // Products List
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(filteredProducts) { product ->
+                        ProductInventoryCard(product = product)
+                    }
+                }
             }
         }
     }

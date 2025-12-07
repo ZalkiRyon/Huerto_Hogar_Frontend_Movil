@@ -23,10 +23,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.huerto_hogar.manager.UserManagerViewModel
-import com.example.huerto_hogar.model.MockProducts
 import com.example.huerto_hogar.model.Role
 import com.example.huerto_hogar.ui.theme.components.animations.pressClickEffectWithInteraction
+import com.example.huerto_hogar.viewmodel.ProductViewModel
 import com.example.huerto_hogar.viewmodel.SalesViewModel
+import androidx.compose.runtime.LaunchedEffect
 
 /**
  * Dashboard administrativo con estadísticas de la tienda (datos dinámicos).
@@ -34,15 +35,22 @@ import com.example.huerto_hogar.viewmodel.SalesViewModel
 @Composable
 fun AdminDashboardScreen(
     userManager: UserManagerViewModel = viewModel(),
+    productViewModel: ProductViewModel = viewModel(),
     salesViewModel: SalesViewModel = viewModel()
 ) {
     val scrollState = rememberScrollState()
     
     // Obtener datos dinámicos
     val userList by userManager.userList.collectAsState()
-    val totalProducts = MockProducts.products.size
+    val products by productViewModel.products.collectAsState()
+    val totalProducts = products.size
     val clientsCount = userList.count { it.role == Role.CLIENT }
     val dailySales by salesViewModel.dailySales.collectAsState()
+    
+    // Cargar productos al iniciar
+    LaunchedEffect(Unit) {
+        productViewModel.getAllProducts()
+    }
 
     Column(
         modifier = Modifier
