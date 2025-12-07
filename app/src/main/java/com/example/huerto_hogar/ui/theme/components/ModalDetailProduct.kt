@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import coil.compose.AsyncImage
 import com.example.huerto_hogar.R
 import com.example.huerto_hogar.model.Product
 import com.example.huerto_hogar.viewmodel.CartViewModel
