@@ -91,9 +91,9 @@ fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) 
     }
     
     LaunchedEffect(viewModel.imageUploadError) {
-        viewModel.imageUploadError.collect { error ->
-            error?.let {
-                Toast.makeText(context, "Error: $it", Toast.LENGTH_LONG).show()
+        viewModel.imageUploadError.collect { message ->
+            message?.let {
+                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             }
         }
     }

@@ -116,7 +116,11 @@ class UserSettingsViewModel() : ViewModel() {
                 if (imageUrl != null) {
                     // Update user state with the new Cloudinary URL
                     val updatedUser = currentUser.copy(profilePictureUrl = imageUrl)
-                    userManager.updateUser(updatedUser)
+                    Log.d("UserSettingsViewModel", "Updated user object: $updatedUser")
+                    
+                    val updateSuccess = userManager.updateUser(updatedUser)
+                    Log.d("UserSettingsViewModel", "UserManager.updateUser returned: $updateSuccess")
+                    Log.d("UserSettingsViewModel", "Current user after update: ${userManager.currentUser.value}")
                     
                     // Clear local URI since we now have the Cloudinary URL
                     _profilePictureUri.value = null
@@ -127,7 +131,7 @@ class UserSettingsViewModel() : ViewModel() {
                     }
                     
                     Log.d("UserSettingsViewModel", "Profile image uploaded successfully: $imageUrl")
-                    _imageUploadError.emit("Imagen subida exitosamente")
+                    _imageUploadError.emit("✓ Foto de perfil actualizada")
                 } else {
                     _imageUploadError.emit("No se recibió la URL de la imagen")
                 }
