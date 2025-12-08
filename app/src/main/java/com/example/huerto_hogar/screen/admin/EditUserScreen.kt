@@ -225,7 +225,7 @@ fun EditUserScreen(
                 value = run,
                 onValueChange = { run = it },
                 label = { Text("RUN (ej: 12.345.678-K)") },
-                leadingIcon = { Icon(Icons.Default.Badge, contentDescription = null) },
+                leadingIcon = { Icon(Icons.Default.AccountBox, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 singleLine = true
