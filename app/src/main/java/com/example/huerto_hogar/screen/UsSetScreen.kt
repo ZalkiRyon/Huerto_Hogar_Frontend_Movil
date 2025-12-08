@@ -66,6 +66,7 @@ fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) 
     val showSourceDialog = remember { mutableStateOf(false) }
     var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
     val profileUri by viewModel.profilePictureUri.collectAsState()
+    val uploadingImage by viewModel.uploadingImage.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.loadUserProfile()
@@ -87,6 +88,14 @@ fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) 
             }
         }
     }
+    
+    LaunchedEffect(viewModel.imageUploadError) {
+        viewModel.imageUploadError.collect { error ->
+            error?.let {
+                Toast.makeText(context, "Error: $it", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
 
     if (!formState.isInitialLoadComplete) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -98,16 +107,14 @@ fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let { viewModel.setProfilePictureUri(it) }
+        uri?.let { viewModel.setProfilePictureUri(it, context) }
     }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success: Boolean ->
         if (success) {
-            // este webon no deja cambiar
-            //viewModel.setProfilePictureUri(uri)
-            cameraImageUri?.let { viewModel.setProfilePictureUri(it) }
+            cameraImageUri?.let { viewModel.setProfilePictureUri(it, context) }
         }
     }
 
@@ -185,9 +192,17 @@ fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) 
                     .clickable { showSourceDialog.value = true },
                 contentAlignment = Alignment.Center
             ) {
-                if (profileUri != null) {
+                // Show image from Cloudinary URL if available, otherwise show local URI
+                val imageToShow = if (!formState.newProfilePhoto.isNullOrBlank() && 
+                    formState.newProfilePhoto.startsWith("http")) {
+                    formState.newProfilePhoto
+                } else {
+                    profileUri
+                }
+                
+                if (imageToShow != null) {
                     Image(
-                        painter = rememberAsyncImagePainter(model = profileUri),
+                        painter = rememberAsyncImagePainter(model = imageToShow),
                         contentDescription = "Foto de perfil",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
@@ -200,14 +215,32 @@ fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) 
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
+                
+                // Show loading indicator while uploading
+                if (uploadingImage) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(40.dp),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
             }
 
             Spacer(Modifier.height(8.dp))
 
             Text(
-                text = "Toca para cambiar la foto",
+                text = when {
+                    uploadingImage -> "Subiendo imagen..."
+                    else -> "Toca para cambiar la foto"
+                },
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary // Cambié a primary para que se vea mejor
+                color = MaterialTheme.colorScheme.primary
             )
         }
 

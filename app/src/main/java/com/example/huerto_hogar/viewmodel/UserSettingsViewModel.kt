@@ -1,12 +1,16 @@
 package com.example.huerto_hogar.viewmodel
 
+import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.huerto_hogar.data.di.NetworkModule
 import com.example.huerto_hogar.manager.UserManagerViewModel
 import com.example.huerto_hogar.model.User
 import com.example.huerto_hogar.model.UserSetting
 import com.example.huerto_hogar.model.UserSettingErrors
+import com.example.huerto_hogar.utils.FileUtils
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -18,6 +22,7 @@ import kotlinx.coroutines.launch
 
 class UserSettingsViewModel() : ViewModel() {
     lateinit var userManager: UserManagerViewModel
+    private val userApiService = NetworkModule.userApiService
 
     private val _uiState = MutableStateFlow(UserSetting())
     val uiState: StateFlow<UserSetting> = _uiState.asStateFlow()
@@ -27,6 +32,12 @@ class UserSettingsViewModel() : ViewModel() {
 
     private val _profilePictureUri = MutableStateFlow<Uri?>(null)
     val profilePictureUri: StateFlow<Uri?> = _profilePictureUri
+    
+    private val _uploadingImage = MutableStateFlow(false)
+    val uploadingImage: StateFlow<Boolean> = _uploadingImage.asStateFlow()
+    
+    private val _imageUploadError = MutableSharedFlow<String?>()
+    val imageUploadError: SharedFlow<String?> = _imageUploadError.asSharedFlow()
 
 
     fun loadUserProfile() {
@@ -40,21 +51,93 @@ class UserSettingsViewModel() : ViewModel() {
                     email = user.email,
                     address = user.address,
                     phone = user.phone ?: "",
-                    newProfilePhoto = user.profilePictureUrl.toString(),
+                    newProfilePhoto = user.profilePictureUrl ?: "",
                     isInitialLoadComplete = true
                 )
+            }
+            
+            // If user has a profile picture URL from Cloudinary, clear the local URI
+            if (!user.profilePictureUrl.isNullOrBlank()) {
+                _profilePictureUri.value = null
             }
         }
     }
 
-    fun setProfilePictureUri(uri: Uri?) {
+    fun setProfilePictureUri(uri: Uri?, context: Context? = null) {
         _profilePictureUri.value = uri
-        val uriString = uri.toString()
-
-        _uiState.update {
-            it.copy(
-                newProfilePhoto = uriString,
+        
+        // Auto-upload to backend when URI is set and context is available
+        if (uri != null && context != null) {
+            uploadProfileImage(uri, context)
+        }
+    }
+    
+    /**
+     * Uploads the selected profile image to the backend (which uploads to Cloudinary)
+     * and updates the user's profile with the new image URL
+     */
+    private fun uploadProfileImage(uri: Uri, context: Context) = viewModelScope.launch {
+        val currentUser = userManager.currentUser.value
+        if (currentUser == null) {
+            _imageUploadError.emit("Usuario no encontrado")
+            return@launch
+        }
+        
+        _uploadingImage.value = true
+        
+        try {
+            // Convert URI to MultipartBody.Part using FileUtils
+            val imagePart = FileUtils.prepareImagePart(context, uri, "file")
+            
+            if (imagePart == null) {
+                _imageUploadError.emit("Error al preparar la imagen")
+                _uploadingImage.value = false
+                return@launch
+            }
+            
+            // Get auth token
+            val token = userManager.getAuthToken() ?: run {
+                _imageUploadError.emit("Token no disponible")
+                _uploadingImage.value = false
+                return@launch
+            }
+            
+            // Upload image to backend
+            val response = userApiService.uploadProfileImage(
+                id = currentUser.id,
+                file = imagePart,
+                token = "Bearer $token"
             )
+            
+            if (response.isSuccessful) {
+                val uploadResponse = response.body()
+                val imageUrl = uploadResponse?.imageUrl
+                
+                if (imageUrl != null) {
+                    // Update user state with the new Cloudinary URL
+                    val updatedUser = currentUser.copy(profilePictureUrl = imageUrl)
+                    userManager.updateUser(updatedUser)
+                    
+                    // Update UI state
+                    _uiState.update {
+                        it.copy(newProfilePhoto = imageUrl)
+                    }
+                    
+                    Log.d("UserSettingsViewModel", "Profile image uploaded successfully: $imageUrl")
+                } else {
+                    _imageUploadError.emit("No se recibió la URL de la imagen")
+                }
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Error desconocido"
+                _imageUploadError.emit("Error al subir imagen: ${response.code()}")
+                Log.e("UserSettingsViewModel", "Upload failed: $errorMsg")
+            }
+            
+        } catch (e: Exception) {
+            _imageUploadError.emit("Error de red: ${e.message}")
+            Log.e("UserSettingsViewModel", "Exception during upload", e)
+        } finally {
+            _uploadingImage.value = false
         }
     }
 
