@@ -26,6 +26,7 @@ import java.util.*
  */
 data class Receipt(
     val receiptNumber: String,
+    val orderNumber: String? = null,
     val date: String,
     val items: List<CartItem>,
     val subtotal: Double,
@@ -94,7 +95,7 @@ fun ReceiptDialog(
                                     color = MaterialTheme.colorScheme.primary
                                 )
                                 Text(
-                                    text = "Boleta #${receipt.receiptNumber}",
+                                    text = if (receipt.orderNumber != null) "Orden #${receipt.orderNumber}" else "Boleta #${receipt.receiptNumber}",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                                 )

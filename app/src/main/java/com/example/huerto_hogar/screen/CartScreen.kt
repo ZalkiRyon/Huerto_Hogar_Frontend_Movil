@@ -443,6 +443,7 @@ fun CartScreen(
                                                     // Si no hay usuario o token, mostrar el recibo de todos modos (modo offline)
                                                     val receipt = Receipt(
                                                         receiptNumber = generateReceiptNumber(),
+                                                        orderNumber = null,
                                                         date = getCurrentDateTime(),
                                                         items = cartItems,
                                                         subtotal = subtotal,
@@ -487,9 +488,10 @@ fun CartScreen(
                                                             Log.d("CartScreen", "Order created successfully: ${resource.data}")
                                                             if (!orderCreated) {
                                                                 orderCreated = true
-                                                                // Generar boleta
+                                                                // Generar boleta con número de orden del backend
                                                                 val receipt = Receipt(
                                                                     receiptNumber = generateReceiptNumber(),
+                                                                    orderNumber = resource.data?.orderNumber,
                                                                     date = getCurrentDateTime(),
                                                                     items = cartItems,
                                                                     subtotal = subtotal,
@@ -517,6 +519,7 @@ fun CartScreen(
                                                                 // Mostrar recibo de todos modos aunque falle el backend
                                                                 val receipt = Receipt(
                                                                     receiptNumber = generateReceiptNumber(),
+                                                                    orderNumber = null,
                                                                     date = getCurrentDateTime(),
                                                                     items = cartItems,
                                                                     subtotal = subtotal,
@@ -542,6 +545,7 @@ fun CartScreen(
                                                 // En caso de excepción, mostrar el recibo de todos modos
                                                 val receipt = Receipt(
                                                     receiptNumber = generateReceiptNumber(),
+                                                    orderNumber = null,
                                                     date = getCurrentDateTime(),
                                                     items = cartItems,
                                                     subtotal = subtotal,
