@@ -19,7 +19,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.huerto_hogar.manager.UserManagerViewModel
 import com.example.huerto_hogar.model.User
+import com.example.huerto_hogar.repository.UserRepository
 import com.example.huerto_hogar.ui.theme.components.animations.bounceInEffect
+import com.example.huerto_hogar.ui.theme.components.ConfirmationDialog
+import com.example.huerto_hogar.utils.Resource
+import kotlinx.coroutines.launch
 
 // No necesitamos MockUsers aquí - usamos directamente UserManagerViewModel
 
@@ -35,24 +39,40 @@ fun AdminUsersScreen(
     var searchQuery by remember { mutableStateOf("") }
     
     val userList by userManager.userList.collectAsState()
+    val currentUser by userManager.currentUser.collectAsState()
     
-    val filteredUsers = remember(selectedRole, searchQuery, userList) {
+    // Estados para el modal de confirmación de eliminación
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var userToDelete by remember { mutableStateOf<User?>(null) }
+    var isDeleting by remember { mutableStateOf(false) }
+    
+    val userRepository = remember { UserRepository() }
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    
+    val filteredUsers = remember(selectedRole, searchQuery, userList, currentUser) {
         userList.filter { user ->
+            // Excluir al usuario loggeado para evitar auto-modificación/eliminación
+            val isNotCurrentUser = currentUser?.id != user.id
             val matchesRole = selectedRole == null || user.role == selectedRole
             val matchesSearch = searchQuery.isEmpty() || 
                 user.name.contains(searchQuery, ignoreCase = true) ||
                 user.lastname.contains(searchQuery, ignoreCase = true) ||
                 user.email.contains(searchQuery, ignoreCase = true)
-            matchesRole && matchesSearch
+            isNotCurrentUser && matchesRole && matchesSearch
         }
     }
     
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp)
-    ) {
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
         // Header
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -132,17 +152,70 @@ fun AdminUsersScreen(
             items(filteredUsers) { user ->
                 UserManagementCard(
                     user = user,
-                    navController = navController
+                    navController = navController,
+                    onDeleteClick = {
+                        userToDelete = user
+                        showDeleteDialog = true
+                    }
                 )
             }
         }
+        }
+        
+        // Modal de confirmación de eliminación
+        ConfirmationDialog(
+            showDialog = showDeleteDialog,
+            onDismiss = {
+                showDeleteDialog = false
+                userToDelete = null
+            },
+            onConfirm = {
+                userToDelete?.let { user ->
+                    isDeleting = true
+                    coroutineScope.launch {
+                        userRepository.deleteUser(user.id, "").collect { resource ->
+                            when (resource) {
+                                is Resource.Loading -> {
+                                    // Mantener isDeleting = true
+                                }
+                                is Resource.Success -> {
+                                    isDeleting = false
+                                    showDeleteDialog = false
+                                    snackbarHostState.showSnackbar(
+                                        message = "Usuario ${user.name} ${user.lastname} eliminado exitosamente",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                    // Recargar lista de usuarios
+                                    userManager.loadUsersFromBackend()
+                                    userToDelete = null
+                                }
+                                is Resource.Error -> {
+                                    isDeleting = false
+                                    showDeleteDialog = false
+                                    snackbarHostState.showSnackbar(
+                                        message = resource.message ?: "Error al eliminar usuario",
+                                        duration = SnackbarDuration.Long
+                                    )
+                                    userToDelete = null
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            title = "Eliminar Usuario",
+            message = "¿Estás seguro de que deseas eliminar a ${userToDelete?.name} ${userToDelete?.lastname}? Esta acción no se puede deshacer.",
+            confirmButtonText = if (isDeleting) "Eliminando..." else "Sí, eliminar",
+            dismissButtonText = "Cancelar"
+        )
     }
 }
 
 @Composable
 fun UserManagementCard(
     user: User,
-    navController: NavController
+    navController: NavController,
+    onDeleteClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -248,10 +321,7 @@ fun UserManagementCard(
                 }
                 
                 IconButton(
-                    onClick = { 
-                        // TODO: Implementar confirmación de eliminación
-                        // Por ahora solo muestra un placeholder
-                    },
+                    onClick = onDeleteClick,
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = Color.Red.copy(alpha = 0.1f)
                     )
