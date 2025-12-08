@@ -96,6 +96,13 @@ fun AppNavigationContainer() {
     val currentUser by userManager.currentUser.collectAsState()
     val showAdminStoreView by userManager.showAdminStoreView.collectAsState()
 
+    // Inicializar favoritos cuando el usuario se loguea
+    LaunchedEffect(currentUser) {
+        currentUser?.let { user ->
+            favoritesViewModel.setUserId(user.id)
+        }
+    }
+
     // Si el usuario es admin y NO está en modo tienda, mostrar panel de administración
     if (currentUser?.role == "admin" && !showAdminStoreView) {
         AdminNavigationContainer(
