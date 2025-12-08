@@ -229,9 +229,9 @@ fun AdminInventoryScreen(
                 )
 
                 FilterChip(
-                    selected = selectedCategory == "Verduras frescas",
-                    onClick = { selectedCategory = "Verduras frescas" },
-                    label = { Text("Verduras frescas") },
+                    selected = selectedCategory == "Verduras organicas",
+                    onClick = { selectedCategory = "Verduras organicas" },
+                    label = { Text("Verduras orgánicas") },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = MaterialTheme.colorScheme.primary,
                         selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
@@ -247,9 +247,9 @@ fun AdminInventoryScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 FilterChip(
-                    selected = selectedCategory == "Orgánicos",
-                    onClick = { selectedCategory = "Orgánicos" },
-                    label = { Text("Orgánicos") },
+                    selected = selectedCategory == "Productos organicos",
+                    onClick = { selectedCategory = "Productos organicos" },
+                    label = { Text("Productos orgánicos") },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = MaterialTheme.colorScheme.primary,
                         selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
@@ -259,9 +259,9 @@ fun AdminInventoryScreen(
                 )
 
                 FilterChip(
-                    selected = selectedCategory == "Productos procesados",
-                    onClick = { selectedCategory = "Productos procesados" },
-                    label = { Text("Productos procesados") },
+                    selected = selectedCategory == "Productos lacteos",
+                    onClick = { selectedCategory = "Productos lacteos" },
+                    label = { Text("Productos lácteos") },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = MaterialTheme.colorScheme.primary,
                         selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
@@ -311,7 +311,6 @@ fun AdminInventoryScreen(
                         ProductInventoryCard(
                             product = product,
                             onEdit = { 
-                                // Navegar a la pantalla de editar producto
                                 navController.navigate("editProduct/${it.id}")
                             },
                             onDelete = {

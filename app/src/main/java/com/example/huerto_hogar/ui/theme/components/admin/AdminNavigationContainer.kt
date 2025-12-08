@@ -54,6 +54,7 @@ import com.example.huerto_hogar.screen.admin.AdminInventoryScreen
 import com.example.huerto_hogar.screen.admin.AdminUsersScreen
 import com.example.huerto_hogar.screen.admin.AdminOrdersScreen
 import com.example.huerto_hogar.screen.admin.CreateProductScreen
+import com.example.huerto_hogar.screen.admin.EditProductScreen
 import com.example.huerto_hogar.screen.admin.CreateUserScreen
 import com.example.huerto_hogar.screen.admin.EditUserScreen
 import com.example.huerto_hogar.screen.admin.OrderDetailScreen
@@ -270,6 +271,20 @@ fun AdminNavigationContainer(
                 exitTransition = { slideOutToLeftWithFade() }
             ) {
                 CreateProductScreen(navController = navController)
+            }
+            
+            // Ruta para editar producto
+            composable(
+                route = "editProduct/{productId}",
+                arguments = listOf(navArgument("productId") { type = NavType.IntType }),
+                enterTransition = { slideInFromRightWithFade() },
+                exitTransition = { slideOutToLeftWithFade() }
+            ) { backStackEntry ->
+                val productId = backStackEntry.arguments?.getInt("productId") ?: 0
+                EditProductScreen(
+                    navController = navController,
+                    productId = productId
+                )
             }
             
             // Ruta para crear usuario
