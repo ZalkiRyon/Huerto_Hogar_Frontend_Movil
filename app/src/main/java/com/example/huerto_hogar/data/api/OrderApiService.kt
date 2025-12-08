@@ -1,6 +1,7 @@
 package com.example.huerto_hogar.data.api
 
 import com.example.huerto_hogar.model.Order
+import com.example.huerto_hogar.model.OrderRequest
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -20,6 +21,15 @@ interface OrderApiService {
      */
     @GET("ordenes/{id}")
     suspend fun getOrderById(@Path("id") id: Int): Response<Order>
+    
+    /**
+     * Crea una nueva orden (Cliente)
+     */
+    @POST("ordenes")
+    suspend fun createOrder(
+        @Body orderRequest: OrderRequest,
+        @Header("Authorization") token: String
+    ): Response<Order>
     
     /**
      * Elimina una orden (Admin)

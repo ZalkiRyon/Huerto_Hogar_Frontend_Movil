@@ -57,13 +57,16 @@ fun OrganicosScreen(
     val productsState by productViewModel.productsState.collectAsState()
     val products by productViewModel.products.collectAsState()
     
-    // Cargar productos de categoría ORGANICOS
+    // Cargar todos los productos para filtrar múltiples categorías
     LaunchedEffect(Unit) {
-        productViewModel.getProductsByCategory("Orgánicos")
+        productViewModel.getAllProducts()
     }
     
-    // Filtrar solo orgánicos del estado
-    val organicos = products.filter { it.category.contains("Orgánico", ignoreCase = true) }
+    // Filtrar orgánicos y lácteos del estado
+    val organicos = products.filter { 
+        it.category.equals("Productos organicos", ignoreCase = true) || 
+        it.category.equals("Productos lacteos", ignoreCase = true)
+    }
 
     val favoriteItems by favoritesViewModel.favoriteItems.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
