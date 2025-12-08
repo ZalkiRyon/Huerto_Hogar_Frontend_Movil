@@ -60,7 +60,7 @@ data class User(
     @SerializedName("fechaRegistro")
     val registrationDate: String? = null,
     
-    @SerializedName("fotoPerfil")
+    @SerializedName("fotoPerfilUrl")
     val profilePictureUrl: String? = null,
     
     @SerializedName("activo")

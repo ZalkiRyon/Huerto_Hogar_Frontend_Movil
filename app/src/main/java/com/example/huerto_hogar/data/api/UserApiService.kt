@@ -5,6 +5,7 @@ import com.example.huerto_hogar.model.LoginRequest
 import com.example.huerto_hogar.model.RegisterUser
 import com.example.huerto_hogar.model.UpdateUserRequest
 import com.example.huerto_hogar.model.User
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -24,6 +25,15 @@ data class RegisterResponse(
     val user: User,
     val token: String? = null,
     val message: String
+)
+
+/**
+ * Respuesta de subida de imagen de perfil
+ */
+data class UploadProfileImageResponse(
+    val message: String,
+    val user: User,
+    val imageUrl: String
 )
 
 /**
@@ -126,4 +136,15 @@ interface UserApiService {
         @Path("id") id: Int,
         @Header("Authorization") token: String
     ): Response<Unit>
+    
+    /**
+     * Sube imagen de perfil del usuario
+     */
+    @Multipart
+    @POST("usuarios/{id}/foto-perfil")
+    suspend fun uploadProfileImage(
+        @Path("id") id: Int,
+        @Part file: MultipartBody.Part,
+        @Header("Authorization") token: String = ""
+    ): Response<UploadProfileImageResponse>
 }
