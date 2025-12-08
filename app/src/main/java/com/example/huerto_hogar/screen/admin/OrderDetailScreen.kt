@@ -126,11 +126,31 @@ fun OrderDetailScreen(
                 title = "Detalles Financieros",
                 icon = Icons.Default.ShoppingCart
             ) {
-                DetailRow("Monto Total", "$${order.totalProducts}", isHighlight = true)
+                // Productos individuales
+                if (order.orderDetails.isNotEmpty()) {
+                    Text(
+                        text = "Productos:",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    
+                    order.orderDetails.forEach { detail ->
+                        ProductDetailRow(
+                            productName = detail.productName,
+                            quantity = detail.quantity,
+                            unitPrice = detail.unitPrice,
+                            subtotal = detail.subtotal
+                        )
+                    }
+                    
+                    Divider(modifier = Modifier.padding(vertical = 12.dp))
+                }
+                
+                DetailRow("Subtotal Productos", "$${order.totalProducts}", isHighlight = true)
                 DetailRow("Costo de Envío", "$${order.shippingCost}")
-                val total = order.totalProducts + order.shippingCost
                 Divider(modifier = Modifier.padding(vertical = 8.dp))
-                DetailRow("Total Final", "$$total", isHighlight = true, isBold = true)
+                DetailRow("Total Final", "$${order.totalFinal}", isHighlight = true, isBold = true)
             }
             
             // Comentarios (si existen)
@@ -221,5 +241,67 @@ fun DetailRow(
             },
             fontWeight = if (isBold) FontWeight.Bold else FontWeight.Normal
         )
+    }
+}
+
+/**
+ * Fila con detalle de un producto individual en la orden
+ */
+@Composable
+fun ProductDetailRow(
+    productName: String,
+    quantity: Int,
+    unitPrice: Int,
+    subtotal: Int
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .background(
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                RoundedCornerShape(8.dp)
+            )
+            .padding(12.dp)
+    ) {
+        // Nombre del producto
+        Text(
+            text = productName,
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        
+        Spacer(modifier = Modifier.height(4.dp))
+        
+        // Precio unitario y cantidad
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Precio unitario: $$unitPrice",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+            Text(
+                text = "Cantidad: $quantity",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(4.dp))
+        
+        // Subtotal
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            Text(
+                text = "Subtotal: $$subtotal",
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
     }
 }

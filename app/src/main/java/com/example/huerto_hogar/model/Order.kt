@@ -43,12 +43,42 @@ data class Order(
     val phone: String,
     
     @SerializedName("comentario")
-    val comments: String? = null
+    val comments: String? = null,
+    
+    @SerializedName("detalles")
+    val orderDetails: List<OrderDetail> = emptyList()
 ) {
     // Propiedad computada para compatibilidad con código existente
     val status: OrderStatus
         get() = OrderStatus(id = 0, name = statusName)
+    
+    // Total final (monto productos + costo envío)
+    val totalFinal: Int
+        get() = totalProducts + shippingCost
 }
+
+/**
+ * Detalle de producto en la orden
+ */
+data class OrderDetail(
+    @SerializedName("id")
+    val id: Int,
+    
+    @SerializedName("nombreProductoSnapshot")
+    val productName: String,
+    
+    @SerializedName("precioUnitarioSnapshot")
+    val unitPrice: Int,
+    
+    @SerializedName("cantidad")
+    val quantity: Int,
+    
+    @SerializedName("subtotal")
+    val subtotal: Int,
+    
+    @SerializedName("imagen")
+    val image: String? = null
+)
 
 /**
  * Estado de la orden
