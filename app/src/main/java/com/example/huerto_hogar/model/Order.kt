@@ -3,7 +3,7 @@ package com.example.huerto_hogar.model
 import com.google.gson.annotations.SerializedName
 
 /**
- * Modelo de Orden (Pedido)
+ * Modelo de Orden (Pedido) - mapea respuesta del backend
  */
 data class Order(
     @SerializedName("id")
@@ -12,42 +12,43 @@ data class Order(
     @SerializedName("numeroOrden")
     val orderNumber: String,
     
-    @SerializedName("usuario")
-    val user: User,
-    
-    @SerializedName("nombreCliente")
-    val customerName: String,
-    
-    @SerializedName("emailCliente")
-    val customerEmail: String,
-    
-    @SerializedName("direccion")
-    val address: String,
-    
-    @SerializedName("region")
-    val region: String,
-    
-    @SerializedName("comuna")
-    val comuna: String,
-    
-    @SerializedName("telefono")
-    val phone: String,
-    
-    @SerializedName("fechaCreacion")
+    @SerializedName("fecha")
     val createdDate: String,
     
     @SerializedName("estado")
-    val status: OrderStatus,
+    val statusName: String, // Backend devuelve String directamente, no objeto
     
-    @SerializedName("totalProductos")
+    @SerializedName("montoTotal")
     val totalProducts: Int,
     
     @SerializedName("costoEnvio")
     val shippingCost: Int,
     
+    @SerializedName("nombreClienteSnapshot")
+    val customerName: String,
+    
+    @SerializedName("emailClienteSnapshot")
+    val customerEmail: String,
+    
+    @SerializedName("direccionEnvio")
+    val address: String,
+    
+    @SerializedName("regionEnvio")
+    val region: String,
+    
+    @SerializedName("comunaEnvio")
+    val comuna: String,
+    
+    @SerializedName("telefonoContacto")
+    val phone: String,
+    
     @SerializedName("comentario")
     val comments: String? = null
-)
+) {
+    // Propiedad computada para compatibilidad con código existente
+    val status: OrderStatus
+        get() = OrderStatus(id = 0, name = statusName)
+}
 
 /**
  * Estado de la orden
