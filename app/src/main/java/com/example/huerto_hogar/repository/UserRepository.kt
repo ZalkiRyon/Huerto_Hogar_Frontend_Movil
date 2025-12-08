@@ -319,4 +319,27 @@ class UserRepository(
             emit(Resource.Error(errorMsg))
         }
     }.flowOn(Dispatchers.IO)
+    
+    /**
+     * Reactiva un usuario desactivado
+     * 
+     * @param userId ID del usuario a reactivar
+     * @param token Token de autenticación del admin
+     * @return Flow<Resource<Unit>>
+     */
+    fun reactivateUser(userId: Int, token: String): Flow<Resource<Unit>> = flow {
+        try {
+            emit(Resource.Loading())
+            
+            val response = apiService.reactivateUser(userId, "Bearer $token")
+            
+            if (response.isSuccessful) {
+                emit(Resource.Success(Unit))
+            } else {
+                emit(Resource.Error("Error al reactivar usuario: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            emit(Resource.Error(NetworkUtils.handleNetworkException(e)))
+        }
+    }.flowOn(Dispatchers.IO)
 }

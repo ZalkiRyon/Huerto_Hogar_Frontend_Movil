@@ -203,4 +203,27 @@ class ProductRepository(
             emit(Resource.Error(NetworkUtils.handleNetworkException(e)))
         }
     }.flowOn(Dispatchers.IO)
+    
+    /**
+     * Reactiva un producto desactivado (requiere token de autenticación)
+     * 
+     * @param productId ID del producto a reactivar
+     * @param token Token de autenticación del admin
+     * @return Flow<Resource<Unit>> - Stream de estados de la petición
+     */
+    fun reactivateProduct(productId: Int, token: String): Flow<Resource<Unit>> = flow {
+        try {
+            emit(Resource.Loading())
+            
+            val response = apiService.reactivateProduct(productId, "Bearer $token")
+            
+            if (response.isSuccessful) {
+                emit(Resource.Success(Unit))
+            } else {
+                emit(Resource.Error("Error al reactivar producto: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            emit(Resource.Error(NetworkUtils.handleNetworkException(e)))
+        }
+    }.flowOn(Dispatchers.IO)
 }

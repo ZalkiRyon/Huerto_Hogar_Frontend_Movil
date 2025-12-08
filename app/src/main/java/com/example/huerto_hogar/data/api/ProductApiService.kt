@@ -75,4 +75,13 @@ interface ProductApiService {
         @Body stockUpdate: Map<String, Int>,
         @Header("Authorization") token: String
     ): Response<Product>
+    
+    /**
+     * Reactiva un producto desactivado (requiere autenticación de admin)
+     */
+    @PATCH("productos/{id}/reactivar")
+    suspend fun reactivateProduct(
+        @Path("id") id: Int,
+        @Header("Authorization") token: String
+    ): Response<Unit>
 }

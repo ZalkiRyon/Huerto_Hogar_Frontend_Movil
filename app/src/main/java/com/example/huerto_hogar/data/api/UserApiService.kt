@@ -109,4 +109,13 @@ interface UserApiService {
     suspend fun getProfile(
         @Header("Authorization") token: String
     ): Response<User>
+    
+    /**
+     * Reactiva un usuario desactivado (solo admin)
+     */
+    @PATCH("usuarios/{id}/reactivar")
+    suspend fun reactivateUser(
+        @Path("id") id: Int,
+        @Header("Authorization") token: String
+    ): Response<Unit>
 }

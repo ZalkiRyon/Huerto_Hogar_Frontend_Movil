@@ -57,6 +57,10 @@ import com.example.huerto_hogar.screen.admin.CreateProductScreen
 import com.example.huerto_hogar.screen.admin.CreateUserScreen
 import com.example.huerto_hogar.screen.admin.EditUserScreen
 import com.example.huerto_hogar.screen.admin.OrderDetailScreen
+import com.example.huerto_hogar.screen.admin.ReactivateUsersScreen
+import com.example.huerto_hogar.screen.admin.ReactivateProductsScreen
+import com.example.huerto_hogar.screen.UsSetScreen
+import com.example.huerto_hogar.viewmodel.UserSettingsViewModel
 import com.example.huerto_hogar.ui.theme.components.ConfirmationDialog
 import com.example.huerto_hogar.ui.theme.components.animations.*
 import androidx.navigation.NavType
@@ -159,7 +163,7 @@ fun AdminNavigationContainer(
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
-                                // TODO: Implementar pantalla de reactivar usuario
+                                navController.navigate(AppScreens.ReactivateUsersScreen.route)
                             },
                             icon = { Icon(Icons.Default.Refresh, contentDescription = "Reactivar Usuario") }
                         )
@@ -169,7 +173,7 @@ fun AdminNavigationContainer(
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
-                                // TODO: Implementar pantalla de reactivar producto
+                                navController.navigate(AppScreens.ReactivateProductsScreen.route)
                             },
                             icon = { Icon(Icons.Default.Refresh, contentDescription = "Reactivar Producto") }
                         )
@@ -183,7 +187,7 @@ fun AdminNavigationContainer(
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
-                                // TODO: Navegar a configuración
+                                navController.navigate(AppScreens.UsSetScreen.route)
                             },
                             icon = { Icon(Icons.Default.Settings, contentDescription = "Configuración") }
                         )
@@ -317,6 +321,40 @@ fun AdminNavigationContainer(
                     orderId = orderId,
                     salesViewModel = salesViewModel
                 )
+            }
+            
+            // Ruta para reactivar usuarios
+            composable(
+                route = AppScreens.ReactivateUsersScreen.route,
+                enterTransition = { slideInFromRightWithFade() },
+                exitTransition = { slideOutToLeftWithFade() }
+            ) {
+                ReactivateUsersScreen(
+                    navController = navController,
+                    userManager = userManager
+                )
+            }
+            
+            // Ruta para reactivar productos
+            composable(
+                route = AppScreens.ReactivateProductsScreen.route,
+                enterTransition = { slideInFromRightWithFade() },
+                exitTransition = { slideOutToLeftWithFade() }
+            ) {
+                ReactivateProductsScreen(
+                    navController = navController,
+                    userManager = userManager
+                )
+            }
+            
+            // Ruta para configuración
+            composable(
+                route = AppScreens.UsSetScreen.route,
+                enterTransition = { slideInFromRightWithFade() },
+                exitTransition = { slideOutToLeftWithFade() }
+            ) {
+                val settingsVM: UserSettingsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+                UsSetScreen(navController = navController, viewModel = settingsVM)
             }
         }
                 }
