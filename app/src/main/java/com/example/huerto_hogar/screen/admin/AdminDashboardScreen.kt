@@ -149,8 +149,8 @@ fun AdminDashboardScreen(
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
                 
-                // Mostrar últimas 3 órdenes
-                val recentOrders = orders.take(3)
+                // Mostrar últimas 3 órdenes (ordenadas por fecha descendente = más recientes primero)
+                val recentOrders = orders.sortedByDescending { it.id }.take(3)
                 if (recentOrders.isNotEmpty()) {
                     recentOrders.forEachIndexed { index, order ->
                         ActivityItem(
