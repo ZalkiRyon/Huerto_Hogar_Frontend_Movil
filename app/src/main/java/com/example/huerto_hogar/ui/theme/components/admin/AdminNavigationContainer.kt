@@ -13,6 +13,8 @@ import com.example.huerto_hogar.viewmodel.SalesViewModel
 import com.example.huerto_hogar.screen.admin.AdminDashboardScreen
 import com.example.huerto_hogar.screen.admin.AdminInventoryScreen
 import com.example.huerto_hogar.screen.admin.AdminUsersScreen
+import com.example.huerto_hogar.screen.admin.CreateProductScreen
+import com.example.huerto_hogar.screen.admin.CreateUserScreen
 import com.example.huerto_hogar.ui.theme.components.animations.*
 
 /**
@@ -47,6 +49,7 @@ fun AdminNavigationContainer(
                 exitTransition = { fadeOut() }
             ) {
                 AdminDashboardScreen(
+                    navController = navController,
                     userManager = userManager,
                     salesViewModel = salesViewModel
                 )
@@ -69,6 +72,24 @@ fun AdminNavigationContainer(
                     navController = navController,
                     userManager = userManager
                 )
+            }
+            
+            // Ruta para crear producto
+            composable(
+                route = "createProduct",
+                enterTransition = { slideInFromRightWithFade() },
+                exitTransition = { slideOutToLeftWithFade() }
+            ) {
+                CreateProductScreen(navController = navController)
+            }
+            
+            // Ruta para crear usuario
+            composable(
+                route = "createUser",
+                enterTransition = { slideInFromRightWithFade() },
+                exitTransition = { slideOutToLeftWithFade() }
+            ) {
+                CreateUserScreen(navController = navController)
             }
         }
     }

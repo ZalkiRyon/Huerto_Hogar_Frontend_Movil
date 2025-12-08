@@ -22,7 +22,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.huerto_hogar.manager.UserManagerViewModel
+import com.example.huerto_hogar.ui.theme.components.animations.pressClickEffect
 import com.example.huerto_hogar.ui.theme.components.animations.pressClickEffectWithInteraction
 import com.example.huerto_hogar.viewmodel.ProductViewModel
 import com.example.huerto_hogar.viewmodel.SalesViewModel
@@ -33,6 +35,7 @@ import androidx.compose.runtime.LaunchedEffect
  */
 @Composable
 fun AdminDashboardScreen(
+    navController: NavController,
     userManager: UserManagerViewModel = viewModel(),
     productViewModel: ProductViewModel = viewModel(),
     salesViewModel: SalesViewModel = viewModel()
@@ -196,14 +199,14 @@ fun AdminDashboardScreen(
                 title = "Agregar Producto",
                 icon = Icons.Default.Add,
                 modifier = Modifier.weight(1f),
-                onClick = { /* navController.navigate("createProduct") */ }
+                onClick = { navController.navigate("createProduct") }
             )
             
             QuickActionCard(
                 title = "Crear Usuario",
                 icon = Icons.Default.Person,
                 modifier = Modifier.weight(1f),
-                onClick = { /* navController.navigate("createUser") */ }
+                onClick = { navController.navigate("createUser") }
             )
         }
     }
@@ -289,23 +292,17 @@ fun QuickActionCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    
     Card(
         modifier = modifier
             .height(80.dp)
-            .pressClickEffectWithInteraction(interactionSource),
+            .pressClickEffect(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null,
-                    onClick = onClick
-                )
+                .clickable(onClick = onClick)
                 .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically

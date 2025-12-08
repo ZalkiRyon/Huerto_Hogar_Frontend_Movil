@@ -77,8 +77,7 @@ fun AdminUsersScreen(
             
             Button(
                 onClick = { 
-                    // TODO: Descomentar cuando las rutas estén configuradas
-                    // navController.navigate("createUser")
+                    navController.navigate("createUser")
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 modifier = Modifier.bounceInEffect()
