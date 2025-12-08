@@ -18,6 +18,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.huerto_hogar.manager.UserManagerViewModel
+import com.example.huerto_hogar.model.UpdateUserRequest
 import com.example.huerto_hogar.model.User
 import com.example.huerto_hogar.repository.UserRepository
 import com.example.huerto_hogar.utils.Resource
@@ -48,7 +49,10 @@ fun EditUserScreen(
     var name by remember { mutableStateOf(userToEdit?.name ?: "") }
     var lastname by remember { mutableStateOf(userToEdit?.lastname ?: "") }
     var email by remember { mutableStateOf(userToEdit?.email ?: "") }
+    var run by remember { mutableStateOf(userToEdit?.run ?: "") }
     var phone by remember { mutableStateOf(userToEdit?.phone ?: "") }
+    var region by remember { mutableStateOf(userToEdit?.region ?: "") }
+    var comuna by remember { mutableStateOf(userToEdit?.comuna ?: "") }
     var address by remember { mutableStateOf(userToEdit?.address ?: "") }
     var selectedRole by remember { mutableStateOf(userToEdit?.role ?: "cliente") }
     var comment by remember { mutableStateOf(userToEdit?.comment ?: "") }
@@ -214,14 +218,17 @@ fun EditUserScreen(
                 leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                singleLine = true,
-                enabled = false // Email no se puede cambiar
+                singleLine = true
             )
             
-            Text(
-                text = "El email no se puede modificar",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+            OutlinedTextField(
+                value = run,
+                onValueChange = { run = it },
+                label = { Text("RUN (ej: 12.345.678-K)") },
+                leadingIcon = { Icon(Icons.Default.Badge, contentDescription = null) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -237,6 +244,26 @@ fun EditUserScreen(
                 onValueChange = { phone = it },
                 label = { Text("Teléfono") },
                 leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true
+            )
+            
+            OutlinedTextField(
+                value = region,
+                onValueChange = { region = it },
+                label = { Text("Región") },
+                leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true
+            )
+            
+            OutlinedTextField(
+                value = comuna,
+                onValueChange = { comuna = it },
+                label = { Text("Comuna") },
+                leadingIcon = { Icon(Icons.Default.Place, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 singleLine = true
@@ -279,8 +306,13 @@ fun EditUserScreen(
                     when {
                         name.isBlank() -> errorMessage = "El nombre es requerido"
                         lastname.isBlank() -> errorMessage = "El apellido es requerido"
+                        email.isBlank() -> errorMessage = "El email es requerido"
+                        run.isBlank() -> errorMessage = "El RUN es requerido"
                         phone.isBlank() -> errorMessage = "El teléfono es requerido"
+                        region.isBlank() -> errorMessage = "La región es requerida"
+                        comuna.isBlank() -> errorMessage = "La comuna es requerida"
                         address.isBlank() -> errorMessage = "La dirección es requerida"
+                        address.length < 5 -> errorMessage = "La dirección debe tener al menos 5 caracteres"
                         else -> {
                             errorMessage = null
                             isLoading = true
@@ -293,18 +325,24 @@ fun EditUserScreen(
                                 else -> 2
                             }
                             
-                            // Crear objeto User actualizado
-                            val updatedUser = userToEdit.copy(
+                            // Crear UpdateUserRequest con todos los campos requeridos
+                            val updateRequest = UpdateUserRequest(
+                                email = email.trim(),
+                                password = userToEdit.password, // Mantener password actual
                                 name = name.trim(),
                                 lastname = lastname.trim(),
+                                run = run.trim(),
                                 phone = phone.trim(),
+                                region = region.trim(),
+                                comuna = comuna.trim(),
                                 address = address.trim(),
-                                role = selectedRole,
-                                comment = if (comment.isNotBlank()) comment.trim() else ""
+                                comment = if (comment.isNotBlank()) comment.trim() else null,
+                                profilePhoto = userToEdit.profilePictureUrl,
+                                roleId = roleId
                             )
                             
                             coroutineScope.launch {
-                                userRepository.updateUser(userId, updatedUser, "").collect { resource ->
+                                userRepository.updateUser(userId, updateRequest, "").collect { resource ->
                                     when (resource) {
                                         is Resource.Loading -> {
                                             // Ya tenemos isLoading = true

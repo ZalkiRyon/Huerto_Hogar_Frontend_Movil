@@ -7,6 +7,7 @@ import com.example.huerto_hogar.data.di.NetworkModule
 import com.example.huerto_hogar.model.CreateUserRequest
 import com.example.huerto_hogar.model.LoginRequest
 import com.example.huerto_hogar.model.RegisterUser
+import com.example.huerto_hogar.model.UpdateUserRequest
 import com.example.huerto_hogar.model.User
 import com.example.huerto_hogar.utils.NetworkUtils
 import com.example.huerto_hogar.utils.Resource
@@ -165,20 +166,39 @@ class UserRepository(
      * Actualiza información de un usuario
      * 
      * @param userId ID del usuario a actualizar
-     * @param user Datos actualizados del usuario
+     * @param updateRequest DTO con datos actualizados del usuario
      * @param token Token de autenticación
      * @return Flow<Resource<User>> - Stream con el usuario actualizado
      */
-    fun updateUser(userId: Int, user: User, token: String): Flow<Resource<User>> = flow {
+    fun updateUser(userId: Int, updateRequest: UpdateUserRequest, token: String): Flow<Resource<User>> = flow {
         try {
             emit(Resource.Loading())
             
-            val response = apiService.updateUser(userId, user, "Bearer $token")
+            val response = apiService.updateUser(userId, updateRequest, "Bearer $token")
             
             if (response.isSuccessful && response.body() != null) {
                 emit(Resource.Success(response.body()!!))
             } else {
-                emit(Resource.Error("Error al actualizar usuario: ${response.code()}"))
+                // Intentar parsear el error del backend
+                val errorBody = response.errorBody()?.string()
+                val errorMessage = if (errorBody != null) {
+                    try {
+                        when {
+                            errorBody.contains("email") && errorBody.contains("ya se encuentra registrado") -> 
+                                "El email ya está registrado por otro usuario"
+                            errorBody.contains("RUN") && errorBody.contains("ya se encuentra registrado") -> 
+                                "El RUN ya está registrado"
+                            errorBody.contains("Duplicate entry") -> 
+                                "Ya existe un registro con estos datos"
+                            else -> errorBody
+                        }
+                    } catch (e: Exception) {
+                        "Error al actualizar usuario: ${response.code()}"
+                    }
+                } else {
+                    "Error al actualizar usuario: ${response.code()}"
+                }
+                emit(Resource.Error(errorMessage))
             }
         } catch (e: Exception) {
             emit(Resource.Error(NetworkUtils.handleNetworkException(e)))

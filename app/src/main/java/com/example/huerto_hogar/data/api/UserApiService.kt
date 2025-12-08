@@ -3,6 +3,7 @@ package com.example.huerto_hogar.data.api
 import com.example.huerto_hogar.model.CreateUserRequest
 import com.example.huerto_hogar.model.LoginRequest
 import com.example.huerto_hogar.model.RegisterUser
+import com.example.huerto_hogar.model.UpdateUserRequest
 import com.example.huerto_hogar.model.User
 import retrofit2.Response
 import retrofit2.http.*
@@ -78,7 +79,7 @@ interface UserApiService {
     @PUT("usuarios/{id}")
     suspend fun updateUser(
         @Path("id") id: Int,
-        @Body user: User,
+        @Body userRequest: UpdateUserRequest,
         @Header("Authorization") token: String
     ): Response<User>
     
