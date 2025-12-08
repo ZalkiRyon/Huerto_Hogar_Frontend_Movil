@@ -78,6 +78,7 @@ import com.example.huerto_hogar.model.OrderRequest
 import com.example.huerto_hogar.model.OrderDetailRequest
 import com.example.huerto_hogar.utils.Resource
 import kotlinx.coroutines.launch
+import android.util.Log
 
 @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
 @Composable
@@ -434,7 +435,10 @@ fun CartScreen(
                                                 val userId = userManager.currentUser.value?.id
                                                 val token = userManager.getAuthToken()
                                                 
+                                                Log.d("CartScreen", "UserId: $userId, Token: ${token?.take(20)}...")
+                                                
                                                 if (userId == null || token == null) {
+                                                    Log.e("CartScreen", "No user ID or token available")
                                                     // Si no hay usuario o token, mostrar el recibo de todos modos (modo offline)
                                                     val receipt = Receipt(
                                                         receiptNumber = generateReceiptNumber(),
@@ -469,12 +473,17 @@ fun CartScreen(
                                                     detalles = detalles
                                                 )
                                                 
+                                                Log.d("CartScreen", "Order request: clienteId=$userId, detalles=${detalles.size} items")
+                                                
                                                 var orderCreated = false
                                                 
                                                 // Enviar orden al backend
+                                                Log.d("CartScreen", "Calling backend API...")
                                                 orderRepository.createOrder(orderRequest, token).collect { resource ->
+                                                    Log.d("CartScreen", "Resource state: ${resource.javaClass.simpleName}")
                                                     when (resource) {
                                                         is Resource.Success -> {
+                                                            Log.d("CartScreen", "Order created successfully: ${resource.data}")
                                                             if (!orderCreated) {
                                                                 orderCreated = true
                                                                 // Generar boleta
@@ -502,6 +511,7 @@ fun CartScreen(
                                                             }
                                                         }
                                                         is Resource.Error -> {
+                                                            Log.e("CartScreen", "Error creating order: ${resource.message}")
                                                             if (!orderCreated) {
                                                                 // Mostrar recibo de todos modos aunque falle el backend
                                                                 val receipt = Receipt(
@@ -527,6 +537,7 @@ fun CartScreen(
                                                     }
                                                 }
                                             } catch (e: Exception) {
+                                                Log.e("CartScreen", "Exception during order creation", e)
                                                 // En caso de excepción, mostrar el recibo de todos modos
                                                 val receipt = Receipt(
                                                     receiptNumber = generateReceiptNumber(),
