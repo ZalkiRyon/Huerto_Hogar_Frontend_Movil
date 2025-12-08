@@ -67,6 +67,7 @@ fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) 
     var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
     val profileUri by viewModel.profilePictureUri.collectAsState()
     val uploadingImage by viewModel.uploadingImage.collectAsState()
+    val currentUser by viewModel.userManager.currentUser.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.loadUserProfile()
@@ -192,12 +193,12 @@ fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) 
                     .clickable { showSourceDialog.value = true },
                 contentAlignment = Alignment.Center
             ) {
-                // Show image from Cloudinary URL if available, otherwise show local URI
-                val imageToShow = if (!formState.newProfilePhoto.isNullOrBlank() && 
-                    formState.newProfilePhoto.startsWith("http")) {
-                    formState.newProfilePhoto
-                } else {
-                    profileUri
+                // Priority: Cloudinary URL from currentUser > local URI > formState
+                val imageToShow = when {
+                    !currentUser?.profilePictureUrl.isNullOrBlank() -> currentUser?.profilePictureUrl
+                    profileUri != null -> profileUri
+                    !formState.newProfilePhoto.isNullOrBlank() -> formState.newProfilePhoto
+                    else -> null
                 }
                 
                 if (imageToShow != null) {
