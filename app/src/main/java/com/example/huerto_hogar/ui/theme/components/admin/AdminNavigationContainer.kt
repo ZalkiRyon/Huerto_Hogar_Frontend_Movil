@@ -14,11 +14,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.PersonOff
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.Store
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -150,9 +149,9 @@ fun AdminNavigationContainer(
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
-                                userManager.toggleAdminView(true) // Cambiar a vista de tienda
+                                userManager.toggleAdminView(true) // Cambiar a vista tienda
                             },
-                            icon = { Icon(Icons.Default.Store, contentDescription = "Tienda") }
+                            icon = { Icon(Icons.Default.ShoppingCart, contentDescription = "Tienda") }
                         )
                         
                         NavigationDrawerItem(
@@ -172,7 +171,7 @@ fun AdminNavigationContainer(
                                 scope.launch { drawerState.close() }
                                 // TODO: Implementar pantalla de reactivar producto
                             },
-                            icon = { Icon(Icons.Default.PersonOff, contentDescription = "Reactivar Producto") }
+                            icon = { Icon(Icons.Default.Refresh, contentDescription = "Reactivar Producto") }
                         )
                         
                         Spacer(modifier = Modifier.weight(1f))
