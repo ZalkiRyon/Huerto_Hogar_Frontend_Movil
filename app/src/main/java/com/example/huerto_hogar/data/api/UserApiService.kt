@@ -1,5 +1,6 @@
 package com.example.huerto_hogar.data.api
 
+import com.example.huerto_hogar.model.CreateUserRequest
 import com.example.huerto_hogar.model.LoginRequest
 import com.example.huerto_hogar.model.RegisterUser
 import com.example.huerto_hogar.model.User
@@ -44,6 +45,15 @@ interface UserApiService {
     suspend fun register(
         @Body userData: RegisterUser
     ): Response<RegisterResponse>
+    
+    /**
+     * Crea un nuevo usuario desde admin (con role_id)
+     */
+    @POST("usuarios")
+    suspend fun createUser(
+        @Body userData: CreateUserRequest,
+        @Header("Authorization") token: String = ""
+    ): Response<User>
     
     /**
      * Obtiene todos los usuarios (solo admin)

@@ -4,6 +4,7 @@ import com.example.huerto_hogar.data.api.UserApiService
 import com.example.huerto_hogar.data.api.LoginResponse
 import com.example.huerto_hogar.data.api.RegisterResponse
 import com.example.huerto_hogar.data.di.NetworkModule
+import com.example.huerto_hogar.model.CreateUserRequest
 import com.example.huerto_hogar.model.LoginRequest
 import com.example.huerto_hogar.model.RegisterUser
 import com.example.huerto_hogar.model.User
@@ -236,6 +237,35 @@ class UserRepository(
                 emit(Resource.Success(Unit))
             } else {
                 emit(Resource.Error("Error al cambiar contraseña: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            emit(Resource.Error(NetworkUtils.handleNetworkException(e)))
+        }
+    }.flowOn(Dispatchers.IO)
+    
+    /**
+     * Crea un nuevo usuario desde el panel de administración
+     * 
+     * @param userData Datos del usuario a crear
+     * @param token Token de autenticación del admin (opcional en desarrollo)
+     * @return Flow<Resource<User>> - Stream con el usuario creado
+     */
+    fun createUser(userData: CreateUserRequest, token: String = ""): Flow<Resource<User>> = flow {
+        try {
+            emit(Resource.Loading())
+            
+            val authHeader = if (token.isNotEmpty()) "Bearer $token" else ""
+            val response = apiService.createUser(userData, authHeader)
+            
+            if (response.isSuccessful && response.body() != null) {
+                emit(Resource.Success(response.body()!!))
+            } else {
+                val errorMsg = when (response.code()) {
+                    400 -> "Datos inválidos"
+                    409 -> "El email ya está registrado"
+                    else -> "Error al crear usuario: ${response.code()}"
+                }
+                emit(Resource.Error(errorMsg))
             }
         } catch (e: Exception) {
             emit(Resource.Error(NetworkUtils.handleNetworkException(e)))

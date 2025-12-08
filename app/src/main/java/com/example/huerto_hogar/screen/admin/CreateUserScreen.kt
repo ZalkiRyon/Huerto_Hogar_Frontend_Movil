@@ -18,6 +18,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.huerto_hogar.manager.UserManagerViewModel
+import com.example.huerto_hogar.model.CreateUserRequest
+import com.example.huerto_hogar.repository.UserRepository
+import com.example.huerto_hogar.utils.Resource
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 
 /**
  * Formulario de creación de usuario desde el panel de administración
@@ -28,6 +33,9 @@ fun CreateUserScreen(
     navController: NavController,
     userManager: UserManagerViewModel = viewModel()
 ) {
+    val userRepository = remember { UserRepository() }
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     var name by remember { mutableStateOf("") }
     var lastname by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -70,7 +78,8 @@ fun CreateUserScreen(
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -325,11 +334,59 @@ fun CreateUserScreen(
                         phone.isBlank() -> errorMessage = "El teléfono es requerido"
                         address.isBlank() -> errorMessage = "La dirección es requerida"
                         else -> {
-                            // TODO: Implementar creación de usuario con API
                             errorMessage = null
                             isLoading = true
-                            // Por ahora solo navegamos de vuelta
-                            navController.navigateUp()
+                            
+                            // Mapear rol a role_id (1=admin, 2=vendedor, 3=cliente)
+                            val roleId = when (selectedRole) {
+                                "admin" -> 1
+                                "vendedor" -> 2
+                                "cliente" -> 3
+                                else -> 3
+                            }
+                            
+                            val createUserRequest = CreateUserRequest(
+                                email = email.trim(),
+                                password = password,
+                                name = name.trim(),
+                                lastname = lastname.trim(),
+                                run = if (run.isNotBlank()) run.trim() else null,
+                                phone = phone.trim(),
+                                region = if (region.isNotBlank()) region.trim() else null,
+                                comuna = if (comuna.isNotBlank()) comuna.trim() else null,
+                                address = address.trim(),
+                                comment = if (comment.isNotBlank()) comment.trim() else null,
+                                roleId = roleId
+                            )
+                            
+                            coroutineScope.launch {
+                                userRepository.createUser(createUserRequest).collect { resource ->
+                                    when (resource) {
+                                        is Resource.Loading -> {
+                                            // Ya tenemos isLoading = true
+                                        }
+                                        is Resource.Success -> {
+                                            isLoading = false
+                                            snackbarHostState.showSnackbar(
+                                                message = "Usuario creado exitosamente",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                            // Recargar lista de usuarios
+                                            userManager.loadUsersFromBackend()
+                                            // Volver a la pantalla anterior
+                                            navController.navigateUp()
+                                        }
+                                        is Resource.Error -> {
+                                            isLoading = false
+                                            errorMessage = resource.message ?: "Error al crear usuario"
+                                            snackbarHostState.showSnackbar(
+                                                message = errorMessage ?: "Error desconocido",
+                                                duration = SnackbarDuration.Long
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 },
