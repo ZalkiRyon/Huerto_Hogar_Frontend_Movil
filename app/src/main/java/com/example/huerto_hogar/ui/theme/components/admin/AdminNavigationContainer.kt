@@ -13,9 +13,11 @@ import com.example.huerto_hogar.viewmodel.SalesViewModel
 import com.example.huerto_hogar.screen.admin.AdminDashboardScreen
 import com.example.huerto_hogar.screen.admin.AdminInventoryScreen
 import com.example.huerto_hogar.screen.admin.AdminUsersScreen
+import com.example.huerto_hogar.screen.admin.AdminOrdersScreen
 import com.example.huerto_hogar.screen.admin.CreateProductScreen
 import com.example.huerto_hogar.screen.admin.CreateUserScreen
 import com.example.huerto_hogar.screen.admin.EditUserScreen
+import com.example.huerto_hogar.screen.admin.OrderDetailScreen
 import com.example.huerto_hogar.ui.theme.components.animations.*
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -107,6 +109,33 @@ fun AdminNavigationContainer(
                     navController = navController,
                     userId = userId,
                     userManager = userManager
+                )
+            }
+            
+            // Ruta para gestión de órdenes
+            composable(
+                route = AppScreens.AdminOrdersScreen.route,
+                enterTransition = { slideInFromRightWithFade() },
+                exitTransition = { slideOutToLeftWithFade() }
+            ) {
+                AdminOrdersScreen(
+                    navController = navController,
+                    salesViewModel = salesViewModel
+                )
+            }
+            
+            // Ruta para detalle de orden
+            composable(
+                route = "orderDetail/{orderId}",
+                arguments = listOf(navArgument("orderId") { type = NavType.IntType }),
+                enterTransition = { slideInFromRightWithFade() },
+                exitTransition = { slideOutToLeftWithFade() }
+            ) { backStackEntry ->
+                val orderId = backStackEntry.arguments?.getInt("orderId") ?: 0
+                OrderDetailScreen(
+                    navController = navController,
+                    orderId = orderId,
+                    salesViewModel = salesViewModel
                 )
             }
         }

@@ -18,4 +18,5 @@ sealed class AppScreens(val route: String) {
     object AdminDashboardScreen: AppScreens(route = "admin_dashboard_screen")
     object AdminInventoryScreen: AppScreens(route = "admin_inventory_screen")
     object AdminUsersScreen: AppScreens(route = "admin_users_screen")
+    object AdminOrdersScreen: AppScreens(route = "admin_orders_screen")
 }

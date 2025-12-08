@@ -39,16 +39,22 @@ sealed class AdminBottomNavItem(
         "Dashboard"
     )
     
+    object Users : AdminBottomNavItem(
+        AppScreens.AdminUsersScreen.route,
+        Icons.Default.Person,
+        "Usuarios"
+    )
+    
     object Inventory : AdminBottomNavItem(
         AppScreens.AdminInventoryScreen.route,
         Icons.AutoMirrored.Filled.List,
         "Inventario"
     )
     
-    object Users : AdminBottomNavItem(
-        AppScreens.AdminUsersScreen.route,
-        Icons.Default.Person,
-        "Usuarios"
+    object Orders : AdminBottomNavItem(
+        AppScreens.AdminOrdersScreen.route,
+        Icons.Default.ShoppingCart,
+        "Órdenes"
     )
     
     object Logout : AdminBottomNavItem(
@@ -85,8 +91,9 @@ fun AdminBottomBar(
             ) {
                 val items = listOf(
                     AdminBottomNavItem.Dashboard,
-                    AdminBottomNavItem.Inventory,
                     AdminBottomNavItem.Users,
+                    AdminBottomNavItem.Inventory,
+                    AdminBottomNavItem.Orders,
                     AdminBottomNavItem.Logout
                 )
                 
