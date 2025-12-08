@@ -435,6 +435,21 @@ fun CartScreen(
                                                 val token = userManager.getAuthToken()
                                                 
                                                 if (userId == null || token == null) {
+                                                    // Si no hay usuario o token, mostrar el recibo de todos modos (modo offline)
+                                                    val receipt = Receipt(
+                                                        receiptNumber = generateReceiptNumber(),
+                                                        date = getCurrentDateTime(),
+                                                        items = cartItems,
+                                                        subtotal = subtotal,
+                                                        discount = discount,
+                                                        total = total,
+                                                        hasStudentDiscount = studentDiscount
+                                                    )
+                                                    
+                                                    salesViewModel.addSale(total)
+                                                    currentReceipt = receipt
+                                                    showReceiptDialog = true
+                                                    cartViewModel.clearCart()
                                                     isCreatingOrder = false
                                                     return@launch
                                                 }
@@ -454,36 +469,57 @@ fun CartScreen(
                                                     detalles = detalles
                                                 )
                                                 
+                                                var orderCreated = false
+                                                
                                                 // Enviar orden al backend
                                                 orderRepository.createOrder(orderRequest, token).collect { resource ->
                                                     when (resource) {
                                                         is Resource.Success -> {
-                                                            // Generar boleta
-                                                            val receipt = Receipt(
-                                                                receiptNumber = generateReceiptNumber(),
-                                                                date = getCurrentDateTime(),
-                                                                items = cartItems,
-                                                                subtotal = subtotal,
-                                                                discount = discount,
-                                                                total = total,
-                                                                hasStudentDiscount = studentDiscount
-                                                            )
+                                                            if (!orderCreated) {
+                                                                orderCreated = true
+                                                                // Generar boleta
+                                                                val receipt = Receipt(
+                                                                    receiptNumber = generateReceiptNumber(),
+                                                                    date = getCurrentDateTime(),
+                                                                    items = cartItems,
+                                                                    subtotal = subtotal,
+                                                                    discount = discount,
+                                                                    total = total,
+                                                                    hasStudentDiscount = studentDiscount
+                                                                )
 
-                                                            // Registrar venta en el sistema
-                                                            salesViewModel.addSale(total)
+                                                                // Registrar venta en el sistema
+                                                                salesViewModel.addSale(total)
 
-                                                            // Guardar boleta y mostrar modal
-                                                            currentReceipt = receipt
-                                                            showReceiptDialog = true
+                                                                // Guardar boleta y mostrar modal
+                                                                currentReceipt = receipt
+                                                                showReceiptDialog = true
 
-                                                            // Limpiar carrito
-                                                            cartViewModel.clearCart()
-                                                            
-                                                            isCreatingOrder = false
+                                                                // Limpiar carrito
+                                                                cartViewModel.clearCart()
+                                                                
+                                                                isCreatingOrder = false
+                                                            }
                                                         }
                                                         is Resource.Error -> {
-                                                            // TODO: Mostrar error al usuario
-                                                            isCreatingOrder = false
+                                                            if (!orderCreated) {
+                                                                // Mostrar recibo de todos modos aunque falle el backend
+                                                                val receipt = Receipt(
+                                                                    receiptNumber = generateReceiptNumber(),
+                                                                    date = getCurrentDateTime(),
+                                                                    items = cartItems,
+                                                                    subtotal = subtotal,
+                                                                    discount = discount,
+                                                                    total = total,
+                                                                    hasStudentDiscount = studentDiscount
+                                                                )
+                                                                
+                                                                salesViewModel.addSale(total)
+                                                                currentReceipt = receipt
+                                                                showReceiptDialog = true
+                                                                cartViewModel.clearCart()
+                                                                isCreatingOrder = false
+                                                            }
                                                         }
                                                         is Resource.Loading -> {
                                                             // Mostrar indicador de carga
@@ -491,6 +527,21 @@ fun CartScreen(
                                                     }
                                                 }
                                             } catch (e: Exception) {
+                                                // En caso de excepción, mostrar el recibo de todos modos
+                                                val receipt = Receipt(
+                                                    receiptNumber = generateReceiptNumber(),
+                                                    date = getCurrentDateTime(),
+                                                    items = cartItems,
+                                                    subtotal = subtotal,
+                                                    discount = discount,
+                                                    total = total,
+                                                    hasStudentDiscount = studentDiscount
+                                                )
+                                                
+                                                salesViewModel.addSale(total)
+                                                currentReceipt = receipt
+                                                showReceiptDialog = true
+                                                cartViewModel.clearCart()
                                                 isCreatingOrder = false
                                             }
                                         }
