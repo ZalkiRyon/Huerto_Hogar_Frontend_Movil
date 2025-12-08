@@ -431,14 +431,15 @@ fun CartScreen(
                                         isCreatingOrder = true
                                         scope.launch {
                                             try {
-                                                // Obtener user ID y token
-                                                val userId = userManager.currentUser.value?.id
+                                                // Obtener user ID y token - usar el parámetro user primero, luego userManager
+                                                val userId = user?.id ?: userManager.currentUser.value?.id
                                                 val token = userManager.getAuthToken()
                                                 
                                                 Log.d("CartScreen", "UserId: $userId, Token: ${token?.take(20)}...")
+                                                Log.d("CartScreen", "User from param: ${user?.id}, User from manager: ${userManager.currentUser.value?.id}")
                                                 
                                                 if (userId == null || token == null) {
-                                                    Log.e("CartScreen", "No user ID or token available")
+                                                    Log.e("CartScreen", "No user ID or token available - UserId=$userId, Token=$token")
                                                     // Si no hay usuario o token, mostrar el recibo de todos modos (modo offline)
                                                     val receipt = Receipt(
                                                         receiptNumber = generateReceiptNumber(),

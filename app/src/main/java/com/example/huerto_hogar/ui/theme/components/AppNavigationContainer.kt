@@ -423,6 +423,7 @@ fun AppNavigationContainer() {
                                 navController = navController,
                                 cartViewModel = cartViewModel,
                                 salesViewModel = salesViewModel,
+                                userManager = userManager,
                                 user = currentUser
                             )
                         }
