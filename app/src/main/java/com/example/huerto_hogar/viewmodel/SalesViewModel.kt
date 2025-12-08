@@ -23,6 +23,9 @@ class SalesViewModel(
     private val _orders = MutableStateFlow<List<Order>>(emptyList())
     val orders: StateFlow<List<Order>> = _orders.asStateFlow()
     
+    private val _selectedOrder = MutableStateFlow<Order?>(null)
+    val selectedOrder: StateFlow<Order?> = _selectedOrder.asStateFlow()
+    
     private val _orderStats = MutableStateFlow(OrderStats())
     val orderStats: StateFlow<OrderStats> = _orderStats.asStateFlow()
     
@@ -101,6 +104,31 @@ class SalesViewModel(
             totalSales = totalSales,
             todaySales = todaySales
         )
+    }
+
+    /**
+     * Carga una orden específica por ID (incluye detalles completos con productos)
+     */
+    fun loadOrderById(orderId: Int) {
+        viewModelScope.launch {
+            orderRepository.getOrderById(orderId).collect { resource ->
+                when (resource) {
+                    is Resource.Loading -> {
+                        _isLoading.value = true
+                    }
+                    is Resource.Success -> {
+                        _isLoading.value = false
+                        resource.data?.let { order ->
+                            _selectedOrder.value = order
+                        }
+                    }
+                    is Resource.Error -> {
+                        _isLoading.value = false
+                        _errorMessage.value = resource.message
+                    }
+                }
+            }
+        }
     }
 
     /**

@@ -30,10 +30,16 @@ fun OrderDetailScreen(
     orderId: Int,
     salesViewModel: SalesViewModel = viewModel()
 ) {
-    val orders by salesViewModel.orders.collectAsState()
-    val order = remember(orders, orderId) {
-        orders.find { it.id == orderId }
+    // Cargar orden específica desde backend (incluye detalles de productos)
+    LaunchedEffect(orderId) {
+        salesViewModel.loadOrderById(orderId)
     }
+    
+    val orderDetailState by salesViewModel.selectedOrder.collectAsState()
+    val orders by salesViewModel.orders.collectAsState()
+    
+    // Usar orden del estado específico o buscar en la lista
+    val order = orderDetailState ?: orders.find { it.id == orderId }
     
     val scrollState = rememberScrollState()
     
