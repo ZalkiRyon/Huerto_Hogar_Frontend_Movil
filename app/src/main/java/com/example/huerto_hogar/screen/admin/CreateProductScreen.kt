@@ -18,6 +18,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.huerto_hogar.viewmodel.ProductViewModel
+import com.example.huerto_hogar.model.Product
+import com.example.huerto_hogar.repository.ProductRepository
+import com.example.huerto_hogar.utils.Resource
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 
 /**
  * Formulario de creación de producto desde el panel de administración
@@ -28,6 +33,9 @@ fun CreateProductScreen(
     navController: NavController,
     productViewModel: ProductViewModel = viewModel()
 ) {
+    val productRepository = remember { ProductRepository() }
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
@@ -42,9 +50,10 @@ fun CreateProductScreen(
     val scrollState = rememberScrollState()
     
     val categories = listOf(
-        "Frutas frescas",
-        "Verduras frescas",
-        "Orgánicos"
+        "Frutas frescas" to "FR",
+        "Verduras organicas" to "VR",
+        "Productos organicos" to "PO",
+        "Productos lacteos" to "PL"
     )
 
     Scaffold(
@@ -62,7 +71,8 @@ fun CreateProductScreen(
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -142,9 +152,10 @@ fun CreateProductScreen(
                     },
                     leadingIcon = {
                         Icon(
-                            when (selectedCategory) {
-                                "Frutas frescas" -> Icons.Default.Star
-                                "Verduras frescas" -> Icons.Default.Star
+                            when {
+                                selectedCategory.contains("Frutas") -> Icons.Default.Star
+                                selectedCategory.contains("Verduras") -> Icons.Default.Star
+                                selectedCategory.contains("lacteos") -> Icons.Default.Star
                                 else -> Icons.Default.Star
                             },
                             contentDescription = null,
@@ -162,11 +173,11 @@ fun CreateProductScreen(
                     expanded = showCategoryMenu,
                     onDismissRequest = { showCategoryMenu = false }
                 ) {
-                    categories.forEach { category ->
+                    categories.forEach { (categoryName, _) ->
                         DropdownMenuItem(
-                            text = { Text(category) },
+                            text = { Text(categoryName) },
                             onClick = {
-                                selectedCategory = category
+                                selectedCategory = categoryName
                                 showCategoryMenu = false
                             },
                             leadingIcon = {
@@ -268,11 +279,60 @@ fun CreateProductScreen(
                         stock.isBlank() -> errorMessage = "El stock es requerido"
                         stock.toIntOrNull() == null || stock.toInt() < 0 -> errorMessage = "El stock debe ser mayor o igual a 0"
                         else -> {
-                            // TODO: Implementar creación de producto con API
                             errorMessage = null
                             isLoading = true
-                            // Por ahora solo navegamos de vuelta
-                            navController.navigateUp()
+                            
+                            // Obtener prefijo de código según categoría
+                            val categoryPrefix = categories.find { it.first == selectedCategory }?.second ?: "XX"
+                            
+                            // Generar número secuencial (en producción debería venir del backend)
+                            val productCode = "$categoryPrefix${(1..999).random().toString().padStart(3, '0')}"
+                            
+                            // Crear producto con prefijo en el nombre
+                            val productName = if (name.matches(Regex("^[A-Z]{2}\\d{3} - .*"))) {
+                                name // Ya tiene prefijo
+                            } else {
+                                "$productCode - $name"
+                            }
+                            
+                            val newProduct = Product(
+                                id = 0,
+                                name = productName,
+                                category = selectedCategory,
+                                price = price.toDouble(),
+                                stock = stock.toInt(),
+                                description = description.trim(),
+                                imageUrl = if (imageUrl.isNotBlank()) imageUrl.trim() else null
+                            )
+                            
+                            coroutineScope.launch {
+                                productRepository.createProduct(newProduct, "").collect { resource ->
+                                    when (resource) {
+                                        is Resource.Loading -> {
+                                            // Ya tenemos isLoading = true
+                                        }
+                                        is Resource.Success -> {
+                                            isLoading = false
+                                            snackbarHostState.showSnackbar(
+                                                message = "Producto \"$productName\" creado exitosamente",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                            // Recargar lista de productos
+                                            productViewModel.getAllProducts()
+                                            // Volver a la pantalla anterior
+                                            navController.navigateUp()
+                                        }
+                                        is Resource.Error -> {
+                                            isLoading = false
+                                            errorMessage = resource.message ?: "Error al crear producto"
+                                            snackbarHostState.showSnackbar(
+                                                message = errorMessage ?: "Error desconocido",
+                                                duration = SnackbarDuration.Long
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 },
