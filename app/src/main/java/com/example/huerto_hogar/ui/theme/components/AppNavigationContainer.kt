@@ -83,6 +83,7 @@ import com.example.huerto_hogar.viewmodel.RegisterUserViewModel
 import com.example.huerto_hogar.viewmodel.SalesViewModel
 import com.example.huerto_hogar.viewmodel.UserSettingsViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.LaunchedEffect
 
 
 @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
@@ -95,6 +96,13 @@ fun AppNavigationContainer() {
 
     val currentUser by userManager.currentUser.collectAsState()
     val showAdminStoreView by userManager.showAdminStoreView.collectAsState()
+
+    // Inicializar favoritos cuando el usuario se loguea
+    LaunchedEffect(currentUser) {
+        currentUser?.let { user ->
+            favoritesViewModel.setUserId(user.id)
+        }
+    }
 
     // Si el usuario es admin y NO está en modo tienda, mostrar panel de administración
     if (currentUser?.role == "admin" && !showAdminStoreView) {
@@ -423,6 +431,7 @@ fun AppNavigationContainer() {
                                 navController = navController,
                                 cartViewModel = cartViewModel,
                                 salesViewModel = salesViewModel,
+                                userManager = userManager,
                                 user = currentUser
                             )
                         }

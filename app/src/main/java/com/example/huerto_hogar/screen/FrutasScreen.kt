@@ -63,7 +63,7 @@ fun FrutasScreen(
     }
     
     // Filtrar solo frutas del estado
-    val frutas = products.filter { it.category.contains("Frutas", ignoreCase = true) }
+    val frutas = products.filter { it.category.equals("Frutas frescas", ignoreCase = true) }
 
     val favoriteItems by favoritesViewModel.favoriteItems.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }

@@ -3,6 +3,7 @@ package com.example.huerto_hogar.repository
 import com.example.huerto_hogar.data.api.OrderApiService
 import com.example.huerto_hogar.data.di.NetworkModule
 import com.example.huerto_hogar.model.Order
+import com.example.huerto_hogar.model.OrderRequest
 import com.example.huerto_hogar.utils.NetworkUtils
 import com.example.huerto_hogar.utils.Resource
 import kotlinx.coroutines.Dispatchers
@@ -47,6 +48,24 @@ class OrderRepository(
                 emit(Resource.Success(response.body()!!))
             } else {
                 emit(Resource.Error("Orden no encontrada"))
+            }
+        } catch (e: Exception) {
+            emit(Resource.Error(NetworkUtils.handleNetworkException(e)))
+        }
+    }.flowOn(Dispatchers.IO)
+    
+    /**
+     * Crea una nueva orden
+     */
+    fun createOrder(orderRequest: OrderRequest, token: String): Flow<Resource<Order>> = flow {
+        try {
+            emit(Resource.Loading())
+            val response = apiService.createOrder(orderRequest, "Bearer $token")
+            
+            if (response.isSuccessful && response.body() != null) {
+                emit(Resource.Success(response.body()!!))
+            } else {
+                emit(Resource.Error("Error al crear orden: ${response.code()}"))
             }
         } catch (e: Exception) {
             emit(Resource.Error(NetworkUtils.handleNetworkException(e)))

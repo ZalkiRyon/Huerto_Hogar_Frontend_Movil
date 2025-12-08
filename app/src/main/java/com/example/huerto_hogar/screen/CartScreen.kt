@@ -33,6 +33,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -46,6 +47,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,6 +72,13 @@ import com.example.huerto_hogar.viewmodel.CartViewModel
 import com.example.huerto_hogar.viewmodel.NFCState
 import com.example.huerto_hogar.viewmodel.NFCViewModel
 import com.example.huerto_hogar.viewmodel.SalesViewModel
+import com.example.huerto_hogar.manager.UserManagerViewModel
+import com.example.huerto_hogar.repository.OrderRepository
+import com.example.huerto_hogar.model.OrderRequest
+import com.example.huerto_hogar.model.OrderDetailRequest
+import com.example.huerto_hogar.utils.Resource
+import kotlinx.coroutines.launch
+import android.util.Log
 
 @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
 @Composable
@@ -78,12 +87,17 @@ fun CartScreen(
     cartViewModel: CartViewModel = viewModel(),
     nfcViewModel: NFCViewModel = viewModel(),
     salesViewModel: SalesViewModel = viewModel(),
+    userManager: UserManagerViewModel = viewModel(),
     user: User?
 ) {
     val context = LocalContext.current
     val cartItems by cartViewModel.cartItems.collectAsState()
     val studentDiscount by cartViewModel.studentDiscount.collectAsState()
     val nfcState by nfcViewModel.nfcState.collectAsState()
+    
+    // Repositorio de órdenes y coroutine scope
+    val orderRepository = remember { OrderRepository() }
+    val scope = rememberCoroutineScope()
 
     // Recalcular cuando cambian cartItems o studentDiscount
     val subtotal = remember(cartItems) {
@@ -100,6 +114,7 @@ fun CartScreen(
     var showNFCDialog by remember { mutableStateOf(false) }
     var showReceiptDialog by remember { mutableStateOf(false) }
     var currentReceipt by remember { mutableStateOf<Receipt?>(null) }
+    var isCreatingOrder by remember { mutableStateOf(false) }
 
     // Gestor NFC para interactuar con hardware NFC del dispositivo
     val nfcManager = remember { NFCManager(context as MainActivity) }
@@ -194,11 +209,16 @@ fun CartScreen(
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                 )
                 if (cartItems.isNotEmpty()) {
-                    IconButton(onClick = { showClearDialog = true }) {
+                    IconButton(
+                        onClick = { showClearDialog = true },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = androidx.compose.ui.graphics.Color(0xFFD32F2F)
+                        )
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Vaciar carrito",
-                            tint = MaterialTheme.colorScheme.error
+                            tint = androidx.compose.ui.graphics.Color.White
                         )
                     }
                 }
@@ -406,26 +426,141 @@ fun CartScreen(
                                 // Checkout button
                                 Button(
                                     onClick = {
-                                        // Generar boleta
-                                        val receipt = Receipt(
-                                            receiptNumber = generateReceiptNumber(),
-                                            date = getCurrentDateTime(),
-                                            items = cartItems,
-                                            subtotal = subtotal,
-                                            discount = discount,
-                                            total = total,
-                                            hasStudentDiscount = studentDiscount
-                                        )
+                                        if (isCreatingOrder) return@Button
+                                        
+                                        isCreatingOrder = true
+                                        scope.launch {
+                                            try {
+                                                // Obtener user ID y token - usar el parámetro user primero, luego userManager
+                                                val userId = user?.id ?: userManager.currentUser.value?.id
+                                                val token = userManager.getAuthToken()
+                                                
+                                                Log.d("CartScreen", "UserId: $userId, Token: ${token?.take(20)}...")
+                                                Log.d("CartScreen", "User from param: ${user?.id}, User from manager: ${userManager.currentUser.value?.id}")
+                                                
+                                                if (userId == null || token == null) {
+                                                    Log.e("CartScreen", "No user ID or token available - UserId=$userId, Token=$token")
+                                                    // Si no hay usuario o token, mostrar el recibo de todos modos (modo offline)
+                                                    val receipt = Receipt(
+                                                        receiptNumber = generateReceiptNumber(),
+                                                        orderNumber = null,
+                                                        date = getCurrentDateTime(),
+                                                        items = cartItems,
+                                                        subtotal = subtotal,
+                                                        discount = discount,
+                                                        total = total,
+                                                        hasStudentDiscount = studentDiscount
+                                                    )
+                                                    
+                                                    salesViewModel.addSale(total)
+                                                    currentReceipt = receipt
+                                                    showReceiptDialog = true
+                                                    cartViewModel.clearCart()
+                                                    isCreatingOrder = false
+                                                    return@launch
+                                                }
+                                                
+                                                // Preparar detalles de la orden
+                                                val detalles = cartItems.map { item ->
+                                                    OrderDetailRequest(
+                                                        productoId = item.product.id,
+                                                        cantidad = item.quantity
+                                                    )
+                                                }
+                                                
+                                                // Crear request de orden
+                                                val orderRequest = OrderRequest(
+                                                    clienteId = userId,
+                                                    comentario = if (studentDiscount) "Descuento estudiantil aplicado" else null,
+                                                    detalles = detalles
+                                                )
+                                                
+                                                Log.d("CartScreen", "Order request: clienteId=$userId, detalles=${detalles.size} items")
+                                                
+                                                var orderCreated = false
+                                                
+                                                // Enviar orden al backend
+                                                Log.d("CartScreen", "Calling backend API...")
+                                                orderRepository.createOrder(orderRequest, token).collect { resource ->
+                                                    Log.d("CartScreen", "Resource state: ${resource.javaClass.simpleName}")
+                                                    when (resource) {
+                                                        is Resource.Success -> {
+                                                            Log.d("CartScreen", "Order created successfully: ${resource.data}")
+                                                            if (!orderCreated) {
+                                                                orderCreated = true
+                                                                // Generar boleta con número de orden del backend
+                                                                val receipt = Receipt(
+                                                                    receiptNumber = generateReceiptNumber(),
+                                                                    orderNumber = resource.data?.orderNumber,
+                                                                    date = getCurrentDateTime(),
+                                                                    items = cartItems,
+                                                                    subtotal = subtotal,
+                                                                    discount = discount,
+                                                                    total = total,
+                                                                    hasStudentDiscount = studentDiscount
+                                                                )
 
-                                        // Registrar venta en el sistema
-                                        salesViewModel.addSale(total)
+                                                                // Registrar venta en el sistema
+                                                                salesViewModel.addSale(total)
 
-                                        // Guardar boleta y mostrar modal
-                                        currentReceipt = receipt
-                                        showReceiptDialog = true
+                                                                // Guardar boleta y mostrar modal
+                                                                currentReceipt = receipt
+                                                                showReceiptDialog = true
 
-                                        // Limpiar carrito
-                                        cartViewModel.clearCart()
+                                                                // Limpiar carrito
+                                                                cartViewModel.clearCart()
+                                                                
+                                                                isCreatingOrder = false
+                                                            }
+                                                        }
+                                                        is Resource.Error -> {
+                                                            Log.e("CartScreen", "Error creating order: ${resource.message}")
+                                                            if (!orderCreated) {
+                                                                // Mostrar recibo de todos modos aunque falle el backend
+                                                                val receipt = Receipt(
+                                                                    receiptNumber = generateReceiptNumber(),
+                                                                    orderNumber = null,
+                                                                    date = getCurrentDateTime(),
+                                                                    items = cartItems,
+                                                                    subtotal = subtotal,
+                                                                    discount = discount,
+                                                                    total = total,
+                                                                    hasStudentDiscount = studentDiscount
+                                                                )
+                                                                
+                                                                salesViewModel.addSale(total)
+                                                                currentReceipt = receipt
+                                                                showReceiptDialog = true
+                                                                cartViewModel.clearCart()
+                                                                isCreatingOrder = false
+                                                            }
+                                                        }
+                                                        is Resource.Loading -> {
+                                                            // Mostrar indicador de carga
+                                                        }
+                                                    }
+                                                }
+                                            } catch (e: Exception) {
+                                                Log.e("CartScreen", "Exception during order creation", e)
+                                                // En caso de excepción, mostrar el recibo de todos modos
+                                                val receipt = Receipt(
+                                                    receiptNumber = generateReceiptNumber(),
+                                                    orderNumber = null,
+                                                    date = getCurrentDateTime(),
+                                                    items = cartItems,
+                                                    subtotal = subtotal,
+                                                    discount = discount,
+                                                    total = total,
+                                                    hasStudentDiscount = studentDiscount
+                                                )
+                                                
+                                                salesViewModel.addSale(total)
+                                                currentReceipt = receipt
+                                                showReceiptDialog = true
+                                                cartViewModel.clearCart()
+                                                isCreatingOrder = false
+                                            }
+                                        }
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -434,13 +569,21 @@ fun CartScreen(
                                         .pressClickEffect(),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = MaterialTheme.colorScheme.primary
-                                    )
+                                    ),
+                                    enabled = !isCreatingOrder
                                 ) {
-                                    Text(
-                                        text = "Terminar de Pagar",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    if (isCreatingOrder) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(24.dp),
+                                            color = MaterialTheme.colorScheme.onPrimary
+                                        )
+                                    } else {
+                                        Text(
+                                            text = "Terminar de Pagar",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
                                 }
                             } else {
                                 // Checkout button
@@ -606,13 +749,16 @@ fun CartScreen(
             title = { Text("Vaciar Carrito") },
             text = { Text("¿Estás seguro de que deseas vaciar el carrito? Esta acción no se puede deshacer.") },
             confirmButton = {
-                TextButton(
+                Button(
                     onClick = {
                         cartViewModel.clearCart()
                         showClearDialog = false
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = androidx.compose.ui.graphics.Color(0xFFD32F2F)
+                    )
                 ) {
-                    Text("Vaciar", color = MaterialTheme.colorScheme.error)
+                    Text("Vaciar", color = androidx.compose.ui.graphics.Color.White)
                 }
             },
             dismissButton = {

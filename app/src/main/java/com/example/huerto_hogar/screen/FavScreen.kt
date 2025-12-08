@@ -117,11 +117,16 @@ fun FavScreen(
                 )
 
                 if (favoriteItems.isNotEmpty()) {
-                    IconButton(onClick = { showClearDialog = true }) {
+                    IconButton(
+                        onClick = { showClearDialog = true },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = androidx.compose.ui.graphics.Color(0xFFD32F2F)
+                        )
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Vaciar favoritos",
-                            tint = MaterialTheme.colorScheme.error
+                            tint = androidx.compose.ui.graphics.Color.White
                         )
                     }
                 }
@@ -265,13 +270,17 @@ fun FavScreen(
             title = { Text("Vaciar Favoritos") },
             text = { Text("¿Estás seguro de que deseas vaciar tu lista de favoritos? Esta acción no se puede deshacer.") },
             confirmButton = {
-                TextButton(
+                Button(
                     onClick = {
                         favoritesViewModel.clearFavorites()
                         showClearDialog = false
                         snackbarMessage = "Lista de favoritos vaciada"
-                    }) {
-                    Text("Vaciar", color = MaterialTheme.colorScheme.error)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = androidx.compose.ui.graphics.Color(0xFFD32F2F)
+                    )
+                ) {
+                    Text("Vaciar", color = androidx.compose.ui.graphics.Color.White)
                 }
             },
             dismissButton = {
@@ -356,13 +365,13 @@ fun FavoriteItemCard(
                 // Remove from favorites button
                 IconButton(
                     onClick = onRemove, colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.error
+                        containerColor = androidx.compose.ui.graphics.Color(0xFFD32F2F)
                     )
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Eliminar de favoritos",
-                        tint = MaterialTheme.colorScheme.onError
+                        tint = androidx.compose.ui.graphics.Color.White
                     )
                 }
 

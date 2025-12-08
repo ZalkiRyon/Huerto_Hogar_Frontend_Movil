@@ -102,68 +102,50 @@ fun ProductCard(
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(
+                // Nombre y precio - clickeable
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ){
-                    // Nombre y precio - clickeable
-                    Column(
-                        modifier = Modifier.clickable { onProductClick(producto) }
-                    ) {
-                        Text(
-                            text = producto.name,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        .padding(12.dp)
+                        .clickable { onProductClick(producto) }
+                ) {
+                    Text(
+                        text = producto.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
 
-                        Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
-                        fun formatAmount(amount: Double, locale: Locale): String {
-                            val formatter = NumberFormat.getCurrencyInstance(locale)
-                            formatter.maximumFractionDigits = 0
-                            return formatter.format(amount)
-                        }
-
-                        val deviceLocale = Locale.getDefault()
-                        val formattedPrice = formatAmount(producto.price, deviceLocale)
-
-                        Text(
-                            text = formattedPrice,
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
+                    fun formatAmount(amount: Double, locale: Locale): String {
+                        val formatter = NumberFormat.getCurrencyInstance(locale)
+                        formatter.maximumFractionDigits = 0
+                        return formatter.format(amount)
                     }
 
-                    // Botón favoritos
-                    IconButton(
-                        onClick = { onToggleFavorito(producto) },
-                        modifier = Modifier.size(30.dp),
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = if (isFavorito) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
-                        )
-                    ) {
-                        Icon(
-                            imageVector = if (isFavorito) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = if (isFavorito) "Quitar de favoritos" else "Agregar a favoritos",
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+                    val deviceLocale = Locale.getDefault()
+                    val formattedPrice = formatAmount(producto.price, deviceLocale)
 
+                    Text(
+                        text = formattedPrice,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
-                // Botones de acción
-                Column(
+
+                // Botones de acción - Carrito y Favoritos en la misma fila
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Botón agregar al carrito
                     Button(
                         onClick = { onAgregarCarrito(producto) },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.weight(1f)
                     ) {
                         Icon(
                             imageVector = Icons.Default.ShoppingCart,
@@ -174,7 +156,20 @@ fun ProductCard(
                         Text("Carrito", maxLines = 1)
                     }
 
-
+                    // Botón favoritos
+                    IconButton(
+                        onClick = { onToggleFavorito(producto) },
+                        modifier = Modifier.size(40.dp),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = if (isFavorito) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
+                        )
+                    ) {
+                        Icon(
+                            imageVector = if (isFavorito) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = if (isFavorito) "Quitar de favoritos" else "Agregar a favoritos",
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }

@@ -1,6 +1,7 @@
 package com.example.huerto_hogar.data.di
 
 import com.example.huerto_hogar.data.api.BlogApiService
+import com.example.huerto_hogar.data.api.FavoriteApiService
 import com.example.huerto_hogar.data.api.OrderApiService
 import com.example.huerto_hogar.data.api.ProductApiService
 import com.example.huerto_hogar.data.api.UserApiService
@@ -103,5 +104,12 @@ object NetworkModule {
      */
     val orderApiService: OrderApiService by lazy {
         retrofit.create(OrderApiService::class.java)
+    }
+    
+    /**
+     * Servicio de API para operaciones con favoritos
+     */
+    val favoriteApiService: FavoriteApiService by lazy {
+        retrofit.create(FavoriteApiService::class.java)
     }
 }

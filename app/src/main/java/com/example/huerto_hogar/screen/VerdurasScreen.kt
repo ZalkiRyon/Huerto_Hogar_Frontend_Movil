@@ -59,11 +59,11 @@ fun VerdurasScreen(
     
     // Cargar productos de categoría VERDURAS
     LaunchedEffect(Unit) {
-        productViewModel.getProductsByCategory("Verduras frescas")
+        productViewModel.getProductsByCategory("Verduras organicas")
     }
     
     // Filtrar solo verduras del estado
-    val verduras = products.filter { it.category.contains("Verduras", ignoreCase = true) }
+    val verduras = products.filter { it.category.equals("Verduras organicas", ignoreCase = true) }
 
     val favoriteItems by favoritesViewModel.favoriteItems.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
