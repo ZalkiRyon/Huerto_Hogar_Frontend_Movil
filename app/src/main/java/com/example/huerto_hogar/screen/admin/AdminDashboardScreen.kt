@@ -195,13 +195,15 @@ fun AdminDashboardScreen(
             QuickActionCard(
                 title = "Agregar Producto",
                 icon = Icons.Default.Add,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                onClick = { /* navController.navigate("createProduct") */ }
             )
             
             QuickActionCard(
-                title = "Ver Reportes",
-                icon = Icons.Default.Info,
-                modifier = Modifier.weight(1f)
+                title = "Crear Usuario",
+                icon = Icons.Default.Person,
+                modifier = Modifier.weight(1f),
+                onClick = { /* navController.navigate("createUser") */ }
             )
         }
     }
@@ -284,7 +286,8 @@ fun ActivityItem(
 fun QuickActionCard(
     title: String,
     icon: ImageVector,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     
@@ -300,8 +303,9 @@ fun QuickActionCard(
                 .fillMaxSize()
                 .clickable(
                     interactionSource = interactionSource,
-                    indication = null
-                ) { /* TODO: Implement action */ }
+                    indication = null,
+                    onClick = onClick
+                )
                 .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically

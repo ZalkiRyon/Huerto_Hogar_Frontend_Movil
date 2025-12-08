@@ -114,7 +114,10 @@ fun AdminInventoryScreen(
             }
 
             Button(
-                onClick = { /* TODO: Add product */ },
+                onClick = { 
+                    // TODO: Descomentar cuando las rutas estén configuradas
+                    // navController.navigate("createProduct")
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
