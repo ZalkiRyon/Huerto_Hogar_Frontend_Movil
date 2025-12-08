@@ -19,7 +19,7 @@ data class Order(
     val statusName: String, // Backend devuelve String directamente, no objeto
     
     @SerializedName("montoTotal")
-    val totalProducts: Int,
+    val montoTotal: Int, // Total incluyendo productos y envío desde el backend
     
     @SerializedName("costoEnvio")
     val shippingCost: Int,
@@ -52,9 +52,13 @@ data class Order(
     val status: OrderStatus
         get() = OrderStatus(id = 0, name = statusName)
     
-    // Total final (monto productos + costo envío)
+    // Subtotal solo de productos (montoTotal - costoEnvio)
+    val totalProducts: Int
+        get() = montoTotal - shippingCost
+    
+    // Total final (el backend ya lo calcula correctamente en montoTotal)
     val totalFinal: Int
-        get() = totalProducts + shippingCost
+        get() = montoTotal
 }
 
 /**
