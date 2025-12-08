@@ -337,12 +337,12 @@ fun CreateUserScreen(
                             errorMessage = null
                             isLoading = true
                             
-                            // Mapear rol a role_id (1=admin, 2=vendedor, 3=cliente)
+                            // Mapear rol a role_id (1=admin, 2=cliente, 3=vendedor)
                             val roleId = when (selectedRole) {
                                 "admin" -> 1
-                                "vendedor" -> 2
-                                "cliente" -> 3
-                                else -> 3
+                                "cliente" -> 2
+                                "vendedor" -> 3
+                                else -> 2 // Por defecto cliente
                             }
                             
                             val createUserRequest = CreateUserRequest(

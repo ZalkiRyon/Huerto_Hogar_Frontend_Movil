@@ -260,15 +260,43 @@ class UserRepository(
             if (response.isSuccessful && response.body() != null) {
                 emit(Resource.Success(response.body()!!))
             } else {
+                // Intentar parsear el mensaje de error del backend
+                val errorBody = response.errorBody()?.string()
                 val errorMsg = when (response.code()) {
-                    400 -> "Datos inválidos"
-                    409 -> "El email ya está registrado"
-                    else -> "Error al crear usuario: ${response.code()}"
+                    400 -> {
+                        if (errorBody?.contains("run", ignoreCase = true) == true) {
+                            "RUN duplicado - Este RUN ya está registrado en el sistema"
+                        } else if (errorBody?.contains("email", ignoreCase = true) == true) {
+                            "Email duplicado - Este email ya está registrado"
+                        } else {
+                            "Datos inválidos: $errorBody"
+                        }
+                    }
+                    409 -> "El email o RUN ya está registrado en el sistema"
+                    500 -> {
+                        if (errorBody?.contains("Duplicate entry", ignoreCase = true) == true) {
+                            when {
+                                errorBody.contains("run", ignoreCase = true) -> 
+                                    "Error: El RUN ingresado ya existe en la base de datos"
+                                errorBody.contains("email", ignoreCase = true) -> 
+                                    "Error: El email ingresado ya existe en la base de datos"
+                                else -> "Error: Datos duplicados en la base de datos"
+                            }
+                        } else {
+                            "Error interno del servidor. Verifique los datos e intente nuevamente."
+                        }
+                    }
+                    else -> "Error al crear usuario (código ${response.code()})"
                 }
                 emit(Resource.Error(errorMsg))
             }
         } catch (e: Exception) {
-            emit(Resource.Error(NetworkUtils.handleNetworkException(e)))
+            val errorMsg = when {
+                e.message?.contains("duplicate", ignoreCase = true) == true -> 
+                    "Error: Ya existe un usuario con estos datos"
+                else -> NetworkUtils.handleNetworkException(e)
+            }
+            emit(Resource.Error(errorMsg))
         }
     }.flowOn(Dispatchers.IO)
 }
