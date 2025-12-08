@@ -30,8 +30,8 @@ data class Favorite(
             price = precioProducto.toDouble(),
             stock = 0, // No viene en el DTO
             description = "",
-            image = imagenProducto ?: "",
-            active = true
+            imageUrl = imagenProducto,
+            activo = true
         )
     }
 }
