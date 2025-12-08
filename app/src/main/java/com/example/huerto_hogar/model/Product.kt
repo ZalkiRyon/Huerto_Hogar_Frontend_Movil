@@ -24,8 +24,8 @@ data class Product(
     @SerializedName("stock")
     val stock: Int,
     
-    @SerializedName("imagen")
-    val imageUrl: String? = null, // Nombre del archivo de imagen
+    @SerializedName("imagenUrl")
+    val imageUrl: String? = null, // URL de Cloudinary
     
     @SerializedName("descripcion")
     val description: String = "",
