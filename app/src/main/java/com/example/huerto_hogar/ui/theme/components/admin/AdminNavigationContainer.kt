@@ -15,7 +15,10 @@ import com.example.huerto_hogar.screen.admin.AdminInventoryScreen
 import com.example.huerto_hogar.screen.admin.AdminUsersScreen
 import com.example.huerto_hogar.screen.admin.CreateProductScreen
 import com.example.huerto_hogar.screen.admin.CreateUserScreen
+import com.example.huerto_hogar.screen.admin.EditUserScreen
 import com.example.huerto_hogar.ui.theme.components.animations.*
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 
 /**
  * Contenedor de navegación para el panel administrativo.
@@ -90,6 +93,21 @@ fun AdminNavigationContainer(
                 exitTransition = { slideOutToLeftWithFade() }
             ) {
                 CreateUserScreen(navController = navController)
+            }
+            
+            // Ruta para editar usuario
+            composable(
+                route = "editUser/{userId}",
+                arguments = listOf(navArgument("userId") { type = NavType.IntType }),
+                enterTransition = { slideInFromRightWithFade() },
+                exitTransition = { slideOutToLeftWithFade() }
+            ) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getInt("userId") ?: 0
+                EditUserScreen(
+                    navController = navController,
+                    userId = userId,
+                    userManager = userManager
+                )
             }
         }
     }

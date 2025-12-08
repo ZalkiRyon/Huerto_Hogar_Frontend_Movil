@@ -130,14 +130,20 @@ fun AdminUsersScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(filteredUsers) { user ->
-                UserManagementCard(user = user)
+                UserManagementCard(
+                    user = user,
+                    navController = navController
+                )
             }
         }
     }
 }
 
 @Composable
-fun UserManagementCard(user: User) {
+fun UserManagementCard(
+    user: User,
+    navController: NavController
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -160,7 +166,7 @@ fun UserManagementCard(user: User) {
                     modifier = Modifier.size(48.dp),
                     shape = CircleShape,
                     color = when(user.role) {
-                        "admin" -> MaterialTheme.colorScheme.error
+                        "admin" -> Color(0xFFFF5252) // Rojo para admin
                         "vendedor" -> MaterialTheme.colorScheme.secondary
                         "cliente" -> MaterialTheme.colorScheme.tertiary
                         else -> MaterialTheme.colorScheme.tertiary
@@ -228,17 +234,16 @@ fun UserManagementCard(user: User) {
             ) {
                 IconButton(
                     onClick = { 
-                        // TODO: Implementar diálogo de edición
-                        // Por ahora solo muestra un placeholder
+                        navController.navigate("editUser/${user.id}")
                     },
                     colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                        containerColor = Color(0xFFFFC107).copy(alpha = 0.2f) // Amarillo/amber
                     )
                 ) {
                     Icon(
                         Icons.Default.Edit,
                         contentDescription = "Editar",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = Color(0xFFFFC107)
                     )
                 }
                 
