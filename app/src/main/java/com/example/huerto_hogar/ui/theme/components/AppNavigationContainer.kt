@@ -94,9 +94,10 @@ fun AppNavigationContainer() {
     val salesViewModel: SalesViewModel = viewModel()
 
     val currentUser by userManager.currentUser.collectAsState()
+    val showAdminStoreView by userManager.showAdminStoreView.collectAsState()
 
-    // Si el usuario es admin, mostrar panel de administración
-    if (currentUser?.role == "admin") {
+    // Si el usuario es admin y NO está en modo tienda, mostrar panel de administración
+    if (currentUser?.role == "admin" && !showAdminStoreView) {
         AdminNavigationContainer(
             userManager = userManager,
             salesViewModel = salesViewModel,
@@ -282,6 +283,24 @@ fun AppNavigationContainer() {
                                 )
                             }
                         )
+                        
+                        // Si el usuario es admin, mostrar acceso al Dashboard
+                        if (currentUser?.role == "admin") {
+                            NavigationDrawerItem(
+                                label = { Text("Dashboard Administración") },
+                                selected = false,
+                                onClick = {
+                                    scope.launch { drawerState.close() }
+                                    userManager.toggleAdminView(false) // Cambiar a vista admin
+                                },
+                                icon = {
+                                    Icon(
+                                        Icons.Default.Home,
+                                        contentDescription = "Dashboard Administración"
+                                    )
+                                }
+                            )
+                        }
 
                         Spacer(modifier = Modifier.weight(1f))
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))

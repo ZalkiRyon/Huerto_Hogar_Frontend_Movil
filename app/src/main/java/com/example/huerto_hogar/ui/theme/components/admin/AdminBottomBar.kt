@@ -57,31 +57,19 @@ sealed class AdminBottomNavItem(
         "Órdenes"
     )
     
-    object Logout : AdminBottomNavItem(
-        "logout",
-        Icons.AutoMirrored.Filled.ExitToApp,
-        "Salir"
+    object Menu : AdminBottomNavItem(
+        "menu",
+        Icons.Default.Menu,
+        "Menú"
     )
 }
 
 @Composable
 fun AdminBottomBar(
     navController: NavHostController,
-    onLogout: () -> Unit
+    onMenuClick: () -> Unit
 ) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-    var showLogoutDialog by remember { mutableStateOf(false) }
-    
-    // Diálogo de confirmación de logout usando componente reutilizable
-    ConfirmationDialog(
-        showDialog = showLogoutDialog,
-        onDismiss = { showLogoutDialog = false },
-        onConfirm = {
-            showLogoutDialog = false
-            onLogout()
-        },
-        message = "¿Estás seguro de que deseas cerrar sesión del panel de administración?"
-    )
     
     BottomAppBar(
         content = {
@@ -94,7 +82,7 @@ fun AdminBottomBar(
                     AdminBottomNavItem.Users,
                     AdminBottomNavItem.Inventory,
                     AdminBottomNavItem.Orders,
-                    AdminBottomNavItem.Logout
+                    AdminBottomNavItem.Menu
                 )
                 
                 items.forEach { item ->
@@ -111,8 +99,8 @@ fun AdminBottomBar(
                     NavigationBarItem(
                         selected = isSelected,
                         onClick = {
-                            if (item == AdminBottomNavItem.Logout) {
-                                showLogoutDialog = true
+                            if (item == AdminBottomNavItem.Menu) {
+                                onMenuClick()
                             } else {
                                 navController.navigate(item.route) {
                                     popUpTo(AppScreens.AdminDashboardScreen.route) {

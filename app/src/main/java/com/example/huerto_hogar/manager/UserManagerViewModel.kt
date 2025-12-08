@@ -155,6 +155,10 @@ class UserManagerViewModel(
     private val _authToken = MutableStateFlow<String?>(null)
     val authToken: StateFlow<String?> = _authToken.asStateFlow()
     
+    // Control de vista para administradores (true = ver tienda como cliente, false = ver dashboard admin)
+    private val _showAdminStoreView = MutableStateFlow(false)
+    val showAdminStoreView: StateFlow<Boolean> = _showAdminStoreView.asStateFlow()
+    
     // Estados para carga de datos
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -271,5 +275,13 @@ class UserManagerViewModel(
     fun logout() {
         _currentUser.value = null
         _authToken.value = null
+        _showAdminStoreView.value = false
+    }
+    
+    /**
+     * Alterna la vista del administrador entre tienda y dashboard
+     */
+    fun toggleAdminView(showStore: Boolean) {
+        _showAdminStoreView.value = showStore
     }
 }
