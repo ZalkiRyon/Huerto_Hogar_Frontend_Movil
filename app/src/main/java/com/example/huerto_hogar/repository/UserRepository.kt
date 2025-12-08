@@ -321,6 +321,28 @@ class UserRepository(
     }.flowOn(Dispatchers.IO)
     
     /**
+     * Obtiene todos los usuarios incluyendo inactivos (solo admin)
+     * 
+     * @param token Token de autenticación del admin
+     * @return Flow<Resource<List<User>>>
+     */
+    fun getAllUsersIncludingInactive(token: String): Flow<Resource<List<User>>> = flow {
+        try {
+            emit(Resource.Loading())
+            
+            val response = apiService.getAllUsersIncludingInactive("Bearer $token")
+            
+            if (response.isSuccessful && response.body() != null) {
+                emit(Resource.Success(response.body()!!))
+            } else {
+                emit(Resource.Error("Error al obtener usuarios: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            emit(Resource.Error(NetworkUtils.handleNetworkException(e)))
+        }
+    }.flowOn(Dispatchers.IO)
+    
+    /**
      * Reactiva un usuario desactivado
      * 
      * @param userId ID del usuario a reactivar

@@ -54,7 +54,12 @@ import com.example.huerto_hogar.viewmodel.ProductViewModel
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.huerto_hogar.manager.UserManagerViewModel
+import com.example.huerto_hogar.ui.theme.components.ConfirmationDialog
 import com.example.huerto_hogar.viewmodel.ProductUiState
+import kotlinx.coroutines.launch
 
 /**
  * Pantalla de gestión de inventario (display only por ahora).
@@ -62,10 +67,15 @@ import com.example.huerto_hogar.viewmodel.ProductUiState
 @Composable
 fun AdminInventoryScreen(
     navController: NavController,
-    productViewModel: ProductViewModel = viewModel()
+    productViewModel: ProductViewModel = viewModel(),
+    userManager: UserManagerViewModel = viewModel()
 ) {
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var productToDelete by remember { mutableStateOf<Product?>(null) }
+    
+    val scope = rememberCoroutineScope()
 
     // Observar estados del ViewModel
     val productsState by productViewModel.productsState.collectAsState()
@@ -84,6 +94,24 @@ fun AdminInventoryScreen(
             matchesCategory && matchesSearch
         }
     }
+    
+    // Diálogo de confirmación para eliminar
+    ConfirmationDialog(
+        showDialog = showDeleteDialog,
+        onDismiss = { showDeleteDialog = false },
+        title = "Eliminar Producto",
+        message = "¿Estás seguro de que deseas eliminar el producto ${productToDelete?.name}?",
+        confirmButtonText = "Sí, eliminar",
+        onConfirm = {
+            showDeleteDialog = false
+            productToDelete?.let { product ->
+                scope.launch {
+                    val token = userManager.getAuthToken() ?: ""
+                    productViewModel.deleteProduct(product.id, token)
+                }
+            }
+        }
+    )
 
     Column(
         modifier = Modifier
@@ -166,28 +194,74 @@ fun AdminInventoryScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Category Filters
-        Row(
+        // Category Filters - Organizado en 2 filas
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            FilterChip(
-                selected = selectedCategory == null,
-                onClick = { selectedCategory = null },
-                label = { Text("Todos") },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primary,
-                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    labelColor = MaterialTheme.colorScheme.onSurface
-                )
-            )
-
-            listOf("Frutas frescas", "Verduras frescas", "Orgánicos").forEach { category ->
+            // Primera fila
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 FilterChip(
-                    selected = selectedCategory == category,
-                    onClick = { selectedCategory = category },
-                    label = { Text(category) },
+                    selected = selectedCategory == null,
+                    onClick = { selectedCategory = null },
+                    label = { Text("Todos") },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        labelColor = MaterialTheme.colorScheme.onSurface
+                    )
+                )
+
+                FilterChip(
+                    selected = selectedCategory == "Frutas frescas",
+                    onClick = { selectedCategory = "Frutas frescas" },
+                    label = { Text("Frutas frescas") },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        labelColor = MaterialTheme.colorScheme.onSurface
+                    )
+                )
+
+                FilterChip(
+                    selected = selectedCategory == "Verduras frescas",
+                    onClick = { selectedCategory = "Verduras frescas" },
+                    label = { Text("Verduras frescas") },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        labelColor = MaterialTheme.colorScheme.onSurface
+                    )
+                )
+            }
+
+            // Segunda fila
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    selected = selectedCategory == "Orgánicos",
+                    onClick = { selectedCategory = "Orgánicos" },
+                    label = { Text("Orgánicos") },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        labelColor = MaterialTheme.colorScheme.onSurface
+                    )
+                )
+
+                FilterChip(
+                    selected = selectedCategory == "Productos procesados",
+                    onClick = { selectedCategory = "Productos procesados" },
+                    label = { Text("Productos procesados") },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = MaterialTheme.colorScheme.primary,
                         selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
@@ -234,7 +308,17 @@ fun AdminInventoryScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(filteredProducts) { product ->
-                        ProductInventoryCard(product = product)
+                        ProductInventoryCard(
+                            product = product,
+                            onEdit = { 
+                                // Navegar a la pantalla de editar producto
+                                navController.navigate("editProduct/${it.id}")
+                            },
+                            onDelete = {
+                                productToDelete = it
+                                showDeleteDialog = true
+                            }
+                        )
                     }
                 }
             }
@@ -243,7 +327,11 @@ fun AdminInventoryScreen(
 }
 
 @Composable
-fun ProductInventoryCard(product: Product) {
+fun ProductInventoryCard(
+    product: Product,
+    onEdit: (Product) -> Unit = {},
+    onDelete: (Product) -> Unit = {}
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -321,27 +409,21 @@ fun ProductInventoryCard(product: Product) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 IconButton(
-                    onClick = { 
-                        // TODO: Implementar diálogo de edición
-                        // Por ahora solo muestra un placeholder
-                    },
+                    onClick = { onEdit(product) },
                     colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.primary
+                        containerColor = Color(0xFFFFC107).copy(alpha = 0.15f),
+                        contentColor = Color(0xFFFFC107)
                     )
                 ) {
                     Icon(
                         Icons.Default.Edit,
                         contentDescription = "Editar",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = Color(0xFFFFC107)
                     )
                 }
 
                 IconButton(
-                    onClick = { 
-                        // TODO: Implementar confirmación de eliminación
-                        // Por ahora solo muestra un placeholder
-                    },
+                    onClick = { onDelete(product) },
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = Color.Red.copy(alpha = 0.1f),
                         contentColor = MaterialTheme.colorScheme.error

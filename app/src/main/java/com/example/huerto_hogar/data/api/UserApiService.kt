@@ -57,10 +57,18 @@ interface UserApiService {
     ): Response<User>
     
     /**
-     * Obtiene todos los usuarios (solo admin)
+     * Obtiene todos los usuarios (solo admin) - retorna solo activos
      */
     @GET("usuarios")
     suspend fun getAllUsers(
+        @Header("Authorization") token: String = ""
+    ): Response<List<User>>
+    
+    /**
+     * Obtiene todos los usuarios incluyendo inactivos (solo admin)
+     */
+    @GET("usuarios/todos")
+    suspend fun getAllUsersIncludingInactive(
         @Header("Authorization") token: String = ""
     ): Response<List<User>>
     

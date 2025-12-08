@@ -48,13 +48,14 @@ fun ReactivateProductsScreen(
     // Cargar productos inactivos
     LaunchedEffect(Unit) {
         isLoading = true
-        productRepository.getAllProducts().collect { resource ->
+        val token = userManager.getAuthToken() ?: ""
+        productRepository.getAllProductsIncludingInactive(token).collect { resource ->
             when (resource) {
                 is Resource.Loading -> isLoading = true
                 is Resource.Success -> {
                     isLoading = false
-                    // Filtrar solo productos con stock 0 (considerados inactivos)
-                    inactiveProducts = resource.data?.filter { it.stock == 0 } ?: emptyList()
+                    // Filtrar solo productos inactivos
+                    inactiveProducts = resource.data?.filter { !it.activo } ?: emptyList()
                 }
                 is Resource.Error -> {
                     isLoading = false
@@ -76,6 +77,8 @@ fun ReactivateProductsScreen(
     ConfirmationDialog(
         showDialog = showReactivateDialog,
         onDismiss = { showReactivateDialog = false },
+        title = "Reactivar Producto",
+        confirmButtonText = "Sí, reactivar",
         onConfirm = {
             showReactivateDialog = false
             selectedProduct?.let { product ->
@@ -89,9 +92,9 @@ fun ReactivateProductsScreen(
                                 isLoading = false
                                 snackbarMessage = "Producto ${product.name} reactivado exitosamente"
                                 // Recargar lista
-                                productRepository.getAllProducts().collect { res ->
+                                productRepository.getAllProductsIncludingInactive(token).collect { res ->
                                     if (res is Resource.Success) {
-                                        inactiveProducts = res.data?.filter { it.stock == 0 } ?: emptyList()
+                                        inactiveProducts = res.data?.filter { !it.activo } ?: emptyList()
                                     }
                                 }
                             }

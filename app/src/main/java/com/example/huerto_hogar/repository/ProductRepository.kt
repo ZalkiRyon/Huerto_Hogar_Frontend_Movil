@@ -205,6 +205,28 @@ class ProductRepository(
     }.flowOn(Dispatchers.IO)
     
     /**
+     * Obtiene todos los productos incluyendo inactivos (requiere token de autenticación)
+     * 
+     * @param token Token de autenticación del admin
+     * @return Flow<Resource<List<Product>>> - Stream de estados de la petición
+     */
+    fun getAllProductsIncludingInactive(token: String): Flow<Resource<List<Product>>> = flow {
+        try {
+            emit(Resource.Loading())
+            
+            val response = apiService.getAllProductsIncludingInactive("Bearer $token")
+            
+            if (response.isSuccessful && response.body() != null) {
+                emit(Resource.Success(response.body()!!))
+            } else {
+                emit(Resource.Error("Error al obtener productos: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            emit(Resource.Error(NetworkUtils.handleNetworkException(e)))
+        }
+    }.flowOn(Dispatchers.IO)
+    
+    /**
      * Reactiva un producto desactivado (requiere token de autenticación)
      * 
      * @param productId ID del producto a reactivar

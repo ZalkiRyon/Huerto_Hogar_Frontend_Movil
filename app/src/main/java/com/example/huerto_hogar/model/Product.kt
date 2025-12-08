@@ -28,7 +28,10 @@ data class Product(
     val imageUrl: String? = null, // Nombre del archivo de imagen
     
     @SerializedName("descripcion")
-    val description: String = ""
+    val description: String = "",
+    
+    @SerializedName("activo")
+    val activo: Boolean = true
 )
 
 enum class ProductCategory(val displayName: String) {

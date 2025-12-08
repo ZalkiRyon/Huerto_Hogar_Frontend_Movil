@@ -11,10 +11,18 @@ import retrofit2.http.*
 interface ProductApiService {
     
     /**
-     * Obtiene todos los productos del catálogo
+     * Obtiene todos los productos del catálogo (solo activos)
      */
     @GET("productos")
     suspend fun getAllProducts(): Response<List<Product>>
+    
+    /**
+     * Obtiene todos los productos incluyendo inactivos (solo admin)
+     */
+    @GET("productos/todos")
+    suspend fun getAllProductsIncludingInactive(
+        @Header("Authorization") token: String
+    ): Response<List<Product>>
     
     /**
      * Obtiene un producto por su ID

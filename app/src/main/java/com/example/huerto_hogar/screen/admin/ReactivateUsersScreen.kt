@@ -51,14 +51,13 @@ fun ReactivateUsersScreen(
     LaunchedEffect(Unit) {
         isLoading = true
         val token = userManager.getAuthToken() ?: ""
-        userRepository.getAllUsers(token).collect { resource ->
+        userRepository.getAllUsersIncludingInactive(token).collect { resource ->
             when (resource) {
                 is Resource.Loading -> isLoading = true
                 is Resource.Success -> {
                     isLoading = false
-                    // TODO: Backend debe proporcionar endpoint para usuarios inactivos
-                    // Por ahora mostramos lista vacía hasta que se implemente
-                    inactiveUsers = emptyList()
+                    // Filtrar solo usuarios inactivos
+                    inactiveUsers = resource.data?.filter { !it.activo } ?: emptyList()
                 }
                 is Resource.Error -> {
                     isLoading = false
@@ -80,6 +79,8 @@ fun ReactivateUsersScreen(
     ConfirmationDialog(
         showDialog = showReactivateDialog,
         onDismiss = { showReactivateDialog = false },
+        title = "Reactivar Usuario",
+        confirmButtonText = "Sí, reactivar",
         onConfirm = {
             showReactivateDialog = false
             selectedUser?.let { user ->
@@ -93,9 +94,9 @@ fun ReactivateUsersScreen(
                                 isLoading = false
                                 snackbarMessage = "Usuario ${user.name} reactivado exitosamente"
                                 // Recargar lista
-                                userRepository.getAllUsers(token).collect { res ->
+                                userRepository.getAllUsersIncludingInactive(token).collect { res ->
                                     if (res is Resource.Success) {
-                                        inactiveUsers = emptyList()
+                                        inactiveUsers = res.data?.filter { !it.activo } ?: emptyList()
                                     }
                                 }
                             }
