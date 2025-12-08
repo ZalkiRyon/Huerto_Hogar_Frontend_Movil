@@ -137,7 +137,7 @@ fun OrderDetailScreen(
             if (!order.comments.isNullOrBlank()) {
                 DetailSection(
                     title = "Comentarios",
-                    icon = Icons.Default.ChatBubble
+                    icon = Icons.Default.Info
                 ) {
                     Text(
                         text = order.comments,

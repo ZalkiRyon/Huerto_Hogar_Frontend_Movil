@@ -303,7 +303,7 @@ fun OrderManagementCard(
                     )
                 ) {
                     Icon(
-                        Icons.Default.RemoveRedEye,
+                        Icons.Default.Info,
                         contentDescription = "Ver detalles",
                         tint = Color(0xFF2196F3)
                     )
