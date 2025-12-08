@@ -56,8 +56,9 @@ fun ReactivateUsersScreen(
                 is Resource.Loading -> isLoading = true
                 is Resource.Success -> {
                     isLoading = false
-                    // Filtrar solo usuarios inactivos
-                    inactiveUsers = resource.data?.filter { !it.activo } ?: emptyList()
+                    // TODO: Backend debe proporcionar endpoint para usuarios inactivos
+                    // Por ahora mostramos lista vacía hasta que se implemente
+                    inactiveUsers = emptyList()
                 }
                 is Resource.Error -> {
                     isLoading = false
@@ -94,7 +95,7 @@ fun ReactivateUsersScreen(
                                 // Recargar lista
                                 userRepository.getAllUsers(token).collect { res ->
                                     if (res is Resource.Success) {
-                                        inactiveUsers = res.data?.filter { !it.activo } ?: emptyList()
+                                        inactiveUsers = emptyList()
                                     }
                                 }
                             }
@@ -284,7 +285,7 @@ fun InactiveUserCard(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
                     Text(
-                        text = user.role.uppercase(),
+                        text = user.role?.uppercase() ?: "CLIENTE",
                         style = MaterialTheme.typography.bodySmall,
                         color = when (user.role) {
                             "admin" -> Color(0xFFFF5252)
