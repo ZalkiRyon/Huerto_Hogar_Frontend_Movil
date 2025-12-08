@@ -50,7 +50,7 @@ interface UserApiService {
      */
     @GET("usuarios")
     suspend fun getAllUsers(
-        @Header("Authorization") token: String
+        @Header("Authorization") token: String = ""
     ): Response<List<User>>
     
     /**

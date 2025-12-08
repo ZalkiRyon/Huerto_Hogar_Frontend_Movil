@@ -58,6 +58,9 @@ fun AdminDashboardScreen(
     LaunchedEffect(Unit) {
         productViewModel.getAllProducts()
         salesViewModel.loadOrders()
+        // Cargar usuarios desde backend (sin token ya que el endpoint es público por ahora)
+        // En producción, deberías pasar el token del admin aquí
+        userManager.loadUsersFromBackend()
     }
 
     Column(
@@ -119,7 +122,7 @@ fun AdminDashboardScreen(
             )
             
             StatCard(
-                title = "Pedidos",
+                title = "Órdenes",
                 value = totalOrders.toString(),
                 icon = Icons.Default.Star,
                 color = Color(0xFF9C27B0),

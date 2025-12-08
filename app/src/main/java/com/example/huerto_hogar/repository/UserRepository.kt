@@ -95,14 +95,15 @@ class UserRepository(
     /**
      * Obtiene todos los usuarios (solo para administradores)
      * 
-     * @param token Token de autenticación del admin
+     * @param token Token de autenticación del admin (opcional para desarrollo)
      * @return Flow<Resource<List<User>>> - Stream con lista de usuarios
      */
-    fun getAllUsers(token: String): Flow<Resource<List<User>>> = flow {
+    fun getAllUsers(token: String = ""): Flow<Resource<List<User>>> = flow {
         try {
             emit(Resource.Loading())
             
-            val response = apiService.getAllUsers("Bearer $token")
+            val authHeader = if (token.isNotEmpty()) "Bearer $token" else ""
+            val response = apiService.getAllUsers(authHeader)
             
             if (response.isSuccessful && response.body() != null) {
                 emit(Resource.Success(response.body()!!))

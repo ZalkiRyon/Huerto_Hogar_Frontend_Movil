@@ -1,13 +1,19 @@
 package com.example.huerto_hogar.manager
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.huerto_hogar.model.User
+import com.example.huerto_hogar.repository.UserRepository
+import com.example.huerto_hogar.utils.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class UserManagerViewModel : ViewModel() {
+class UserManagerViewModel(
+    private val userRepository: UserRepository = UserRepository()
+) : ViewModel() {
 
     private val initialUsers = listOf(
         // ADMINISTRADORES
@@ -138,8 +144,8 @@ class UserManagerViewModel : ViewModel() {
         )
     )
 
-    // Users List
-    private val _userList = MutableStateFlow(initialUsers.toMutableList())
+    // Users List - inicializa con lista vacía y carga desde backend
+    private val _userList = MutableStateFlow<MutableList<User>>(mutableListOf())
     val userList: StateFlow<List<User>> = _userList.asStateFlow()
 
     private val _currentUser = MutableStateFlow<User?>(null)
@@ -148,8 +154,52 @@ class UserManagerViewModel : ViewModel() {
     // Token de autenticación
     private val _authToken = MutableStateFlow<String?>(null)
     val authToken: StateFlow<String?> = _authToken.asStateFlow()
+    
+    // Estados para carga de datos
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
-    private var nextId = initialUsers.maxOf { it.id } + 1
+    private var nextId = 100 // ID inicial alto para evitar conflictos
+
+    init {
+        // Usar datos mock como fallback solo si no hay conexión
+        _userList.value = initialUsers.toMutableList()
+    }
+
+    /**
+     * Carga todos los usuarios desde el backend
+     * Puede llamarse con o sin token de autenticación
+     */
+    fun loadUsersFromBackend(token: String? = null) {
+        viewModelScope.launch {
+            // Usar token proporcionado, o el guardado, o vacío para endpoints públicos
+            val authToken = token ?: _authToken.value ?: ""
+            
+            userRepository.getAllUsers(authToken).collect { resource ->
+                when (resource) {
+                    is Resource.Loading -> {
+                        _isLoading.value = true
+                        _errorMessage.value = null
+                    }
+                    is Resource.Success -> {
+                        _isLoading.value = false
+                        resource.data?.let { users ->
+                            _userList.value = users.toMutableList()
+                            nextId = (users.maxOfOrNull { it.id } ?: 100) + 1
+                        }
+                    }
+                    is Resource.Error -> {
+                        _isLoading.value = false
+                        _errorMessage.value = resource.message
+                        // Mantener datos mock si falla la carga
+                    }
+                }
+            }
+        }
+    }
 
     fun registerUser(newUser: User): User? {
         if (_userList.value.any { it.email.equals(newUser.email, ignoreCase = true) }) {
