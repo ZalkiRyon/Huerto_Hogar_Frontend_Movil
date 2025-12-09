@@ -265,49 +265,100 @@ class UserSettingsViewModel() : ViewModel() {
 
 
     fun onClickSave() = viewModelScope.launch {
-        _uiState.update { it.copy(isLoading = true,) }
+        _uiState.update { it.copy(isLoading = true) }
+        
         val state = _uiState.value
-        val currentUser = userManager.currentUser.value ?: run {
-            _saveResult.emit(false); return@launch
-        }
-
-        val hasValidationErrors = validateProfileForm(state, currentUser)
-
-        if (hasValidationErrors) {
-            _uiState.update { it.copy() }
+        val currentUser = userManager.currentUser.value
+        
+        if (currentUser == null) {
+            _uiState.update { it.copy(isLoading = false) }
+            _saveResult.emit(false)
             return@launch
         }
 
-
-        val finalPassword = state.newPassword.ifBlank {
-            currentUser.password
+        // Validar formulario
+        val hasValidationErrors = validateProfileForm(state, currentUser)
+        if (hasValidationErrors) {
+            _uiState.update { it.copy(isLoading = false) }
+            return@launch
         }
 
-
-        val updatedUser = currentUser.copy(
-            name = state.name,
-            lastname = state.lastname,
-            email = state.email,
-            address = state.address,
-            phone = state.phone.ifBlank { null },
-            password = finalPassword,
-            profilePictureUrl = state.newProfilePhoto
-        )
-
-
-        val success = userManager.updateUser(updatedUser)
-
-
-        _uiState.update {
-            it.copy()
-        }
-
-        if (!success && !updatedUser.email.equals(currentUser.email, ignoreCase = true)) {
-            _uiState.update {
-                it.copy(errors = it.errors.copy(errors = "El nuevo correo electrónico ya está en uso por otro usuario."),)
+        try {
+            // Determinar password (si está cambiando o mantener el actual)
+            val finalPassword = state.newPassword.ifBlank { currentUser.password }
+            
+            // Construir request para el backend
+            val updateRequest = com.example.huerto_hogar.model.UpdateUserRequest(
+                email = state.email,
+                password = finalPassword,
+                name = state.name,
+                lastname = state.lastname,
+                run = currentUser.run ?: "",
+                phone = state.phone.ifBlank { "" },
+                region = currentUser.region ?: "",
+                comuna = currentUser.comuna ?: "",
+                address = state.address,
+                comment = currentUser.comment,
+                profilePhoto = state.newProfilePhoto,
+                roleId = if (currentUser.role == "admin") 1 else if (currentUser.role == "vendedor") 3 else 2
+            )
+            
+            // Obtener token
+            val token = userManager.getAuthToken()
+            if (token == null) {
+                Log.e("UserSettingsViewModel", "No auth token available")
+                _uiState.update { it.copy(isLoading = false) }
+                _saveResult.emit(false)
+                return@launch
             }
+            
+            // Llamar al backend
+            val response = userApiService.updateUser(
+                id = currentUser.id,
+                userRequest = updateRequest,
+                token = "Bearer $token"
+            )
+            
+            if (response.isSuccessful) {
+                val updatedUser = response.body()
+                if (updatedUser != null) {
+                    // Actualizar estado local
+                    userManager.updateUser(updatedUser)
+                    
+                    // Recargar perfil en el formulario
+                    loadUserProfile()
+                    
+                    Log.d("UserSettingsViewModel", "Profile updated successfully")
+                    _uiState.update { it.copy(isLoading = false) }
+                    _saveResult.emit(true)
+                } else {
+                    Log.e("UserSettingsViewModel", "Response body is null")
+                    _uiState.update { it.copy(isLoading = false) }
+                    _saveResult.emit(false)
+                }
+            } else {
+                val errorBody = response.errorBody()?.string()
+                Log.e("UserSettingsViewModel", "Update failed: ${response.code()} - $errorBody")
+                
+                // Verificar si es error de email duplicado
+                if (errorBody?.contains("correo") == true || errorBody?.contains("email") == true) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errors = it.errors.copy(errors = "El correo electrónico ya está en uso.")
+                        )
+                    }
+                } else {
+                    _uiState.update { it.copy(isLoading = false) }
+                }
+                _saveResult.emit(false)
+            }
+            
+        } catch (e: Exception) {
+            Log.e("UserSettingsViewModel", "Exception updating profile", e)
+            _uiState.update { it.copy(isLoading = false) }
+            _saveResult.emit(false)
         }
-        _saveResult.emit(success)
     }
 
     private fun isValidEmail(email: String): Boolean {
