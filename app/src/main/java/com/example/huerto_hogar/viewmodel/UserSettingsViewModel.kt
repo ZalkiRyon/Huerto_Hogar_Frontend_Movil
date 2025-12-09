@@ -324,10 +324,13 @@ class UserSettingsViewModel() : ViewModel() {
                 if (updatedUser != null) {
                     Log.d("UserSettingsViewModel", "Backend returned user: $updatedUser")
                     
-                    // Actualizar estado local en UserManager
-                    val updateSuccess = userManager.updateUser(updatedUser)
-                    Log.d("UserSettingsViewModel", "UserManager.updateUser returned: $updateSuccess")
+                    // Actualizar currentUser DIRECTAMENTE (no depende de la lista)
+                    userManager.setCurrentUser(updatedUser)
+                    Log.d("UserSettingsViewModel", "Set currentUser directly")
                     Log.d("UserSettingsViewModel", "Current user after update: ${userManager.currentUser.value}")
+                    
+                    // También intentar actualizar en la lista (si existe)
+                    userManager.updateUser(updatedUser)
                     
                     // Recargar perfil en el formulario y limpiar contraseñas
                     _uiState.update {
