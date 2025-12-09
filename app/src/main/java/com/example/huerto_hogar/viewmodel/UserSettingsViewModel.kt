@@ -322,14 +322,32 @@ class UserSettingsViewModel() : ViewModel() {
             if (response.isSuccessful) {
                 val updatedUser = response.body()
                 if (updatedUser != null) {
-                    // Actualizar estado local
-                    userManager.updateUser(updatedUser)
+                    Log.d("UserSettingsViewModel", "Backend returned user: $updatedUser")
                     
-                    // Recargar perfil en el formulario
-                    loadUserProfile()
+                    // Actualizar estado local en UserManager
+                    val updateSuccess = userManager.updateUser(updatedUser)
+                    Log.d("UserSettingsViewModel", "UserManager.updateUser returned: $updateSuccess")
+                    Log.d("UserSettingsViewModel", "Current user after update: ${userManager.currentUser.value}")
                     
-                    Log.d("UserSettingsViewModel", "Profile updated successfully")
-                    _uiState.update { it.copy(isLoading = false) }
+                    // Recargar perfil en el formulario y limpiar contraseñas
+                    _uiState.update {
+                        it.copy(
+                            id = updatedUser.id,
+                            name = updatedUser.name,
+                            lastname = updatedUser.lastname,
+                            email = updatedUser.email,
+                            address = updatedUser.address,
+                            phone = updatedUser.phone ?: "",
+                            newProfilePhoto = updatedUser.profilePictureUrl ?: "",
+                            currentPassword = "",
+                            newPassword = "",
+                            confirmNewPassword = "",
+                            isLoading = false,
+                            errors = UserSettingErrors() // Limpiar errores
+                        )
+                    }
+                    
+                    Log.d("UserSettingsViewModel", "Profile updated successfully and UI state refreshed")
                     _saveResult.emit(true)
                 } else {
                     Log.e("UserSettingsViewModel", "Response body is null")
