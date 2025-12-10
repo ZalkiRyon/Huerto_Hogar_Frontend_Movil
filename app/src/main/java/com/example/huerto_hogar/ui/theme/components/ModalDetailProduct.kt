@@ -1,7 +1,6 @@
 package com.example.huerto_hogar.ui.theme.components
 
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,16 +30,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
-import com.example.huerto_hogar.R
 import com.example.huerto_hogar.model.Product
 import com.example.huerto_hogar.viewmodel.CartViewModel
-import com.example.huerto_hogar.viewmodel.FavoritesViewModel
 
 @Composable
 fun ModalDetailProduct(
@@ -123,7 +120,9 @@ fun ModalDetailProduct(
                     ) {
                         IconButton(
                             onClick = { cart.decrementQuantity(product.id) },
-                            modifier = Modifier.size(36.dp),
+                            modifier = Modifier
+                                .size(36.dp)
+                                .testTag("decreaseButton"),
                             enabled = quantity > 0
                         ) {
                             Icon(
@@ -137,7 +136,9 @@ fun ModalDetailProduct(
                             text = "$quantity",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.widthIn(min = 32.dp),
+                            modifier = Modifier
+                                .widthIn(min = 32.dp)
+                                .testTag("quantityText"),
                             textAlign = TextAlign.Center
                         )
 
@@ -150,7 +151,10 @@ fun ModalDetailProduct(
                                 }
 
                             },
-                            modifier = Modifier.size(36.dp)
+                            modifier = Modifier
+                                .size(36.dp)
+                                .testTag("increaseButton"),
+
                         ) {
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowUp,
