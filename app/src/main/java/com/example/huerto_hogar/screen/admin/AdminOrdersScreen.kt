@@ -283,7 +283,7 @@ fun OrderManagementCard(
                             tint = Color(0xFF4CAF50)
                         )
                         Text(
-                            text = "$${order.totalProducts}",
+                            text = "$${order.montoTotal}",
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                             color = Color(0xFF4CAF50)
                         )

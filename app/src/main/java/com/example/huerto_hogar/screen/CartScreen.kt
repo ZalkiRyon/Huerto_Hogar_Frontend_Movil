@@ -92,6 +92,8 @@ fun CartScreen(
     val cartItems by cartViewModel.cartItems.collectAsState()
     val studentDiscount by cartViewModel.studentDiscount.collectAsState()
 
+    // Costo de envío fijo
+    val shippingCost = 3000.0
     
     // Repositorio de órdenes y coroutine scope
     val orderRepository = remember { OrderRepository() }
@@ -105,7 +107,7 @@ fun CartScreen(
         cartViewModel.calculateDiscount()
     }
     val total = remember(studentDiscount, cartItems) {
-        cartViewModel.calculateTotal()
+        cartViewModel.calculateTotal() + estimatedShippingCost
     }
 
     var showClearDialog by remember { mutableStateOf(false) }
@@ -303,6 +305,23 @@ fun CartScreen(
 
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "Costo Envío:",
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                Text(
+                                    text = "$${shippingCost.toInt()}",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+
+                            HorizontalDivider(thickness = 1.dp)
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -344,6 +363,7 @@ fun CartScreen(
                                                         items = cartItems,
                                                         subtotal = subtotal,
                                                         discount = discount,
+                                                        shippingCost = shippingCost,
                                                         total = total,
                                                         hasStudentDiscount = studentDiscount
                                                     )
@@ -385,6 +405,8 @@ fun CartScreen(
                                                             if (!orderCreated) {
                                                                 orderCreated = true
                                                                 // Generar boleta con número de orden del backend
+                                                                val actualShippingCost = resource.data?.shippingCost?.toDouble() ?: shippingCost
+                                                                val actualTotal = subtotal - discount + actualShippingCost
                                                                 val receipt = Receipt(
                                                                     receiptNumber = generateReceiptNumber(),
                                                                     orderNumber = resource.data?.orderNumber,
@@ -392,7 +414,8 @@ fun CartScreen(
                                                                     items = cartItems,
                                                                     subtotal = subtotal,
                                                                     discount = discount,
-                                                                    total = total,
+                                                                    shippingCost = actualShippingCost,
+                                                                    total = actualTotal,
                                                                     hasStudentDiscount = studentDiscount
                                                                 )
 
@@ -420,6 +443,7 @@ fun CartScreen(
                                                                     items = cartItems,
                                                                     subtotal = subtotal,
                                                                     discount = discount,
+                                                                    shippingCost = shippingCost,
                                                                     total = total,
                                                                     hasStudentDiscount = studentDiscount
                                                                 )
@@ -446,6 +470,7 @@ fun CartScreen(
                                                     items = cartItems,
                                                     subtotal = subtotal,
                                                     discount = discount,
+                                                    shippingCost = shippingCost,
                                                     total = total,
                                                     hasStudentDiscount = studentDiscount
                                                 )

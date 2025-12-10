@@ -31,6 +31,7 @@ data class Receipt(
     val items: List<CartItem>,
     val subtotal: Double,
     val discount: Double,
+    val shippingCost: Double,
     val total: Double,
     val hasStudentDiscount: Boolean
 )
@@ -219,6 +220,20 @@ fun ReceiptDialog(
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Costo de Envío:",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = "$${receipt.shippingCost.toInt()}",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
 
                     HorizontalDivider(thickness = 2.dp)
