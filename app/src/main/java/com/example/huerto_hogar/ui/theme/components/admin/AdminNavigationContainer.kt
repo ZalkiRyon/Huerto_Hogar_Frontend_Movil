@@ -369,6 +369,7 @@ fun AdminNavigationContainer(
                 exitTransition = { slideOutToLeftWithFade() }
             ) {
                 val settingsVM: UserSettingsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+                settingsVM.userManager = userManager // Inicializar userManager
                 UsSetScreen(navController = navController, viewModel = settingsVM)
             }
         }

@@ -1,6 +1,16 @@
 package com.example.huerto_hogar.screen.admin
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Environment
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,18 +21,29 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
+import com.example.huerto_hogar.data.di.NetworkModule
 import com.example.huerto_hogar.viewmodel.ProductViewModel
 import com.example.huerto_hogar.model.Product
 import com.example.huerto_hogar.repository.ProductRepository
+import com.example.huerto_hogar.ui.theme.components.ConfirmationDialog
+import com.example.huerto_hogar.utils.FileUtils
 import com.example.huerto_hogar.utils.Resource
 import com.example.huerto_hogar.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,12 +66,120 @@ fun EditProductScreen(
     var stock by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("Frutas frescas") }
     var imageUrl by remember { mutableStateOf("") }
+    var productImageUri by remember { mutableStateOf<Uri?>(null) }
+    var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
+    var showSourceDialog by remember { mutableStateOf(false) }
+    var uploadingImage by remember { mutableStateOf(false) }
     
     var showCategoryMenu by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     
+    val context = LocalContext.current
+    val productApiService = NetworkModule.productApiService
+    
     val scrollState = rememberScrollState()
+    
+    // Launcher para galería
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            productImageUri = it
+            // Subir imagen a Cloudinary
+            uploadingImage = true
+            coroutineScope.launch {
+                try {
+                    val imagePart = FileUtils.prepareImagePart(context, it, "file")
+                    if (imagePart != null) {
+                        val result = productApiService.uploadProductImage(productId, imagePart)
+                        if (result.isSuccessful && result.body() != null) {
+                            imageUrl = result.body()!!
+                            Toast.makeText(context, "Imagen subida exitosamente", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, "Error al subir imagen", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        Toast.makeText(context, "Error al procesar la imagen", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                } finally {
+                    uploadingImage = false
+                }
+            }
+        }
+    }
+
+    // Launcher para cámara
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success: Boolean ->
+        if (success) {
+            cameraImageUri?.let {
+                productImageUri = it
+                // Subir imagen a Cloudinary
+                uploadingImage = true
+                coroutineScope.launch {
+                    try {
+                        val imagePart = FileUtils.prepareImagePart(context, it, "file")
+                        if (imagePart != null) {
+                            val result = productApiService.uploadProductImage(productId, imagePart)
+                            if (result.isSuccessful && result.body() != null) {
+                                imageUrl = result.body()!!
+                                Toast.makeText(context, "Imagen subida exitosamente", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "Error al subir imagen", Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            Toast.makeText(context, "Error al procesar la imagen", Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                    } finally {
+                        uploadingImage = false
+                    }
+                }
+            }
+        }
+    }
+
+    // Launcher para permisos de cámara
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            cameraImageUri?.let { uri -> cameraLauncher.launch(uri) }
+        } else {
+            Toast.makeText(context, "Permiso de cámara denegado", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun launchCameraFlow() {
+        val newPhotoFile = File.createTempFile(
+            "product_${System.currentTimeMillis()}",
+            ".jpg",
+            context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        )
+
+        val newUri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            newPhotoFile
+        )
+
+        cameraImageUri = newUri
+
+        if (ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            cameraLauncher.launch(newUri)
+        } else {
+            permissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
     
     val categories = listOf(
         "Frutas frescas" to "FR",
@@ -280,20 +409,94 @@ fun EditProductScreen(
                 
                 // Imagen (Opcional)
                 Text(
-                    text = "Imagen (Opcional)",
+                    text = "Imagen del Producto (Opcional)",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
                 
-                OutlinedTextField(
-                    value = imageUrl,
-                    onValueChange = { imageUrl = it },
-                    label = { Text("URL de la imagen") },
-                    leadingIcon = { Icon(Icons.Default.Share, contentDescription = null) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    singleLine = true,
-                    placeholder = { Text("https://ejemplo.com/imagen.jpg") }
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(200.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
+                            .clickable { showSourceDialog = true },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (productImageUri != null || imageUrl.isNotBlank()) {
+                            Image(
+                                painter = rememberAsyncImagePainter(
+                                    model = productImageUri ?: imageUrl
+                                ),
+                                contentDescription = "Imagen del producto",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.Add,
+                                contentDescription = "Agregar imagen",
+                                modifier = Modifier.size(80.dp),
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                            )
+                        }
+                        
+                        // Indicador de carga
+                        if (uploadingImage) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(40.dp),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+                    
+                    Spacer(Modifier.height(8.dp))
+                    
+                    Text(
+                        text = when {
+                            uploadingImage -> "Subiendo imagen..."
+                            productImageUri != null || imageUrl.isNotBlank() -> "Toca para cambiar imagen"
+                            else -> "Toca para agregar imagen"
+                        },
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    
+                    Text(
+                        text = "Si no se proporciona una imagen, se usará la imagen por defecto",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                    )
+                }
+                
+                // Diálogo de selección de fuente
+                if (showSourceDialog) {
+                    ConfirmationDialog(
+                        showDialog = showSourceDialog,
+                        title = "Seleccionar Imagen",
+                        message = "¿De dónde deseas obtener la imagen?",
+                        onConfirm = {
+                            showSourceDialog = false
+                            galleryLauncher.launch("image/*")
+                        },
+                        onDismiss = {
+                            showSourceDialog = false
+                            launchCameraFlow()
+                        },
+                        confirmButtonText = "Galería",
+                        dismissButtonText = "Cámara"
+                    )
+                }
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
