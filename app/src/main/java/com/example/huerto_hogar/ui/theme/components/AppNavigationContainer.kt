@@ -463,7 +463,8 @@ fun AppNavigationContainer() {
                             FrutasScreen(
                                 navController = navController,
                                 cartViewModel = cartViewModel,
-                                favoritesViewModel = favoritesViewModel
+                                favoritesViewModel = favoritesViewModel,
+                                userViewModel = userViewModel
                             )
                         }
 
@@ -475,7 +476,8 @@ fun AppNavigationContainer() {
                             OrganicosScreen(
                                 navController = navController,
                                 cartViewModel = cartViewModel,
-                                favoritesViewModel = favoritesViewModel
+                                favoritesViewModel = favoritesViewModel,
+                                userViewModel = userViewModel
                             )
                         }
 
@@ -487,7 +489,8 @@ fun AppNavigationContainer() {
                             VerdurasScreen(
                                 navController = navController,
                                 cartViewModel = cartViewModel,
-                                favoritesViewModel = favoritesViewModel
+                                favoritesViewModel = favoritesViewModel,
+                                userViewModel = userViewModel
                             )
                         }
 
@@ -507,7 +510,8 @@ fun AppNavigationContainer() {
                             AllProductsScreen(
                                 navController = navController,
                                 cartViewModel = cartViewModel,
-                                favoritesViewModel = favoritesViewModel
+                                favoritesViewModel = favoritesViewModel,
+                                userViewModel = userViewModel
                             )
                         }
                     }

@@ -20,16 +20,16 @@ data class CreateUserRequest(
     val lastname: String,
     
     @SerializedName("run")
-    val run: String? = null,
+    val run: String,
     
     @SerializedName("telefono")
-    val phone: String,
+    val phone: String? = null,
     
     @SerializedName("region")
-    val region: String? = null,
+    val region: String,
     
     @SerializedName("comuna")
-    val comuna: String? = null,
+    val comuna: String,
     
     @SerializedName("direccion")
     val address: String,

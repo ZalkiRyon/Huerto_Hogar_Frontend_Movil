@@ -239,7 +239,7 @@ fun EditUserScreen(
             OutlinedTextField(
                 value = phone,
                 onValueChange = { phone = it },
-                label = { Text("Teléfono") },
+                label = { Text("Teléfono (Opcional)") },
                 leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -305,7 +305,6 @@ fun EditUserScreen(
                         lastname.isBlank() -> errorMessage = "El apellido es requerido"
                         email.isBlank() -> errorMessage = "El email es requerido"
                         run.isBlank() -> errorMessage = "El RUN es requerido"
-                        phone.isBlank() -> errorMessage = "El teléfono es requerido"
                         region.isBlank() -> errorMessage = "La región es requerida"
                         comuna.isBlank() -> errorMessage = "La comuna es requerida"
                         address.isBlank() -> errorMessage = "La dirección es requerida"
@@ -329,7 +328,7 @@ fun EditUserScreen(
                                 name = name.trim(),
                                 lastname = lastname.trim(),
                                 run = run.trim(),
-                                phone = phone.trim(),
+                                phone = if (phone.isNotBlank()) phone.trim() else null,
                                 region = region.trim(),
                                 comuna = comuna.trim(),
                                 address = address.trim(),
