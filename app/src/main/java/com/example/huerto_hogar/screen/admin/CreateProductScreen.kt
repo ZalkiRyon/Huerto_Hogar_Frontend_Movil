@@ -1,5 +1,6 @@
 package com.example.huerto_hogar.screen.admin
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -11,7 +12,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -41,12 +44,12 @@ fun CreateProductScreen(
     var price by remember { mutableStateOf("") }
     var stock by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("Frutas frescas") }
-    var imageUrl by remember { mutableStateOf("") }
     
     var showCategoryMenu by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     
+    val context = LocalContext.current
     val scrollState = rememberScrollState()
     
     val categories = listOf(
@@ -238,30 +241,34 @@ fun CreateProductScreen(
                 )
             }
             
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             
-            // Imagen (Opcional)
-            Text(
-                text = "Imagen (Opcional)",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-            )
-            
-            OutlinedTextField(
-                value = imageUrl,
-                onValueChange = { imageUrl = it },
-                label = { Text("URL de la imagen") },
-                leadingIcon = { Icon(Icons.Default.Share, contentDescription = null) },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                singleLine = true,
-                placeholder = { Text("https://ejemplo.com/imagen.jpg") }
-            )
-            
-            Text(
-                text = "Si no se proporciona una imagen, se usará una por defecto",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-            )
+            // Nota sobre imagen
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.padding(end = 12.dp)
+                    )
+                    Text(
+                        text = "Podrás agregar una imagen después de crear el producto desde la opción de editar",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+            }
             
             Spacer(modifier = Modifier.height(16.dp))
             
@@ -290,7 +297,7 @@ fun CreateProductScreen(
                                 price = price.toDouble(),
                                 stock = stock.toInt(),
                                 description = description.trim(),
-                                imageUrl = if (imageUrl.isNotBlank()) imageUrl.trim() else null
+                                imageUrl = null // La imagen se agregará después desde la opción de editar
                             )
                             
                             coroutineScope.launch {

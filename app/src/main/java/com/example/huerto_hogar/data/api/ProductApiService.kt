@@ -2,6 +2,7 @@ package com.example.huerto_hogar.data.api
 
 import com.example.huerto_hogar.model.Product
 import com.example.huerto_hogar.model.ProductCategory
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -92,4 +93,14 @@ interface ProductApiService {
         @Path("id") id: Int,
         @Header("Authorization") token: String
     ): Response<Unit>
+    
+    /**
+     * Sube imagen del producto a Cloudinary
+     */
+    @Multipart
+    @POST("productos/{id}/imagen")
+    suspend fun uploadProductImage(
+        @Path("id") id: Int,
+        @Part file: MultipartBody.Part
+    ): Response<String>
 }
