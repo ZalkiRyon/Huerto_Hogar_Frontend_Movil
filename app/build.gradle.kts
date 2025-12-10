@@ -8,6 +8,15 @@ android {
     namespace = "com.example.huerto_hogar"
     compileSdk = 36
 
+    packaging {
+        resources {
+            excludes += "META-INF/LICENSE.md"
+            excludes += "META-INF/LICENSE-notice.md"
+            excludes += "META-INF/licenses/**"
+            excludes += "META-INF/AL2.0"
+            excludes += "META-INF/LGPL2.1"
+        }
+    }
     defaultConfig {
         applicationId = "com.example.huerto_hogar"
         minSdk = 24
@@ -67,6 +76,22 @@ dependencies {
     // Coroutines para operaciones asíncronas
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+
+    // Pruebas Unitarias
+    // MockK
+    testImplementation("io.mockk:mockk:1.13.8")
+    // Si también haces pruebas instrumentadas (androidTest), añade esta línea también:
+    androidTestImplementation("io.mockk:mockk-android:1.13.8")
+    // --- Instrumented Tests (androidTest - UI Tests) ---
+
+    // Dependencias base de AndroidX Test (Versiones actualizadas y compatibles)
+    // Usa las versiones del libs.versions.toml si existen, si no, usa cableado:
+    androidTestImplementation("androidx.test.ext:junit:1.1.5") // Usa una version consistente
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1") // Usa una version consistente
+
+    // Dependencias de Compose UI Test (usando el BOM para compatibilidad)
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4) // Usa la versión gestionada por el BOM/libs
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
