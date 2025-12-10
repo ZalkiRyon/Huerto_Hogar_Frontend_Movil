@@ -20,13 +20,13 @@ data class User(
     @SerializedName("password")
     val password: String = "",
     @SerializedName("run")
-    val run: String? = null,
+    val run: String,
     
     @SerializedName("region")
-    val region: String? = null,
+    val region: String,
     
     @SerializedName("comuna")
-    val comuna: String? = null,
+    val comuna: String,
     
     @SerializedName("direccion")
     val address: String,
@@ -55,8 +55,8 @@ data class UserRegisterRequest(
     val apellido: String?,
     val run: String,
     val telefono: String?,
-    val region: String?,
-    val comuna: String?,
+    val region: String,
+    val comuna: String,
     val direccion: String,
     val comentario: String?,
     val fotoPerfil: String?

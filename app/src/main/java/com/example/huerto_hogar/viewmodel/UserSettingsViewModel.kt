@@ -48,13 +48,16 @@ class UserSettingsViewModel() : ViewModel() {
                     name = user.name,
                     lastname = user.lastname,
                     email = user.email,
+                    run = user.run,
+                    region = user.region,
+                    comuna = user.comuna,
                     address = user.address,
                     phone = user.phone ?: "",
                     newProfilePhoto = user.profilePictureUrl ?: "",
                     isInitialLoadComplete = true
                 )
             }
-            Log.d("USER_VM_DEBUG", "TRAE IMAGEN: ${ user.profilePictureUrl}")
+            Log.d("USER_VM_DEBUG", "TRAE IMAGEN: ${user.profilePictureUrl}")
             // If user has a profile picture URL from Cloudinary, clear the local URI
             if (!user.profilePictureUrl.isNullOrBlank()) {
                 _profilePictureUri.value = null
