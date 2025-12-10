@@ -2,33 +2,22 @@ package com.example.huerto_hogar.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.huerto_hogar.manager.UserManagerViewModel
-import com.example.huerto_hogar.model.RegisterUser
-import com.example.huerto_hogar.model.RegistrationResult
-import com.example.huerto_hogar.model.User
+import com.example.huerto_hogar.model.UserRegisterRequest
+import com.example.huerto_hogar.model.uistate.RegisterUserUiState
 import com.example.huerto_hogar.repository.UserRepository
-import com.example.huerto_hogar.utils.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * ViewModel refactorizado para Registro con integración de API
- * 
- * Usa UserRepository para registrar usuarios en el backend
- * Mantiene compatibilidad con UserManagerViewModel para gestión local temporal
- */
+
 class RegisterUserViewModel(
-    private val repository: UserRepository = UserRepository()
+    private val repository: UserRepository = UserRepository(),
 ) : ViewModel() {
 
-    lateinit var userManager: UserManagerViewModel
-    // Unique StateFlow trying to clean the code without using multiples mutablestateflow
-    private val _uiState = MutableStateFlow(RegisterUser())
-    val uiState: StateFlow<RegisterUser> = _uiState.asStateFlow()
-
+    private val _uiState = MutableStateFlow(RegisterUserUiState())
+    val uiState: StateFlow<RegisterUserUiState> = _uiState.asStateFlow()
     fun onChangeEmail(email: String) {
         var error: String? = null
 
@@ -43,8 +32,8 @@ class RegisterUserViewModel(
         }
 
         _uiState.update {
-            // When we try to call de update is necessary to specify wich val is like:
-            //  email = email, otherwise the program will not know wich it is
+            // When we try to call de update is necessary to specify which val is like:
+            //  email = email, otherwise the program will not know which it is
             it.copy(
                 email = email.trim(),
                 errors = it.errors.copy(emailError = error)
@@ -114,7 +103,7 @@ class RegisterUserViewModel(
 
         _uiState.update {
             it.copy(
-                name = normalizeName,
+                nombre = normalizeName,
                 errors = it.errors.copy(nameError = error)
             )
         }
@@ -141,7 +130,7 @@ class RegisterUserViewModel(
 
         _uiState.update {
             it.copy(
-                lastname = normalizeLastname,
+                apellido = normalizeLastname,
                 errors = it.errors.copy(lastnameError = error)
             )
         }
@@ -149,22 +138,19 @@ class RegisterUserViewModel(
 
     fun onChangePhone(phone: String) {
         var error: String? = null
-        val trimmedPhone = phone.trim()
+        val strippedPhone = phone.filter { it.isDigit() }
 
-        if (trimmedPhone.isNotEmpty()) {
-            if (!trimmedPhone.matches(Regex("^[0-9]+$"))) {
-                error = "El teléfono solo puede contener números"
-            } else if (trimmedPhone.length < 8) {
-                error = "El teléfono debe tener al menos 8 dígitos"
-            } else if (trimmedPhone.length > 9) {
-                error = "El teléfono no puede exceder 9 dígitos"
+        if (strippedPhone.isNotEmpty()) {
+            if (strippedPhone.length < 8 || strippedPhone.length > 15) {
+                error = "El teléfono debe tener entre 8 y 15 dígitos."
             }
+
         }
 
-        _uiState.update { currentState ->
-            currentState.copy(
-                phone = phone,
-                errors = currentState.errors.copy(phoneError = error)
+        _uiState.update {
+            it.copy(
+                telefono = phone,
+                errors = it.errors.copy(phoneError = error)
             )
         }
     }
@@ -183,33 +169,73 @@ class RegisterUserViewModel(
 
         _uiState.update { currentState ->
             currentState.copy(
-                address = address,
+                direccion = address,
                 errors = currentState.errors.copy(addressError = error)
             )
         }
     }
 
-    fun clearRegistrationResultEvent() {
+    fun onChangeRun(run: String) {
+        var error: String? = null
+
+        if (run.isEmpty() || run.trim().isBlank()) {
+            error = "El RUN es obligatorio y no puede estar vacio"
+
+        } else if (!run.matches(Regex("^\\d{1,2}\\.\\d{3}\\.\\d{3}-[\\dkK]\$"))) {
+            error = "El formato del RUN no es válido. Debe usar puntos y guión (ej: 12.345.678-K)."
+        }
+
         _uiState.update {
-            it.copy(registrationResultEvent = null)
+            it.copy(
+                run = run,
+                errors = it.errors.copy(runErrors = error)
+            )
         }
     }
 
-    fun resetUiState() {
-        _uiState.update { RegisterUser() }
+    fun onChangeRegion(region: String) {
+        var error: String? = null
+
+        if (region.isEmpty() || region.trim().isBlank()) {
+            error = "La region es obligatoria y no puede estar vacia."
+
+        }
+
+        _uiState.update {
+            it.copy(
+                region = region,
+                errors = it.errors.copy(regionErrors = error)
+            )
+        }
+    }
+
+    fun onChangeComuna(comuna: String) {
+        var error: String? = null
+
+        if (comuna.isEmpty() || comuna.trim().isBlank()) {
+            error = "La comuna comuna es obligatoria y no puede estar vacia."
+
+        }
+
+        _uiState.update {
+            it.copy(
+                comuna = comuna,
+                errors = it.errors.copy(comunaErrors = error)
+            )
+        }
     }
 
     // Function for button register - Refactorizado para usar API
     fun onClickRegister() {
         val currentState = _uiState.value
 
-        onChangeName(currentState.name)
-        onChangeLastname(currentState.lastname)
+        onChangeName(currentState.nombre)
+        onChangeLastname(currentState.apellido)
         onChangeEmail(currentState.email)
         onChangePassword(currentState.password)
         onChangeConfirmPassword(currentState.confirmPassword)
-        onChangeAddress(currentState.address)
-        onChangePhone(currentState.phone)
+        onChangeAddress(currentState.direccion)
+
 
         val validatedState = _uiState.value
 
@@ -223,89 +249,66 @@ class RegisterUserViewModel(
             return
         }
 
-        // Iniciar proceso de registro
         _uiState.update { it.copy(isLoading = true) }
 
-        // TODO: Descomentar cuando el backend esté listo
-        /*
+
         viewModelScope.launch {
-            repository.register(
-                name = validatedState.name,
-                lastname = validatedState.lastname,
-                email = validatedState.email,
-                password = validatedState.password,
-                phone = validatedState.phone.ifBlank { "" },
-                address = validatedState.address
-            ).collect { resource ->
-                when (resource) {
-                    is Resource.Loading -> {
-                        // Ya establecimos isLoading = true arriba
-                    }
-                    is Resource.Success -> {
-                        resource.data?.let { registerResponse ->
-                            // Guardar usuario y token en UserManager
-                            userManager.setCurrentUser(registerResponse.user)
-                            if (registerResponse.token != null) {
-                                userManager.saveAuthToken(registerResponse.token)
-                            }
-                            
-                            _uiState.update {
-                                it.copy(
-                                    registrationResultEvent = RegistrationResult.SUCCESS,
-                                    isLoading = false,
-                                    registeredUser = registerResponse.user
-                                )
-                            }
-                        }
-                    }
-                    is Resource.Error -> {
-                        val result = if (resource.message?.contains("ya existe") == true) {
-                            RegistrationResult.EMAIL_ALREADY_EXISTS
-                        } else {
-                            RegistrationResult.ERROR
-                        }
-                        
-                        _uiState.update {
-                            it.copy(
-                                registrationResultEvent = result,
-                                isLoading = false,
-                                errors = it.errors.copy(
-                                    emailError = if (result == RegistrationResult.EMAIL_ALREADY_EXISTS) 
-                                        "Este correo ya está registrado" else null
-                                )
-                            )
-                        }
-                    }
+            try {
+                val request = UserRegisterRequest(
+                    email = validatedState.email,
+                    password = validatedState.password,
+                    nombre = validatedState.nombre,
+                    apellido = validatedState.apellido,
+                    telefono = validatedState.telefono,
+                    direccion = validatedState.direccion,
+                    run = validatedState.run,
+                    region = validatedState.region,
+                    comuna = validatedState.comuna,
+                    comentario = null,
+                    fotoPerfil = null
+                )
+
+                val response = repository.registerUser(request)
+
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        registrationSuccess = true,
+                        registeredUser = response.user,
+                        error = null
+                    )
+                }
+
+            } catch (e: Exception) {
+
+
+                val errorMessage = when {
+                    e.message?.contains(
+                        "409",
+                        ignoreCase = true
+                    ) == true || e.message?.contains(
+                        "ya existe",
+                        ignoreCase = true
+                    ) == true -> "Este correo ya está registrado."
+
+                    else -> "Error de conexión: ${e.message}"
+                }
+
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        registrationSuccess = false,
+                        error = errorMessage,
+                        errors = it.errors.copy(
+                            emailError = if (errorMessage.contains("ya registrado")) errorMessage else null
+                        )
+                    )
                 }
             }
         }
-        */
+    }
 
-        // Versión temporal usando UserManager hasta que el backend esté listo
-        val newUser = User(
-            name = validatedState.name,
-            lastname = validatedState.lastname,
-            email = validatedState.email,
-            password = validatedState.password,
-            address = validatedState.address,
-            phone = validatedState.phone.ifBlank { null },
-            comment = null,
-        )
-
-        val finalRegisteredUser = userManager.registerUser(newUser)
-
-        val result = if (finalRegisteredUser != null) {
-            RegistrationResult.SUCCESS
-        } else {
-            RegistrationResult.EMAIL_ALREADY_EXISTS
-        }
-
-        _uiState.update {
-            it.copy(
-                registrationResultEvent = result,
-                isLoading = false,
-                registeredUser = finalRegisteredUser
-            )
-        }
+    fun resetUiState() {
+        _uiState.update { RegisterUserUiState() }
     }
 }
