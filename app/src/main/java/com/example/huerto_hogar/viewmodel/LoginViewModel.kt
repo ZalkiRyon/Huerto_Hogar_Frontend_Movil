@@ -68,7 +68,6 @@ class LoginViewModel(
 
         _uiState.update { it.copy(isLoading = true, error = null) }
 
-
         viewModelScope.launch {
             try {
                 val request = UserLoginRequest(
@@ -78,42 +77,60 @@ class LoginViewModel(
 
                 val response = repository.loginUser(request)
 
-
-                response.token?.let { token ->
-
-                    response.user?.let { userObject ->
-
+                if (response.token != null && response.user != null) {
+                    response.user.let { userObject ->
                         userViewModel.setCurrentUser(userObject)
                     }
-                    Log.d("AUTH_DEBUG", "TOEKNE EN ELK LOGIN: ${token} ")
-                    userViewModel.saveAuthToken(token)
 
+                    response.token.let { token ->
+                        userViewModel.saveAuthToken(token)
+                    }
+                    Log.d("LOGINVIEWMODEL", "TRY ${response}")
                     _uiState.update {
                         it.copy(
                             isLoading = false,
                             loginSuccess = true,
                             loggedInUser = response.user,
-
-                            token = token,
+                            token = response.token,
                             error = null
+                        )
+                    }
+                } else {
+                    val errorMessage = response.message.takeIf { it.isNotBlank() }
+                        ?: "Credenciales inválidas. Intente de nuevo."
+
+                    Log.d("LOGINVIEWMODEL", "TRY ELSE ${response}")
+
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            loginSuccess = false,
+                            error = errorMessage
                         )
                     }
                 }
             } catch (e: Exception) {
+                val finalErrorMessage = "Error de conexión: ${e.message}"
+                Log.d("LOGINVIEWMODEL", "CATCH ${e.message}")
+
                 val errorMessage = when {
-                    e.message?.contains(
-                        "401",
-                        ignoreCase = true
-                    ) == true -> "Credenciales invalidas. Revise su email y contraseña"
+                    e.message?.contains("400", ignoreCase = true) == true ->
+                        "Faltan datos obligatorios (email y contraseña)."
 
-                    e.message?.contains(
-                        "404",
-                        ignoreCase = true
-                    ) == true -> "Usuario no encontrado"
+                    e.message?.contains("401", ignoreCase = true) == true ->
+                        "Credenciales incorrectas. Revise su email y contraseña."
 
-                    else -> "Error de conexión: ${e.message}"
+                    e.message?.contains("403", ignoreCase = true) == true ->
+                        "Usuario inactivo"
+
+                    e.message?.contains("404", ignoreCase = true) == true ->
+                        "Usuario no encontrado. Verifique su correo electrónico."
+
+                    e.message?.contains("500", ignoreCase = true) == true ->
+                        "Error interno del servidor. Intente más tarde."
+
+                    else -> "Error de conexión inesperado: ${e.message}"
                 }
-
                 _uiState.update {
                     it.copy(
                         isLoading = false,

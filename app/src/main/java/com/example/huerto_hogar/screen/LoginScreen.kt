@@ -129,6 +129,15 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
                 isPassword = true
             )
 
+            formState.error?.let { msg ->
+                Text(
+                    text = msg,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
 
