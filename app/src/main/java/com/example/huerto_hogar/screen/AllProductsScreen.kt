@@ -79,7 +79,7 @@ fun AllProductsScreen(
                 message = "Necesitas iniciar sesión para agregar favoritos.",
                 duration = SnackbarDuration.Long,
 
-            )
+                )
         }
     }
 
@@ -103,19 +103,23 @@ fun AllProductsScreen(
                 cart = cartViewModel,
                 isFavorite = isProductFavorite,
                 onToggleFavorito = { product ->
-                    val wasAdded = favoritesViewModel.addToFavorites(product)
-                    coroutineScope.launch {
-                        if (wasAdded) {
-                            snackbarHostState.showSnackbar(
-                                message = "${product.name} agregado a favoritos",
-                                duration = SnackbarDuration.Short
-                            )
-                        } else {
-                            favoritesViewModel.removeFromFavorites(product.id)
-                            snackbarHostState.showSnackbar(
-                                message = "${product.name} eliminado de favoritos",
-                                duration = SnackbarDuration.Short
-                            )
+                    if (currentUser == null) {
+                        onLoginRequiredHandler()
+                    } else {
+                        val wasAdded = favoritesViewModel.addToFavorites(product)
+                        coroutineScope.launch {
+                            if (wasAdded) {
+                                snackbarHostState.showSnackbar(
+                                    message = "${product.name} agregado a favoritos",
+                                    duration = SnackbarDuration.Short
+                                )
+                            } else {
+                                favoritesViewModel.removeFromFavorites(product.id)
+                                snackbarHostState.showSnackbar(
+                                    message = "${product.name} eliminado de favoritos",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
                         }
                     }
                 },
@@ -184,24 +188,28 @@ fun AllProductsScreen(
                                     )
                                 }
                             },
-                            isUserLoggedIn = currentUser != null,
-                            onLoginRequired = onLoginRequiredHandler,
+
                             onToggleFavorito = { product ->
-                                val wasAdded = favoritesViewModel.addToFavorites(product)
-                                coroutineScope.launch {
-                                    if (wasAdded) {
-                                        snackbarHostState.showSnackbar(
-                                            message = "${product.name} agregado a favoritos",
-                                            duration = SnackbarDuration.Short
-                                        )
-                                    } else {
-                                        favoritesViewModel.removeFromFavorites(product.id)
-                                        snackbarHostState.showSnackbar(
-                                            message = "El producto ya no se encuentra agregado",
-                                            duration = SnackbarDuration.Short
-                                        )
+                                if (currentUser == null) {
+                                    onLoginRequiredHandler()
+                                } else {
+                                    val wasAdded = favoritesViewModel.addToFavorites(product)
+                                    coroutineScope.launch {
+                                        if (wasAdded) {
+                                            snackbarHostState.showSnackbar(
+                                                message = "${product.name} agregado a favoritos",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        } else {
+                                            favoritesViewModel.removeFromFavorites(product.id)
+                                            snackbarHostState.showSnackbar(
+                                                message = "El producto ya no se encuentra agregado",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
                                     }
                                 }
+
                             },
                             isFavorito = favoriteItems.any { it.id == producto.id }
                         )

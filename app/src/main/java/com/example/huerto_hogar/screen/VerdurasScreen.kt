@@ -86,15 +86,11 @@ fun VerdurasScreen(
     // selected product for detail
     var selectedProduct by remember { mutableStateOf<Product?>(null) }
 
-    Scaffold(
-        topBar = {
-            Header(
-                navController = navController,
-                title = "Verduras"
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { paddingValues ->
+    Scaffold(topBar = {
+        Header(
+            navController = navController, title = "Verduras"
+        )
+    }, snackbarHost = { SnackbarHost(snackbarHostState) }) { paddingValues ->
         if (showModal && selectedProduct != null) {
             val isProductFavorite = favoriteItems.any { it.id == selectedProduct!!.id }
             ModalDetailProduct(
@@ -106,21 +102,26 @@ fun VerdurasScreen(
                 cart = cartViewModel,
                 isFavorite = isProductFavorite,
                 onToggleFavorito = { product ->
-                    val wasAdded = favoritesViewModel.addToFavorites(product)
-                    coroutineScope.launch {
-                        if (wasAdded) {
-                            snackbarHostState.showSnackbar(
-                                message = "${product.name} agregado a favoritos",
-                                duration = SnackbarDuration.Short
-                            )
-                        } else {
-                            favoritesViewModel.removeFromFavorites(product.id)
-                            snackbarHostState.showSnackbar(
-                                message = "${product.name} eliminado de favoritos",
-                                duration = SnackbarDuration.Short
-                            )
+                    if (currentUser == null) {
+                        onLoginRequiredHandler()
+                    } else {
+                        val wasAdded = favoritesViewModel.addToFavorites(product)
+                        coroutineScope.launch {
+                            if (wasAdded) {
+                                snackbarHostState.showSnackbar(
+                                    message = "${product.name} agregado a favoritos",
+                                    duration = SnackbarDuration.Short
+                                )
+                            } else {
+                                favoritesViewModel.removeFromFavorites(product.id)
+                                snackbarHostState.showSnackbar(
+                                    message = "${product.name} eliminado de favoritos",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
                         }
                     }
+
                 },
             )
         }
@@ -170,44 +171,44 @@ fun VerdurasScreen(
                 ) {
                     items(
                         verduras.withIndex().toList(),
-                        key = { (_, product) -> product.id }
-                    ) { (index, producto) ->
+                        key = { (_, product) -> product.id }) { (index, producto) ->
                         ProductCard(
-                            producto = producto,
-                            onProductClick = { product ->
-                                selectedProduct = product
-                                showModal = true
-                            },
-                            onAgregarCarrito = { productoAgregado ->
-                                cartViewModel.addToCart(productoAgregado)
-                                coroutineScope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = "${productoAgregado.name} agregado al carrito",
-                                        duration = SnackbarDuration.Short
-                                    )
-                                }
-                            },
-                            isUserLoggedIn = currentUser != null,
-                            onLoginRequired = onLoginRequiredHandler,
+                            producto = producto, onProductClick = { product ->
+                            selectedProduct = product
+                            showModal = true
+                        }, onAgregarCarrito = { productoAgregado ->
+                            cartViewModel.addToCart(productoAgregado)
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "${productoAgregado.name} agregado al carrito",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                        },
+
                             onToggleFavorito = { product ->
-                                val wasAdded = favoritesViewModel.addToFavorites(product)
-                                coroutineScope.launch {
-                                    if (wasAdded) {
-                                        snackbarHostState.showSnackbar(
-                                            message = "${product.name} agregado a favoritos",
-                                            duration = SnackbarDuration.Short
-                                        )
-                                    } else {
-                                        favoritesViewModel.removeFromFavorites(product.id)
-                                        snackbarHostState.showSnackbar(
-                                            message = "El producto ya no se encuentra agregado",
-                                            duration = SnackbarDuration.Short
-                                        )
+                                if (currentUser == null) {
+                                    onLoginRequiredHandler()
+                                } else {
+                                    val wasAdded = favoritesViewModel.addToFavorites(product)
+                                    coroutineScope.launch {
+                                        if (wasAdded) {
+                                            snackbarHostState.showSnackbar(
+                                                message = "${product.name} agregado a favoritos",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        } else {
+                                            favoritesViewModel.removeFromFavorites(product.id)
+                                            snackbarHostState.showSnackbar(
+                                                message = "El producto ya no se encuentra agregado",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
                                     }
+
                                 }
-                            },
-                            isFavorito = favoriteItems.any { it.id == producto.id }
-                        )
+
+                            }, isFavorito = favoriteItems.any { it.id == producto.id })
                     }
                 }
             }

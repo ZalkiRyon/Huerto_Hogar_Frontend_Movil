@@ -54,9 +54,7 @@ fun ProductCard(
     onProductClick: (Product) -> Unit = {},
     onAgregarCarrito: (Product) -> Unit,
     onToggleFavorito: (Product) -> Unit = {},
-    isFavorito: Boolean = false,
-    onLoginRequired: () -> Unit = {},
-    isUserLoggedIn: Boolean = false
+    isFavorito: Boolean = false
 ) {
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
@@ -154,13 +152,7 @@ fun ProductCard(
 
                     // Botón favoritos
                     IconButton(
-                        onClick = {
-                            if (isUserLoggedIn) {
-                                onToggleFavorito(producto)
-                            } else {
-                                onLoginRequired()
-                            }
-                        },
+                        onClick = { onToggleFavorito(producto) },
                         modifier = Modifier.size(40.dp),
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = if (isFavorito) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
