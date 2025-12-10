@@ -229,7 +229,7 @@ fun InactiveProductCard(
             ) {
                 // Imagen del producto
                 AsyncImage(
-                    model = "http://10.0.2.2:8080/api/productos/imagenes/${product.imageUrl}",
+                    model = product.imageUrl,
                     contentDescription = product.name,
                     modifier = Modifier
                         .size(80.dp)
