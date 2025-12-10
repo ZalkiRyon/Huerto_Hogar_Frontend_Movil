@@ -106,8 +106,8 @@ fun CartScreen(
     val discount = remember(studentDiscount, cartItems) {
         cartViewModel.calculateDiscount()
     }
-    val total = remember(studentDiscount, cartItems) {
-        cartViewModel.calculateTotal() + estimatedShippingCost
+    val total = remember(studentDiscount, cartItems, shippingCost) {
+        cartViewModel.calculateTotal() + shippingCost
     }
 
     var showClearDialog by remember { mutableStateOf(false) }
