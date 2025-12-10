@@ -104,7 +104,7 @@ fun CategoryButtonPreview() {
     Huerto_HogarTheme {
         CategoryButton(
             text = "Verduras",
-            imageRes = R.drawable.zanahorias,
+            imageRes = R.drawable.carrot,
             onClick = {}
         )
     }
