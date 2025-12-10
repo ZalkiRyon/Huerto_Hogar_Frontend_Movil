@@ -1,28 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!--
-        PERMISOS NFC - Descuento Estudiante
-        
-        Permite a la app leer tags NFC para validar tarjetas estudiantiles
-        y aplicar descuento del 10% en el carrito de compras.
-    -->
-    <uses-permission android:name="android.permission.NFC" />
-
-    <!--
-        FEATURE NFC (OPCIONAL)
-        
-        android:required="false" permite que la app se instale y funcione
-        en dispositivos sin hardware NFC. La funcionalidad de descuento
-        simplemente no estará disponible en esos dispositivos.
-        
-        Si se cambia a "true", la app solo aparecerá en Play Store
-        para dispositivos con NFC.
-    -->
-    <uses-feature
-        android:name="android.hardware.nfc"
-        android:required="false" />
-
     <uses-feature
         android:name="android.hardware.camera.any"
         android:required="true" />
