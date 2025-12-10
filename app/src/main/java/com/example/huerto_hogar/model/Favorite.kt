@@ -15,8 +15,17 @@ data class Favorite(
     @SerializedName("nombreProducto")
     val nombreProducto: String,
     
+    @SerializedName("categoriaProducto")
+    val categoriaProducto: String,
+    
     @SerializedName("precioProducto")
     val precioProducto: Int,
+    
+    @SerializedName("stockProducto")
+    val stockProducto: Int,
+    
+    @SerializedName("descripcionProducto")
+    val descripcionProducto: String,
     
     @SerializedName("imagenProducto")
     val imagenProducto: String?
@@ -26,12 +35,12 @@ data class Favorite(
         return Product(
             id = productoId,
             name = nombreProducto,
-            category = "", // No viene en el DTO
+            category = categoriaProducto,
             price = precioProducto.toDouble(),
-            stock = 0, // No viene en el DTO
-            description = "",
+            stock = stockProducto,
+            description = descripcionProducto,
             imageUrl = imagenProducto,
-            activo = true
+            activo = true // Los favoritos solo devuelven productos activos
         )
     }
 }

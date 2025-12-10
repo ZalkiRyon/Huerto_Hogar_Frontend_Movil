@@ -62,6 +62,15 @@ class FavoritesViewModel(
     }
     
     /**
+     * Recarga los favoritos desde el backend (útil para actualizar después de cambios)
+     */
+    fun reloadFavorites() {
+        currentUserId?.let { userId ->
+            loadUserFavorites(userId)
+        }
+    }
+    
+    /**
      * Agrega un producto a favoritos en el backend.
      * Retorna true si se agregó correctamente, false si ya existía.
      */
@@ -83,8 +92,8 @@ class FavoritesViewModel(
             favoriteRepository.addFavorite(userId, product.id).collect { resource ->
                 when (resource) {
                     is Resource.Success -> {
-                        // Agregar a la lista local
-                        _favoriteItems.value = _favoriteItems.value + product
+                        // Recargar la lista desde el backend para obtener datos actualizados
+                        loadUserFavorites(userId)
                         Log.d("FavoritesViewModel", "Added product ${product.id} to favorites")
                     }
                     is Resource.Error -> {
