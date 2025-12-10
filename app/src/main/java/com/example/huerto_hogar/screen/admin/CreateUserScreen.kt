@@ -208,7 +208,7 @@ fun CreateUserScreen(
             OutlinedTextField(
                 value = phone,
                 onValueChange = { phone = it },
-                label = { Text("Teléfono") },
+                label = { Text("Teléfono (Opcional)") },
                 leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -326,12 +326,14 @@ fun CreateUserScreen(
                     when {
                         name.isBlank() -> errorMessage = "El nombre es requerido"
                         lastname.isBlank() -> errorMessage = "El apellido es requerido"
+                        run.isBlank() -> errorMessage = "El RUN es requerido"
                         email.isBlank() -> errorMessage = "El email es requerido"
                         !email.contains("@") -> errorMessage = "Email inválido"
                         password.isBlank() -> errorMessage = "La contraseña es requerida"
                         password.length < 6 -> errorMessage = "La contraseña debe tener al menos 6 caracteres"
                         password != confirmPassword -> errorMessage = "Las contraseñas no coinciden"
-                        phone.isBlank() -> errorMessage = "El teléfono es requerido"
+                        region.isBlank() -> errorMessage = "La región es requerida"
+                        comuna.isBlank() -> errorMessage = "La comuna es requerida"
                         address.isBlank() -> errorMessage = "La dirección es requerida"
                         else -> {
                             errorMessage = null
@@ -350,10 +352,10 @@ fun CreateUserScreen(
                                 password = password,
                                 name = name.trim(),
                                 lastname = lastname.trim(),
-                                run = if (run.isNotBlank()) run.trim() else null,
-                                phone = phone.trim(),
-                                region = if (region.isNotBlank()) region.trim() else null,
-                                comuna = if (comuna.isNotBlank()) comuna.trim() else null,
+                                run = run.trim(),
+                                phone = if (phone.isNotBlank()) phone.trim() else null,
+                                region = region.trim(),
+                                comuna = comuna.trim(),
                                 address = address.trim(),
                                 comment = if (comment.isNotBlank()) comment.trim() else null,
                                 roleId = roleId

@@ -26,7 +26,7 @@ data class UpdateUserRequest(
     val run: String,
     
     @SerializedName("telefono")
-    val phone: String,
+    val phone: String? = null,
     
     @SerializedName("region")
     val region: String,
