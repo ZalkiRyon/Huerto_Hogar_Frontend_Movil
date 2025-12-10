@@ -13,17 +13,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.huerto_hogar.manager.UserManagerViewModel
 import com.example.huerto_hogar.model.UpdateUserRequest
-import com.example.huerto_hogar.model.User
 import com.example.huerto_hogar.repository.UserRepository
 import com.example.huerto_hogar.utils.Resource
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
+import com.example.huerto_hogar.viewmodel.UserViewModel
 
 /**
  * Formulario de edición de usuario desde el panel de administración
@@ -33,7 +30,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 fun EditUserScreen(
     navController: NavController,
     userId: Int,
-    userManager: UserManagerViewModel = viewModel()
+    userManager: UserViewModel = viewModel()
 ) {
     val userRepository = remember { UserRepository() }
     val coroutineScope = rememberCoroutineScope()

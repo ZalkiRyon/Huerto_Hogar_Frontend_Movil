@@ -23,12 +23,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.huerto_hogar.manager.UserManagerViewModel
+
 import com.example.huerto_hogar.ui.theme.components.animations.pressClickEffect
 import com.example.huerto_hogar.ui.theme.components.animations.pressClickEffectWithInteraction
 import com.example.huerto_hogar.viewmodel.ProductViewModel
 import com.example.huerto_hogar.viewmodel.SalesViewModel
 import androidx.compose.runtime.LaunchedEffect
+import com.example.huerto_hogar.viewmodel.UserViewModel
 
 /**
  * Dashboard administrativo con estadísticas de la tienda (datos dinámicos desde el backend).
@@ -36,7 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 @Composable
 fun AdminDashboardScreen(
     navController: NavController,
-    userManager: UserManagerViewModel = viewModel(),
+    userManager: UserViewModel = viewModel(),
     productViewModel: ProductViewModel = viewModel(),
     salesViewModel: SalesViewModel = viewModel()
 ) {

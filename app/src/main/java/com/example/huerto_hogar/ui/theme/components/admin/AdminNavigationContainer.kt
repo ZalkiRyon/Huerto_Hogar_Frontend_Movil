@@ -47,7 +47,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.huerto_hogar.AppScreens.AppScreens
-import com.example.huerto_hogar.manager.UserManagerViewModel
 import com.example.huerto_hogar.viewmodel.SalesViewModel
 import com.example.huerto_hogar.screen.admin.AdminDashboardScreen
 import com.example.huerto_hogar.screen.admin.AdminInventoryScreen
@@ -66,6 +65,7 @@ import com.example.huerto_hogar.ui.theme.components.ConfirmationDialog
 import com.example.huerto_hogar.ui.theme.components.animations.*
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.huerto_hogar.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
 /**
@@ -74,7 +74,7 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun AdminNavigationContainer(
-    userManager: UserManagerViewModel,
+    userManager: UserViewModel,
     salesViewModel: SalesViewModel,
     onLogout: () -> Unit
 ) {
@@ -84,7 +84,7 @@ fun AdminNavigationContainer(
     val scope = rememberCoroutineScope()
     var showLogoutDialog by remember { mutableStateOf(false) }
     
-    val currentUser = userManager.currentUser.value
+    val currentUser = userManager.currentUser
     
     // Drawer desde la derecha (RTL)
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
@@ -105,7 +105,7 @@ fun AdminNavigationContainer(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             currentUser?.let { user ->
-                                val profileUrl = user.profilePictureUrl
+                                val profileUrl = user.value?.profilePictureUrl
                                 Box(
                                     modifier = Modifier
                                         .size(100.dp)
@@ -120,7 +120,7 @@ fun AdminNavigationContainer(
                                     if (profileUrl != null) {
                                         Image(
                                             painter = rememberAsyncImagePainter(model = profileUrl),
-                                            contentDescription = "Foto de perfil de ${user.name}",
+                                            contentDescription = "Foto de perfil",
                                             contentScale = ContentScale.Crop,
                                             modifier = Modifier.fillMaxSize()
                                         )
@@ -135,7 +135,7 @@ fun AdminNavigationContainer(
                                 }
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
-                                    text = "Bienvenido ${user.name} ${user.lastname}",
+                                    text = "Bienvenido ${user.value?.name} ${user.value?.lastname}",
                                     style = MaterialTheme.typography.titleMedium
                                 )
                                 Text(

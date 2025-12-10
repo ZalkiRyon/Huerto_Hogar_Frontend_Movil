@@ -1,6 +1,5 @@
 package com.example.huerto_hogar.screen
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -30,8 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.huerto_hogar.manager.BlogManagerViewModel
-import com.example.huerto_hogar.manager.BlogUiState
+import com.example.huerto_hogar.viewmodel.BlogManagerViewModel
+import com.example.huerto_hogar.viewmodel.BlogUiState
 import com.example.huerto_hogar.model.Blog
 import com.example.huerto_hogar.ui.theme.components.NewsCard
 import com.example.huerto_hogar.ui.theme.components.NewsModal

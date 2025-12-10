@@ -1,10 +1,13 @@
-package com.example.huerto_hogar.model
+package com.example.huerto_hogar.model.uistate
 
-data class UserSetting(
+data class SettingUserUIState(
     val id: Int = 0,
     val name: String = "",
     val lastname: String = "",
     val email: String = "",
+    val run: String = "",
+    val region: String = "",
+    val comuna: String = "",
     val address: String = "",
     val phone: String = "",
     val currentPassword: String = "",
@@ -14,13 +17,16 @@ data class UserSetting(
 
     val isLoading: Boolean = false,
     val isInitialLoadComplete: Boolean = false,
-    val errors: UserSettingErrors = UserSettingErrors(),
+    val errors: SettingUserUIStateErrors = SettingUserUIStateErrors(),
 )
 
-data class UserSettingErrors(
+data class SettingUserUIStateErrors(
     val nameError: String? = null,
     val lastnameError: String? = null,
     val emailError: String? = null,
+    val runError: String? = null,
+    val regionError: String? = null,
+    val comunaError: String? = null,
     val addressError: String? = null,
     val phoneError: String? = null,
     val currentPasswordError: String? = null,

@@ -2,57 +2,31 @@ package com.example.huerto_hogar.model
 
 import com.google.gson.annotations.SerializedName
 
-// Roles in the system
-enum class Role {
-    @SerializedName("ADMIN")
-    ADMIN,
-    
-    @SerializedName("CLIENT")
-    CLIENT,
-    
-    @SerializedName("SALESMAN")
-    SALESMAN
-}
-
-/**
- * Modelo de Usuario (DTO) que coincide con el backend
- * 
- * Backend envía: id, email, password, nombre, apellido, run, telefono, region, 
- * comuna, direccion, comentario, fechaRegistro, fotoPerfil, roleNombre
- */
 data class User(
     @SerializedName("id")
-    val id: Int = 0,
-    
+    val id: Int,
     @SerializedName("roleNombre")
     val role: String? = "cliente",
-
     @SerializedName("comentario")
     val comment: String? = null,
-    
     @SerializedName("telefono")
-    val phone: String?,
-
+    val phone: String? = null,
     @SerializedName("nombre")
     val name: String,
-    
     @SerializedName("apellido")
     val lastname: String,
-    
     @SerializedName("email")
     val email: String,
-    
     @SerializedName("password")
     val password: String = "",
-    
     @SerializedName("run")
-    val run: String? = null,
+    val run: String,
     
     @SerializedName("region")
-    val region: String? = null,
+    val region: String,
     
     @SerializedName("comuna")
-    val comuna: String? = null,
+    val comuna: String,
     
     @SerializedName("direccion")
     val address: String,
@@ -65,4 +39,31 @@ data class User(
     
     @SerializedName("activo")
     val activo: Boolean = true
+)
+
+data class AuthResponse(
+    val message: String,
+    @SerializedName("user")
+    val user: User?,
+    val token: String?
+)
+
+data class UserRegisterRequest(
+    val email: String,
+    val password: String,
+    val nombre: String,
+    val apellido: String?,
+    val run: String,
+    val telefono: String?,
+    val region: String,
+    val comuna: String,
+    val direccion: String,
+    val comentario: String?,
+    val fotoPerfil: String?
+)
+
+
+data class UserLoginRequest(
+    val email: String,
+    val password: String,
 )

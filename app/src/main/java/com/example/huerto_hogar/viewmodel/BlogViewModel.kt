@@ -1,4 +1,4 @@
-package com.example.huerto_hogar.manager
+package com.example.huerto_hogar.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

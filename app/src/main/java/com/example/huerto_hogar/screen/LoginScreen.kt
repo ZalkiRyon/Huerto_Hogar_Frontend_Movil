@@ -29,60 +29,52 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.huerto_hogar.model.LoginResult
 import com.example.huerto_hogar.ui.theme.components.InputField
 import com.example.huerto_hogar.ui.theme.components.animations.bounceInEffect
 import com.example.huerto_hogar.ui.theme.components.animations.pressClickEffect
 import com.example.huerto_hogar.viewmodel.LoginViewModel
 
 @Composable
-fun LoginScreen(navController: NavController, viewModel: LoginViewModel) {
+fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewModel()) {
+
     val formState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
-    LaunchedEffect(formState.loginResultEvent) {
-        val resultEvent = formState.loginResultEvent
-        if (resultEvent != null) {
-            when (resultEvent) {
-                LoginResult.SUCCESS -> {
-                    Toast.makeText(
-                        context,
-                        "¡Bienvenido, ${formState.loggedInUser?.name}!",
-                        Toast.LENGTH_SHORT
-                    ).show()
+    LaunchedEffect(formState.loginSuccess, formState.loginErrors) {
+        if (formState.loginSuccess) {
+            val user = formState.loggedInUser
 
-                    // Redirigir según rol del usuario
-                    val destination =
-                        if (formState.loggedInUser?.role == "admin") {
-                            "admin_dashboard_screen"
-                        } else {
-                            "home_screen"
-                        }
+            Toast.makeText(
+                context,
+                "¡Bienvenido, ${user?.name ?: "Usuario"}!",
+                Toast.LENGTH_SHORT
+            ).show()
 
-                    navController.navigate(destination) {
-                        popUpTo(navController.graph.id) { inclusive = true }
-                    }
+
+            val destination =
+                if (user?.role == "admin") {
+                    "admin_dashboard_screen"
+                } else {
+                    "home_screen"
                 }
 
-                LoginResult.INVALID_CREDENTIALS -> {
-                    Toast.makeText(
-                        context,
-                        "Error: Credenciales incorrectos.",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-
-                LoginResult.ERROR -> {
-                    Toast.makeText(
-                        context,
-                        "Error desconocido al iniciar sesión.",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
+            navController.navigate(destination) {
+                popUpTo(navController.graph.id) { inclusive = true }
             }
-            viewModel.clearLoginResultEvent()
+
+            viewModel.resetUiState()
+
+        } else if (formState.error != null && !formState.isLoading) {
+            Toast.makeText(
+                context,
+                "Error: ${formState.error}",
+                Toast.LENGTH_LONG
+            ).show()
+
+            viewModel.clearError()
         }
     }
 
@@ -120,7 +112,7 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel) {
                 onValueChange = viewModel::onChangeEmail,
                 label = "Correo electrónico",
                 placeholder = "Solo @duocuc.cl o @profesor.duoc.cl",
-                error = formState.errors.emailError,
+                error = formState.loginErrors.emailError,
                 modifier = Modifier
                     .fillMaxWidth()
                     .bounceInEffect(delay = 100)
@@ -130,12 +122,21 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel) {
                 value = formState.password,
                 onValueChange = viewModel::onChangePassword,
                 label = "Contraseña",
-                error = formState.errors.passwordError,
+                error = formState.loginErrors.passwordError,
                 modifier = Modifier
                     .fillMaxWidth()
                     .bounceInEffect(delay = 200),
                 isPassword = true
             )
+
+            formState.error?.let { msg ->
+                Text(
+                    text = msg,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -147,7 +148,10 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel) {
                     .bounceInEffect(delay = 300)
                     .pressClickEffect()
                     .height(56.dp),
-                enabled = !formState.isLoading && formState.errors.emailError == null && formState.errors.passwordError == null,
+                enabled = !formState.isLoading &&
+                        formState.loginErrors.emailError == null &&
+                        formState.loginErrors.passwordError == null &&
+                        formState.email.isNotBlank() && formState.password.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -194,5 +198,6 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel) {
         }
     }
 
-
 }
+
+

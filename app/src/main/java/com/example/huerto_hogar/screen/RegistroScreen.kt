@@ -32,11 +32,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.huerto_hogar.model.RegistrationResult
 import com.example.huerto_hogar.ui.theme.components.InputField
 import com.example.huerto_hogar.ui.theme.components.animations.bounceInEffect
 import com.example.huerto_hogar.ui.theme.components.animations.pressClickEffect
 import com.example.huerto_hogar.viewmodel.RegisterUserViewModel
+
 
 @Composable
 fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewModel) {
@@ -45,41 +45,19 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
     val scrollState = rememberScrollState()
 
     var showSuccessDialog by remember { mutableStateOf(false) }
-    var finalResult by remember { mutableStateOf<RegistrationResult?>(null) }
     val context = LocalContext.current
 
-    val resultEvent = formState.registrationResultEvent
-    LaunchedEffect(resultEvent) {
-        if (resultEvent != null) {
-
-            finalResult = resultEvent
-
-            when (resultEvent) {
-                RegistrationResult.SUCCESS -> {
-                    showSuccessDialog = true
-                }
-
-                RegistrationResult.EMAIL_ALREADY_EXISTS -> {
-                    Toast.makeText(
-                        context,
-                        "Error: El correo electrónico ya está registrado.",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-
-                RegistrationResult.ERROR -> {
-                    Toast.makeText(
-                        context,
-                        "Error al registrar. Verifique sus datos o intente más tarde.",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
-
-            viewModel.clearRegistrationResultEvent()
+    LaunchedEffect(formState.registrationSuccess, formState.error) {
+        if (formState.registrationSuccess) {
+            showSuccessDialog = true
+        } else if (formState.error != null && !formState.isLoading) {
+            Toast.makeText(
+                context,
+                formState.error,
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
-
 
     Box(
         modifier = Modifier
@@ -111,7 +89,7 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
             )
 
             InputField(
-                value = formState.name,
+                value = formState.nombre,
                 onValueChange = { viewModel.onChangeName(it) },
                 label = "Nombre",
                 placeholder = "Entre 4 y 20 caracteres, solo letras",
@@ -120,7 +98,7 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
             )
 
             InputField(
-                value = formState.lastname,
+                value = formState.apellido,
                 onValueChange = { viewModel.onChangeLastname(it) },
                 label = "Apellido",
                 placeholder = "Entre 4 y 20 caracteres, solo letras",
@@ -134,6 +112,15 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
                 label = "Correo electrónico",
                 placeholder = "Solo @duocuc.cl o @profesor.duoc.cl",
                 error = formState.errors.emailError,
+                modifier = Modifier.bounceInEffect(delay = 150)
+            )
+
+            InputField(
+                value = formState.run,
+                onValueChange = viewModel::onChangeRun,
+                label = "RUN",
+                placeholder = "Formato XX.XXX.XXX-X",
+                error = formState.errors.runErrors,
                 modifier = Modifier.bounceInEffect(delay = 150)
             )
 
@@ -156,7 +143,25 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
             )
 
             InputField(
-                value = formState.address,
+                value = formState.region,
+                onValueChange = viewModel::onChangeRegion,
+                label = "Region",
+                placeholder = "Entre 5 y 40 caracteres",
+                error = formState.errors.regionErrors,
+                modifier = Modifier.bounceInEffect(delay = 300)
+            )
+
+            InputField(
+                value = formState.comuna,
+                onValueChange = viewModel::onChangeComuna,
+                label = "Comuna",
+                placeholder = "Entre 5 y 40 caracteres",
+                error = formState.errors.comunaErrors,
+                modifier = Modifier.bounceInEffect(delay = 300)
+            )
+
+            InputField(
+                value = formState.direccion,
                 onValueChange = { viewModel.onChangeAddress(it) },
                 label = "Dirección",
                 placeholder = "Entre 5 y 40 caracteres",
@@ -164,7 +169,7 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
                 modifier = Modifier.bounceInEffect(delay = 300)
             )
             InputField(
-                value = formState.phone,
+                value = formState.telefono,
                 onValueChange = { viewModel.onChangePhone(it) },
                 label = "Teléfono (opcional)",
                 placeholder = "Solo números, entre 8 y 9 dígitos",
@@ -176,6 +181,7 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
 
             Button(
                 onClick = { viewModel.onClickRegister() },
+                enabled = !formState.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .bounceInEffect(delay = 400)
@@ -187,13 +193,22 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text(
-                    text = "REGISTRAR",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
+                if (formState.isLoading) {
+                    Text(
+                        "Cargando...",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
+                } else {
+                    Text(
+                        text = "REGISTRAR",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
+                }
             }
 
             if (showSuccessDialog) {
@@ -201,7 +216,6 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
                 AlertDialog(
                     onDismissRequest = { },
                     title = { Text(text = "¡Registro Exitoso!") },
-                    //text = { Text("Tu cuenta ha sido creada con éxito. Serás redirigido al inicio de sesión para continuar.") },
                     text = {
                         Column {
                             Text("Tu cuenta ha sido creada con éxito. Aquí están tus detalles:")
@@ -210,9 +224,18 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
                             // Mostrando los detalles del usuario
                             Text("Nombre: ${user?.name} ${user?.lastname}")
                             Text("Email: ${user?.email}")
+                            Text("RUN: ${user?.run}")
                             Text("Rol Asignado: ${user?.role ?: "CLIENTE"}")
+                            Text("Region: ${user?.region}")
+                            Text("Comuna: ${user?.comuna}")
                             Text("Dirección: ${user?.address}")
-                            Text("Teléfono: ${user?.phone ?: "No Registrado"}")
+                            Text(text = "Teléfono: ${
+                                if (user?.phone.isNullOrBlank()) {
+                                    "No Registrado"
+                                } else {
+                                    user.phone
+                                }
+                            }")
 
                             Spacer(modifier = Modifier.height(16.dp))
                             Text("Serás redirigido al inicio de sesión para continuar.")
@@ -222,11 +245,8 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
                         Button(
                             onClick = {
                                 showSuccessDialog = false
-
-                                if (finalResult == RegistrationResult.SUCCESS) {
-                                    navController.navigate("login_screen") {
-                                        popUpTo(navController.graph.id) { inclusive = true }
-                                    }
+                                navController.navigate("login_screen") {
+                                    popUpTo(navController.graph.id) { inclusive = true }
                                 }
                                 viewModel.resetUiState()
                             },
