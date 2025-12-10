@@ -235,13 +235,16 @@ class RegisterUserViewModel(
         onChangePassword(currentState.password)
         onChangeConfirmPassword(currentState.confirmPassword)
         onChangeAddress(currentState.direccion)
-
+        onChangeRun(currentState.run)
+        onChangeRegion(currentState.region)
+        onChangeComuna(currentState.comuna)
 
         val validatedState = _uiState.value
 
         val hasLocalErrors = with(validatedState.errors) {
             emailError != null || passwordError != null || confirmPasswordError != null ||
-                    nameError != null || lastnameError != null
+                    nameError != null || lastnameError != null || regionErrors != null ||
+                    comunaErrors != null || runErrors != null || addressError != null
         }
 
         if (hasLocalErrors) {
@@ -281,27 +284,25 @@ class RegisterUserViewModel(
 
             } catch (e: Exception) {
 
+                val isDuplicateEmailError =
+                    e.message?.contains("ya está registrado", ignoreCase = true) == true
+                            || e.message?.contains("409", ignoreCase = true) == true
+                            || e.message?.contains("email ya existe", ignoreCase = true) == true
 
-                val errorMessage = when {
-                    e.message?.contains(
-                        "409",
-                        ignoreCase = true
-                    ) == true || e.message?.contains(
-                        "ya existe",
-                        ignoreCase = true
-                    ) == true -> "Este correo ya está registrado."
-
-                    else -> "Error de conexión: ${e.message}"
+                val errorMessage = if (isDuplicateEmailError) {
+                    "Este correo ya está registrado."
+                } else {
+                    "Error de conexión: ${e.message}"
                 }
 
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         registrationSuccess = false,
-                        error = errorMessage,
-                        errors = it.errors.copy(
-                            emailError = if (errorMessage.contains("ya registrado")) errorMessage else null
-                        )
+                        errors = currentState.errors.copy(
+                            emailError = if (isDuplicateEmailError) errorMessage else null
+                        ),
+                        error = if (!isDuplicateEmailError) errorMessage else null
                     )
                 }
             }

@@ -117,7 +117,7 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
 
             InputField(
                 value = formState.run,
-                onValueChange = { viewModel.onChangeRun(it) },
+                onValueChange = viewModel::onChangeRun,
                 label = "RUN",
                 placeholder = "Formato XX.XXX.XXX-X",
                 error = formState.errors.runErrors,
@@ -144,7 +144,7 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
 
             InputField(
                 value = formState.region,
-                onValueChange = { viewModel.onChangeRegion(it) },
+                onValueChange = viewModel::onChangeRegion,
                 label = "Region",
                 placeholder = "Entre 5 y 40 caracteres",
                 error = formState.errors.regionErrors,
@@ -153,7 +153,7 @@ fun RegistroScreen(navController: NavController, viewModel: RegisterUserViewMode
 
             InputField(
                 value = formState.comuna,
-                onValueChange = { viewModel.onChangeComuna(it) },
+                onValueChange = viewModel::onChangeComuna,
                 label = "Comuna",
                 placeholder = "Entre 5 y 40 caracteres",
                 error = formState.errors.comunaErrors,
