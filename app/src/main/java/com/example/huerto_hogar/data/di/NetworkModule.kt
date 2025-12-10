@@ -77,39 +77,29 @@ object NetworkModule {
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
-    
-    /**
-     * Servicio de API para operaciones con productos
-     */
+
+    // API productos
     val productApiService: ProductApiService by lazy {
         retrofit.create(ProductApiService::class.java)
     }
-    
-    /**
-     * Servicio de API para operaciones con usuarios
-     */
+
+    // API usuarios
     val userApiService: UserApiService by lazy {
         retrofit.create(UserApiService::class.java)
     }
-    
-    /**
-     * Servicio de API para operaciones con blogs
-     */
-    val blogApiService: BlogApiService by lazy {
-        retrofit.create(BlogApiService::class.java)
-    }
-    
-    /**
-     * Servicio de API para operaciones con órdenes
-     */
+
+    // API ordenes
     val orderApiService: OrderApiService by lazy {
         retrofit.create(OrderApiService::class.java)
     }
-    
-    /**
-     * Servicio de API para operaciones con favoritos
-     */
+
+    // API favoritos
     val favoriteApiService: FavoriteApiService by lazy {
         retrofit.create(FavoriteApiService::class.java)
+    }
+
+    // API blogs
+    val blogApiService: BlogApiService by lazy {
+        retrofit.create(BlogApiService::class.java)
     }
 }
