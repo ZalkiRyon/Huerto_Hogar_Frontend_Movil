@@ -359,8 +359,11 @@ fun CreateUserScreen(
                                 roleId = roleId
                             )
                             
+                            // Obtener token de autenticación
+                            val token = userManager.getAuthToken() ?: ""
+                            
                             coroutineScope.launch {
-                                userRepository.createUser(createUserRequest).collect { resource ->
+                                userRepository.createUser(createUserRequest, token).collect { resource ->
                                     when (resource) {
                                         is Resource.Loading -> {
                                             // Ya tenemos isLoading = true
