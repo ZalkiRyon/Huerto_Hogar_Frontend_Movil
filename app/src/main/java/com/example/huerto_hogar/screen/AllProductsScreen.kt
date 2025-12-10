@@ -43,6 +43,7 @@ import com.example.huerto_hogar.viewmodel.CartViewModel
 import com.example.huerto_hogar.viewmodel.FavoritesViewModel
 import com.example.huerto_hogar.viewmodel.ProductUiState
 import com.example.huerto_hogar.viewmodel.ProductViewModel
+import com.example.huerto_hogar.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -50,12 +51,14 @@ fun AllProductsScreen(
     navController: NavHostController,
     productViewModel: ProductViewModel = viewModel(),
     cartViewModel: CartViewModel = viewModel(),
-    favoritesViewModel: FavoritesViewModel = viewModel()
+    favoritesViewModel: FavoritesViewModel = viewModel(),
+    userViewModel: UserViewModel = viewModel()
 ) {
     // Observar estados del ViewModel
     val productsState by productViewModel.productsState.collectAsState()
     val allProducts by productViewModel.products.collectAsState()
-    
+    val currentUser by userViewModel.currentUser.collectAsState()
+
     // Cargar todos los productos
     LaunchedEffect(Unit) {
         productViewModel.getAllProducts()
@@ -70,6 +73,15 @@ fun AllProductsScreen(
     // selected product for detail
     var selectedProduct by remember { mutableStateOf<Product?>(null) }
 
+    val onLoginRequiredHandler: () -> Unit = {
+        coroutineScope.launch {
+            snackbarHostState.showSnackbar(
+                message = "Necesitas iniciar sesión para agregar favoritos.",
+                duration = SnackbarDuration.Long,
+
+            )
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -109,7 +121,7 @@ fun AllProductsScreen(
                 },
             )
         }
-        
+
         // Manejo de estados de carga y error
         when (productsState) {
             is ProductUiState.Loading -> {
@@ -122,6 +134,7 @@ fun AllProductsScreen(
                     CircularProgressIndicator()
                 }
             }
+
             is ProductUiState.Error -> {
                 Box(
                     modifier = Modifier
@@ -144,6 +157,7 @@ fun AllProductsScreen(
                     }
                 }
             }
+
             is ProductUiState.Success, ProductUiState.Idle -> {
                 LazyColumn(
                     modifier = Modifier
@@ -161,36 +175,38 @@ fun AllProductsScreen(
                                 selectedProduct = product
                                 showModal = true
                             },
-                    onAgregarCarrito = { productoAgregado ->
-                        cartViewModel.addToCart(productoAgregado)
-                        coroutineScope.launch {
-                            snackbarHostState.showSnackbar(
-                                message = "${productoAgregado.name} agregado al carrito",
-                                duration = SnackbarDuration.Short
-                            )
-                        }
-                    },
-                    onToggleFavorito = { product ->
-                        val wasAdded = favoritesViewModel.addToFavorites(product)
-                        coroutineScope.launch {
-                            if (wasAdded) {
-                                snackbarHostState.showSnackbar(
-                                    message = "${product.name} agregado a favoritos",
-                                    duration = SnackbarDuration.Short
-                                )
-                            } else {
-                                favoritesViewModel.removeFromFavorites(product.id)
-                                snackbarHostState.showSnackbar(
-                                    message = "El producto ya se encuentra agregado",
-                                    duration = SnackbarDuration.Short
-                                )
-                            }
-                        }
-                    },
-                    isFavorito = favoriteItems.any { it.id == producto.id }
-                )
-            }
-        }
+                            onAgregarCarrito = { productoAgregado ->
+                                cartViewModel.addToCart(productoAgregado)
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "${productoAgregado.name} agregado al carrito",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            },
+                            isUserLoggedIn = currentUser != null,
+                            onLoginRequired = onLoginRequiredHandler,
+                            onToggleFavorito = { product ->
+                                val wasAdded = favoritesViewModel.addToFavorites(product)
+                                coroutineScope.launch {
+                                    if (wasAdded) {
+                                        snackbarHostState.showSnackbar(
+                                            message = "${product.name} agregado a favoritos",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    } else {
+                                        favoritesViewModel.removeFromFavorites(product.id)
+                                        snackbarHostState.showSnackbar(
+                                            message = "El producto ya no se encuentra agregado",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
+                                }
+                            },
+                            isFavorito = favoriteItems.any { it.id == producto.id }
+                        )
+                    }
+                }
             }
         }
     }

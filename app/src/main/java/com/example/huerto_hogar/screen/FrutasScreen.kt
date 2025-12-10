@@ -35,7 +35,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.huerto_hogar.model.Product
-import com.example.huerto_hogar.model.ProductCategory
 import com.example.huerto_hogar.ui.theme.Huerto_HogarTheme
 import com.example.huerto_hogar.ui.theme.components.Header
 import com.example.huerto_hogar.ui.theme.components.ModalDetailProduct
@@ -44,6 +43,7 @@ import com.example.huerto_hogar.viewmodel.CartViewModel
 import com.example.huerto_hogar.viewmodel.FavoritesViewModel
 import com.example.huerto_hogar.viewmodel.ProductUiState
 import com.example.huerto_hogar.viewmodel.ProductViewModel
+import com.example.huerto_hogar.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -51,17 +51,19 @@ fun FrutasScreen(
     navController: NavHostController,
     productViewModel: ProductViewModel = viewModel(),
     cartViewModel: CartViewModel = viewModel(),
-    favoritesViewModel: FavoritesViewModel = viewModel()
+    favoritesViewModel: FavoritesViewModel = viewModel(),
+    userViewModel: UserViewModel = viewModel()
 ) {
     // Observar estados del ViewModel
     val productsState by productViewModel.productsState.collectAsState()
     val products by productViewModel.products.collectAsState()
-    
+
+    val currentUser by userViewModel.currentUser.collectAsState()
     // Cargar productos de categoría FRUTAS
     LaunchedEffect(Unit) {
         productViewModel.getProductsByCategory("Frutas frescas")
     }
-    
+
     // Filtrar solo frutas del estado
     val frutas = products.filter { it.category.equals("Frutas frescas", ignoreCase = true) }
 
@@ -69,6 +71,15 @@ fun FrutasScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
+    val onLoginRequiredHandler: () -> Unit = {
+        coroutineScope.launch {
+            snackbarHostState.showSnackbar(
+                message = "Necesitas iniciar sesión para agregar favoritos.",
+                duration = SnackbarDuration.Long,
+
+                )
+        }
+    }
     // state modal detail product
     var showModal by remember { mutableStateOf(false) }
     // selected product for detail
@@ -112,7 +123,7 @@ fun FrutasScreen(
                 },
             )
         }
-        
+
         // Manejo de estados de carga y error
         when (productsState) {
             is ProductUiState.Loading -> {
@@ -125,6 +136,7 @@ fun FrutasScreen(
                     CircularProgressIndicator()
                 }
             }
+
             is ProductUiState.Error -> {
                 Box(
                     modifier = Modifier
@@ -147,6 +159,7 @@ fun FrutasScreen(
                     }
                 }
             }
+
             is ProductUiState.Success, ProductUiState.Idle -> {
                 LazyColumn(
                     modifier = Modifier
@@ -164,36 +177,38 @@ fun FrutasScreen(
                                 selectedProduct = product
                                 showModal = true
                             },
-                    onAgregarCarrito = { productoAgregado ->
-                        cartViewModel.addToCart(productoAgregado)
-                        coroutineScope.launch {
-                            snackbarHostState.showSnackbar(
-                                message = "${productoAgregado.name} agregado al carrito",
-                                duration = SnackbarDuration.Short
-                            )
-                        }
-                    },
-                    onToggleFavorito = { product ->
-                        val wasAdded = favoritesViewModel.addToFavorites(product)
-                        coroutineScope.launch {
-                            if (wasAdded) {
-                                snackbarHostState.showSnackbar(
-                                    message = "${product.name} agregado a favoritos",
-                                    duration = SnackbarDuration.Short
-                                )
-                            } else {
-                                favoritesViewModel.removeFromFavorites(product.id)
-                                snackbarHostState.showSnackbar(
-                                    message = "El producto ya se encuentra agregado",
-                                    duration = SnackbarDuration.Short
-                                )
-                            }
-                        }
-                    },
-                    isFavorito = favoriteItems.any { it.id == producto.id }
-                )
-            }
-        }
+                            onAgregarCarrito = { productoAgregado ->
+                                cartViewModel.addToCart(productoAgregado)
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "${productoAgregado.name} agregado al carrito",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            },
+                            isUserLoggedIn = currentUser != null,
+                            onLoginRequired = onLoginRequiredHandler,
+                            onToggleFavorito = { product ->
+                                val wasAdded = favoritesViewModel.addToFavorites(product)
+                                coroutineScope.launch {
+                                    if (wasAdded) {
+                                        snackbarHostState.showSnackbar(
+                                            message = "${product.name} agregado a favoritos",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    } else {
+                                        favoritesViewModel.removeFromFavorites(product.id)
+                                        snackbarHostState.showSnackbar(
+                                            message = "El producto ya no se encuentra agregado",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
+                                }
+                            },
+                            isFavorito = favoriteItems.any { it.id == producto.id }
+                        )
+                    }
+                }
             }
         }
     }
