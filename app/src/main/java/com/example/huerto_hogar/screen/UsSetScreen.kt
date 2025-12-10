@@ -296,6 +296,34 @@ fun UsSetScreen(navController: NavController, viewModel: UserSettingsViewModel) 
             modifier = Modifier,
             error = formState.errors.emailError
         )
+
+        InputField(
+            value = formState.run,
+            onValueChange = { viewModel.onChangeRun(it) },
+            label = "RUN",
+            placeholder = "Formato XX.XXX.XXX-X",
+            error = formState.errors.runError,
+            modifier = Modifier.bounceInEffect(delay = 150)
+        )
+
+        InputField(
+            value = formState.region,
+            onValueChange = { viewModel.onChangeRegion(it) },
+            label = "Region",
+            placeholder = "Entre 5 y 40 caracteres",
+            error = formState.errors.regionError,
+            modifier = Modifier.bounceInEffect(delay = 300)
+        )
+
+        InputField(
+            value = formState.comuna,
+            onValueChange = { viewModel.onChangeComuna(it) },
+            label = "Comuna",
+            placeholder = "Entre 5 y 40 caracteres",
+            error = formState.errors.comunaError,
+            modifier = Modifier.bounceInEffect(delay = 300)
+        )
+
         InputField(
             value = formState.address,
             onValueChange = viewModel::onChangeAddress,
