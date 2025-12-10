@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,8 +54,6 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.huerto_hogar.AppScreens.AppScreens
 import com.example.huerto_hogar.R
-import com.example.huerto_hogar.manager.UserManagerViewModel
-import com.example.huerto_hogar.model.Role
 import com.example.huerto_hogar.screen.AllProductsScreen
 import com.example.huerto_hogar.screen.BlogScreen
 import com.example.huerto_hogar.screen.CartScreen
@@ -82,20 +81,20 @@ import com.example.huerto_hogar.viewmodel.LoginViewModel
 import com.example.huerto_hogar.viewmodel.RegisterUserViewModel
 import com.example.huerto_hogar.viewmodel.SalesViewModel
 import com.example.huerto_hogar.viewmodel.UserSettingsViewModel
+import com.example.huerto_hogar.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.LaunchedEffect
 
 
 @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
 @Composable
 fun AppNavigationContainer() {
-    val userManager: UserManagerViewModel = viewModel()
+    val userViewModel: UserViewModel = viewModel()
     val cartViewModel: CartViewModel = viewModel()
     val favoritesViewModel: FavoritesViewModel = viewModel()
     val salesViewModel: SalesViewModel = viewModel()
 
-    val currentUser by userManager.currentUser.collectAsState()
-    val showAdminStoreView by userManager.showAdminStoreView.collectAsState()
+    val currentUser by userViewModel.currentUser.collectAsState()
+    val showAdminStoreView by userViewModel.showAdminStoreView.collectAsState()
 
     // Inicializar favoritos cuando el usuario se loguea
     LaunchedEffect(currentUser) {
@@ -107,12 +106,12 @@ fun AppNavigationContainer() {
     // Si el usuario es admin y NO está en modo tienda, mostrar panel de administración
     if (currentUser?.role == "admin" && !showAdminStoreView) {
         AdminNavigationContainer(
-            userManager = userManager,
+            userManager = userViewModel,
             salesViewModel = salesViewModel,
             onLogout = {
                 cartViewModel.clearCart()
                 favoritesViewModel.clearFavorites()
-                userManager.setCurrentUser(null)
+                userViewModel.setCurrentUser(null)
             }
         )
         return
@@ -291,7 +290,7 @@ fun AppNavigationContainer() {
                                 )
                             }
                         )
-                        
+
                         // Si el usuario es admin, mostrar acceso al Dashboard
                         if (currentUser?.role == "admin") {
                             NavigationDrawerItem(
@@ -299,7 +298,7 @@ fun AppNavigationContainer() {
                                 selected = false,
                                 onClick = {
                                     scope.launch { drawerState.close() }
-                                    userManager.toggleAdminView(false) // Cambiar a vista admin
+                                    userViewModel.toggleAdminView(false) // Cambiar a vista admin
                                 },
                                 icon = {
                                     Icon(
@@ -356,7 +355,7 @@ fun AppNavigationContainer() {
                         showLogoutDialog = false
                         cartViewModel.clearCart()
                         favoritesViewModel.clearFavorites()
-                        userManager.setCurrentUser(null)
+                        userViewModel.setCurrentUser(null)
                         navController.navigate(AppScreens.HomeScreen.route) {
                             popUpTo(AppScreens.HomeScreen.route) { inclusive = true }
                         }
@@ -393,8 +392,10 @@ fun AppNavigationContainer() {
                             enterTransition = { scaleInWithFade() },
                             exitTransition = { scaleOutWithFade() }
                         ) {
-                            val loginVM: LoginViewModel = viewModel()
-                            loginVM.userManager = userManager
+
+                            val loginVM: LoginViewModel = viewModel(initializer = {
+                                LoginViewModel(userViewModel = userViewModel)
+                            })
                             LoginScreen(navController = navController, loginVM)
                         }
 
@@ -404,7 +405,7 @@ fun AppNavigationContainer() {
                             exitTransition = { slideOutToBottomWithFade() }
                         ) {
                             val registerVM: RegisterUserViewModel = viewModel()
-                            registerVM.userManager = userManager
+
                             RegistroScreen(navController, registerVM)
                         }
 
@@ -431,7 +432,7 @@ fun AppNavigationContainer() {
                                 navController = navController,
                                 cartViewModel = cartViewModel,
                                 salesViewModel = salesViewModel,
-                                userManager = userManager,
+                                userManager = userViewModel,
                                 user = currentUser
                             )
                         }
@@ -442,7 +443,7 @@ fun AppNavigationContainer() {
                             exitTransition = { slideOutToBottomWithFade() }
                         ) {
                             val settingsVM: UserSettingsViewModel = viewModel()
-                            settingsVM.userManager = userManager
+                            settingsVM.userManager = userViewModel
                             UsSetScreen(navController = navController, viewModel = settingsVM)
                         }
 

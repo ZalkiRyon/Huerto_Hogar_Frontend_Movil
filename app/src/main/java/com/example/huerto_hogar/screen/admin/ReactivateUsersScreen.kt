@@ -22,18 +22,18 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.huerto_hogar.manager.UserManagerViewModel
 import com.example.huerto_hogar.model.User
 import com.example.huerto_hogar.repository.UserRepository
 import com.example.huerto_hogar.ui.theme.components.ConfirmationDialog
 import com.example.huerto_hogar.utils.Resource
+import com.example.huerto_hogar.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReactivateUsersScreen(
     navController: NavController,
-    userManager: UserManagerViewModel = viewModel()
+    userManager: UserViewModel = viewModel()
 ) {
     val scope = rememberCoroutineScope()
     val userRepository = remember { UserRepository() }

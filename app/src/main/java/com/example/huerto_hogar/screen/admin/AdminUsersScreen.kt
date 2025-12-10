@@ -17,15 +17,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.huerto_hogar.manager.UserManagerViewModel
 import com.example.huerto_hogar.model.User
 import com.example.huerto_hogar.repository.UserRepository
 import com.example.huerto_hogar.ui.theme.components.animations.bounceInEffect
 import com.example.huerto_hogar.ui.theme.components.ConfirmationDialog
 import com.example.huerto_hogar.utils.Resource
+import com.example.huerto_hogar.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
-
-// No necesitamos MockUsers aquí - usamos directamente UserManagerViewModel
 
 /**
  * Pantalla de gestión de usuarios (display only por ahora).
@@ -33,7 +31,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun AdminUsersScreen(
     navController: NavController,
-    userManager: com.example.huerto_hogar.manager.UserManagerViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    userManager: UserViewModel = viewModel()
 ) {
     var selectedRole by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }

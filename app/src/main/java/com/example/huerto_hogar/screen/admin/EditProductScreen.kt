@@ -20,8 +20,8 @@ import androidx.navigation.NavController
 import com.example.huerto_hogar.viewmodel.ProductViewModel
 import com.example.huerto_hogar.model.Product
 import com.example.huerto_hogar.repository.ProductRepository
-import com.example.huerto_hogar.manager.UserManagerViewModel
 import com.example.huerto_hogar.utils.Resource
+import com.example.huerto_hogar.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,7 +30,7 @@ fun EditProductScreen(
     navController: NavController,
     productId: Int,
     productViewModel: ProductViewModel = viewModel(),
-    userManager: UserManagerViewModel = viewModel()
+    userManager: UserViewModel = viewModel()
 ) {
     val productRepository = remember { ProductRepository() }
     val coroutineScope = rememberCoroutineScope()

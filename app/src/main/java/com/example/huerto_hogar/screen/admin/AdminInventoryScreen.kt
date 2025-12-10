@@ -55,10 +55,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.huerto_hogar.manager.UserManagerViewModel
 import com.example.huerto_hogar.ui.theme.components.ConfirmationDialog
 import com.example.huerto_hogar.viewmodel.ProductUiState
+import com.example.huerto_hogar.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
 /**
@@ -68,7 +67,7 @@ import kotlinx.coroutines.launch
 fun AdminInventoryScreen(
     navController: NavController,
     productViewModel: ProductViewModel = viewModel(),
-    userManager: UserManagerViewModel = viewModel()
+    userManager: UserViewModel = viewModel()
 ) {
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
