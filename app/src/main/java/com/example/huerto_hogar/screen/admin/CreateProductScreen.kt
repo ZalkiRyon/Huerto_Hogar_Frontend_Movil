@@ -282,22 +282,10 @@ fun CreateProductScreen(
                             errorMessage = null
                             isLoading = true
                             
-                            // Obtener prefijo de código según categoría
-                            val categoryPrefix = categories.find { it.first == selectedCategory }?.second ?: "XX"
-                            
-                            // Generar número secuencial (en producción debería venir del backend)
-                            val productCode = "$categoryPrefix${(1..999).random().toString().padStart(3, '0')}"
-                            
-                            // Crear producto con prefijo en el nombre
-                            val productName = if (name.matches(Regex("^[A-Z]{2}\\d{3} - .*"))) {
-                                name // Ya tiene prefijo
-                            } else {
-                                "$productCode - $name"
-                            }
-                            
+                            // El backend se encargará de generar el código secuencial automáticamente
                             val newProduct = Product(
                                 id = 0,
-                                name = productName,
+                                name = name.trim(),
                                 category = selectedCategory,
                                 price = price.toDouble(),
                                 stock = stock.toInt(),
@@ -313,8 +301,9 @@ fun CreateProductScreen(
                                         }
                                         is Resource.Success -> {
                                             isLoading = false
+                                            val createdProductName = resource.data?.name ?: name
                                             snackbarHostState.showSnackbar(
-                                                message = "Producto \"$productName\" creado exitosamente",
+                                                message = "Producto \"$createdProductName\" creado exitosamente",
                                                 duration = SnackbarDuration.Short
                                             )
                                             // Recargar lista de productos
