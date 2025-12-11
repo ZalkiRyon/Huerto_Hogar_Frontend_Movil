@@ -113,7 +113,7 @@ Aplicación móvil Android para marketplace de productos orgánicos y frescos, d
 │  │  - CartViewModel, FavoritesViewModel, etc.      │    │
 │  │  (StateFlow, business logic)                    │    │
 │  └────────────────┬────────────────────────────────┘    │
-└───────────────────┼──────────────────────────────────────┘
+└───────────────────┼─────────────────────────────────────┘
                     │ calls Repository
                     ▼
 ┌─────────────────────────────────────────────────────────┐
