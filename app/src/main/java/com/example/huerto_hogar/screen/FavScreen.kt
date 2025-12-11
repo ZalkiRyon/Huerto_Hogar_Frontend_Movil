@@ -78,6 +78,13 @@ fun FavScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
 
+    // Reload favorites every time the screen is displayed
+    LaunchedEffect(Unit) {
+        user?.id?.let { userId ->
+            favoritesViewModel.reloadFavorites()
+        }
+    }
+
     LaunchedEffect(snackbarMessage) {
         snackbarMessage?.let { message ->
             snackbarHostState.showSnackbar(

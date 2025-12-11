@@ -1,17 +1,24 @@
 package com.example.huerto_hogar.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.huerto_hogar.model.CartItem
 import com.example.huerto_hogar.model.Product
+import com.example.huerto_hogar.repository.ProductRepository
+import com.example.huerto_hogar.utils.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import android.util.Log
 
 /**
  * ViewModel para gestionar el carrito de compras.
  * Implementa patrón Singleton para compartir estado entre pantallas.
  */
-class CartViewModel : ViewModel() {
+class CartViewModel(
+    private val productRepository: ProductRepository = ProductRepository()
+) : ViewModel() {
     
     // Lista de items en el carrito (producto + cantidad)
     private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
@@ -140,5 +147,41 @@ class CartViewModel : ViewModel() {
      */
     fun calculateTotal(): Double {
         return calculateSubtotal() - calculateDiscount()
+    }
+    
+    /**
+     * Valida y actualiza los productos del carrito desde el backend
+     * Elimina productos inactivos y actualiza precios/nombres
+     */
+    fun validateAndRefreshCart() {
+        viewModelScope.launch {
+            val currentItems = _cartItems.value.toMutableList()
+            val validatedItems = mutableListOf<CartItem>()
+            
+            currentItems.forEach { cartItem ->
+                productRepository.getProductById(cartItem.product.id).collect { resource ->
+                    when (resource) {
+                        is Resource.Success -> {
+                            resource.data?.let { freshProduct ->
+                                // Solo agregar si el producto está activo
+                                if (freshProduct.activo) {
+                                    validatedItems.add(CartItem(freshProduct, cartItem.quantity))
+                                    Log.d("CartViewModel", "Product ${freshProduct.id} validated and updated")
+                                } else {
+                                    Log.d("CartViewModel", "Product ${freshProduct.id} is inactive, removed from cart")
+                                }
+                            }
+                        }
+                        is Resource.Error -> {
+                            // Si hay error al obtener producto, lo removemos del carrito
+                            Log.e("CartViewModel", "Error validating product ${cartItem.product.id}: ${resource.message}")
+                        }
+                        else -> { /* Loading state */ }
+                    }
+                }
+            }
+            
+            _cartItems.value = validatedItems
+        }
     }
 }

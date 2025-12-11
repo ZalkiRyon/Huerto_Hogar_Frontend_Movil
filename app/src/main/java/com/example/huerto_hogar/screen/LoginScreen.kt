@@ -54,14 +54,9 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
             ).show()
 
 
-            val destination =
-                if (user?.role == "admin") {
-                    "admin_dashboard_screen"
-                } else {
-                    "home_screen"
-                }
-
-            navController.navigate(destination) {
+            // Always navigate to home_screen
+            // AppNavigationContainer will handle showing admin panel if role is admin
+            navController.navigate("home_screen") {
                 popUpTo(navController.graph.id) { inclusive = true }
             }
 

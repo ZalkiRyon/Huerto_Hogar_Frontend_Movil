@@ -116,9 +116,10 @@ fun CartScreen(
     var currentReceipt by remember { mutableStateOf<Receipt?>(null) }
     var isCreatingOrder by remember { mutableStateOf(false) }
 
-
-
-
+    // Validate and refresh cart every time the screen is displayed
+    LaunchedEffect(Unit) {
+        cartViewModel.validateAndRefreshCart()
+    }
 
     /**
      * MANEJO DE ESTADOS NFC
